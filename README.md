@@ -7,8 +7,8 @@ A React Native implementation of Brightcove Player SDK.
 ## Installation
 
 ```console
-yarn add git+https://git@github.com/manse/react-native-brightcove-player.git
-react-native link
+yarn add react-native-brightcove-player
+react-native link react-native-brightcove-player
 ```
 
 ### iOS
@@ -27,7 +27,7 @@ end
 
 ### Android
 
-- Add following lines in `app/build.gradle`
+- Add following lines in `android/app/build.gradle`
 ```gradle
 repositories {
     maven {
