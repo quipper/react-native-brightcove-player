@@ -1,0 +1,8 @@
+source 'https://github.com/brightcove/BrightcoveSpecs.git'
+
+platform :ios, '8.0'
+use_frameworks!
+
+target 'example' do
+    pod 'Brightcove-Player-Core'
+end

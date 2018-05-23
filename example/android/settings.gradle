@@ -1,0 +1,5 @@
+rootProject.name = 'example'
+include ':react-native-brightcove-player'
+project(':react-native-brightcove-player').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-brightcove-player/android')
+
+include ':app'
