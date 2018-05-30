@@ -16,13 +16,13 @@
 - (void)setup {
     _playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
     _playbackController.delegate = self;
-    _playbackController.autoAdvance = YES;
     _playbackController.autoPlay = YES;
+    _playbackController.autoAdvance = YES;
 
-    BCOVPUIPlayerView *playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
-    playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    playerView.backgroundColor = UIColor.blackColor;
-    [self addSubview:playerView];
+    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+    _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    _playerView.backgroundColor = UIColor.blackColor;
+    [self addSubview:_playerView];
 }
 
 - (void)setupService {
@@ -32,12 +32,20 @@
 }
 
 - (void)loadMovie {
-    if (!_videoReferenceId || !_playbackService) return;
-    [_playbackService findVideoWithVideoID:_videoReferenceId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
-        if (video) {
-            [self.playbackController setVideos: @[ video ]];
-        }
-    }];
+    if (!_playbackService) return;
+    if (_videoId) {
+        [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
+            if (video) {
+                [self.playbackController setVideos: @[ video ]];
+            }
+        }];
+    } else if (_referenceId) {
+        [_playbackService findVideoWithReferenceID:_referenceId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
+            if (video) {
+                [self.playbackController setVideos: @[ video ]];
+            }
+        }];
+    }
 }
 
 - (id<BCOVPlaybackController>)createPlaybackController {
@@ -46,8 +54,16 @@
     return [BCOVPlayerSDKManager.sharedManager createPlaybackControllerWithSessionProvider:provider viewStrategy:nil];
 }
 
-- (void)setVideoReferenceId:(NSString *)videoReferenceId {
-    _videoReferenceId = videoReferenceId;
+- (void)setReferenceId:(NSString *)referenceId {
+    _referenceId = referenceId;
+    _videoId = NULL;
+    [self setupService];
+    [self loadMovie];
+}
+
+- (void)setVideoId:(NSString *)videoId {
+    _videoId = videoId;
+    _referenceId = NULL;
     [self setupService];
     [self loadMovie];
 }
@@ -62,6 +78,54 @@
     _policyKey = policyKey;
     [self setupService];
     [self loadMovie];
+}
+
+- (void)setAutoPlay:(BOOL)autoPlay {
+    _playbackController.autoPlay = autoPlay;
+}
+
+- (void)setPlay:(BOOL)play {
+    if (_playing == play) return;
+    if (play) {
+        [_playbackController play];
+    } else {
+        [_playbackController pause];
+    }
+}
+
+- (void)seekTo:(NSNumber *)time {
+    [_playbackController seekToTime:CMTimeMakeWithSeconds([time floatValue], NSEC_PER_SEC) completionHandler:^(BOOL finished) {
+    }];
+}
+
+-(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+        if (self.onReady) {
+            self.onReady(@{});
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
+        _playing = true;
+        if (self.onPlay) {
+            self.onPlay(@{});
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
+        _playing = false;
+        if (self.onPause) {
+            self.onPause(@{});
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
+        if (self.onEnd) {
+            self.onEnd(@{});
+        }
+    }
+}
+
+-(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
+    if (self.onProgress && progress > 0) {
+        self.onProgress(@{
+                          @"currentTime": @(progress)
+                          });
+    }
 }
 
 @end

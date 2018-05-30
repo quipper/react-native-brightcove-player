@@ -6,14 +6,27 @@
 #import <BrightcovePlayerSDK/BCOVBasicSessionProvider.h>
 #import <BrightcovePlayerSDK/BCOVPlayerSDKManager.h>
 #import <BrightcovePlayerSDK/BCOVPUIBasicControlView.h>
+#import <BrightcovePlayerSDK/BCOVPlaybackSession.h>
+#import <React/RCTBridge.h>
+#import <React/UIView+React.h>
 
 @interface BrightcovePlayer : UIView
 
 @property (nonatomic) BCOVPlaybackService *playbackService;
 @property (nonatomic) id<BCOVPlaybackController> playbackController;
 @property (nonatomic) BCOVPUIPlayerView *playerView;
-@property (nonatomic, copy) NSString *videoReferenceId;
+@property (nonatomic) BOOL playing;
+
+@property (nonatomic, copy) NSString *referenceId;
+@property (nonatomic, copy) NSString *videoId;
 @property (nonatomic, copy) NSString *accountId;
 @property (nonatomic, copy) NSString *policyKey;
+@property (nonatomic, copy) RCTDirectEventBlock onReady;
+@property (nonatomic, copy) RCTDirectEventBlock onPlay;
+@property (nonatomic, copy) RCTDirectEventBlock onPause;
+@property (nonatomic, copy) RCTDirectEventBlock onEnd;
+@property (nonatomic, copy) RCTDirectEventBlock onProgress;
+
+-(void) seekTo:(NSNumber *)time;
 
 @end
