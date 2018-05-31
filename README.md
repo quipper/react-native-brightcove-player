@@ -48,7 +48,7 @@ export default class App extends Component {
                 <BrightcovePlayer
                     style={styles.player}
                     accountId="3636334163001"
-                    videoReferenceId="3666678807001"
+                    videoId="3666678807001"
                     policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
                 />
             </View>
@@ -57,6 +57,26 @@ export default class App extends Component {
 }
 ```
 
-- Specifying `accountId`, `videoReferenceId` and `policyKey` will load the video.
+- Specifying `accountId`, `policyKey`, and `videoId` or `referenceId` will load the video.
 - Size of the player must be non-zero.
 - It may not work on Android simulator, in that case please run on device.
+- For a more detailed example, please see [example/App.js](https://github.com/manse/react-native-brightcove-player/blob/master/example/App.js).
+
+| Prop | Type | Required | Note |
+| ---- | ---- | -------- | ---- |
+| accountId | string | y | Brightcove AccountId |
+| policyKey | string | y | Brightcove PolicyKey |
+| videoId | string | y* | Brightcove VideoId. *Either videoId or referenceId is required |
+| referenceId | string | y* | Brightcove ReferenceId. *Either videoId or referenceId is required |
+| autoPlay | boolean | n | Whether to play automatically when video loaded |
+| play | boolean | n | Control playback and pause |
+| onReady | Function | n | Indicates the video can be played back |
+| onPlay | Function | n | Indicates the video playback starts |
+| onPause | Function | n | Indicates the video is paused |
+| onEnd | Function | n | Indicates the video is played to the end |
+| onProgress | Function | n | Indicates the playback head of the video advances. The playback info is passed as the first argument; `{ currentTime: number }` |
+
+| Method | Note |
+| ------ | ---- |
+| seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
+
