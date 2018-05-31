@@ -64,17 +64,17 @@ export default class App extends Component {
 
 | Prop | Type | Required | Note |
 | ---- | ---- | -------- | ---- |
-| accountId | string | y | |
-| policyKey | string | y | |
-| videoId | string | y* | *Either videoId or referenceId is required |
-| referenceId | string | y* | *Either videoId or referenceId is required |
+| accountId | string | y | Brightcove AccountId |
+| policyKey | string | y | Brightcove PolicyKey |
+| videoId | string | y* | Brightcove VideoId. *Either videoId or referenceId is required |
+| referenceId | string | y* | Brightcove ReferenceId. *Either videoId or referenceId is required |
 | autoPlay | boolean | n | Whether to play automatically when video loaded |
 | play | boolean | n | Control playback and pause |
 | onReady | Function | n | Indicates the video can be played back |
 | onPlay | Function | n | Indicates the video playback starts |
 | onPause | Function | n | Indicates the video is paused |
 | onEnd | Function | n | Indicates the video is played to the end |
-| onProgress | Function | n | Indicates the playback head of the video advances. The playback info is passed as the first argument like; `{ currentTime: number }` |
+| onProgress | Function | n | Indicates the playback head of the video advances. The playback info is passed as the first argument; `{ currentTime: number }` |
 
 | Method | Note |
 | ------ | ---- |
