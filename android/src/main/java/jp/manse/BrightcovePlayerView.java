@@ -1,17 +1,9 @@
 package jp.manse;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceView;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
@@ -19,19 +11,23 @@ import com.brightcove.player.event.Event;
 import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
-import com.brightcove.player.mediacontroller.ShowHideController;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
-import com.brightcove.player.view.BrightcovePlayer;
 
-import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
     private String policyKey;
     private String accountId;
-    private String videoReferenceId;
+    private String videoId;
+    private String referenceId;
     private Catalog catalog;
+    private Boolean autoPlay = true;
+    private Boolean playing = false;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -48,6 +44,50 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
                 fixVideoLayout();
             }
         });
+        this.getEventEmitter().on(EventType.READY_TO_PLAY, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_READY, event);
+            }
+        });
+        this.getEventEmitter().on(EventType.DID_PLAY, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                BrightcovePlayerView.this.playing = true;
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PLAY, event);
+            }
+        });
+        this.getEventEmitter().on(EventType.DID_PAUSE, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                BrightcovePlayerView.this.playing = false;
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PAUSE, event);
+            }
+        });
+        this.getEventEmitter().on(EventType.COMPLETED, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_END, event);
+            }
+        });
+        this.getEventEmitter().on(EventType.PROGRESS, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                Long playhead = (Long)e.properties.get(Event.PLAYHEAD_POSITION);
+                event.putDouble("currentTime", playhead / 1000d);
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
+            }
+        });
     }
 
     public void setPolicyKey(String policyKey) {
@@ -62,10 +102,31 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
         this.loadMovie();
     }
 
-    public void setVideoReferenceId(String videoReferenceId) {
-        this.videoReferenceId = videoReferenceId;
+    public void setVideoId(String videoId) {
+        this.videoId = videoId;
+        this.referenceId = null;
         this.setupCatalog();
         this.loadMovie();
+    }
+
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+        this.videoId = null;
+        this.setupCatalog();
+        this.loadMovie();
+    }
+
+    public void setAutoPlay(Boolean autoPlay) {
+        this.autoPlay = autoPlay;
+    }
+
+    public void setPlay(Boolean play) {
+        if (this.playing == play) return;
+        if (play) {
+            this.start();
+        } else {
+            this.pause();
+        }
     }
 
     private void setupCatalog() {
@@ -74,16 +135,23 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
     }
 
     private void loadMovie() {
-        if (this.catalog == null || this.videoReferenceId == null) return;
-        this.catalog.findVideoByID(this.videoReferenceId, new VideoListener() {
+        if (this.catalog == null) return;
+        VideoListener listener = new VideoListener() {
 
             @Override
             public void onVideo(Video video) {
                 BrightcovePlayerView.this.clear();
                 BrightcovePlayerView.this.add(video);
-                BrightcovePlayerView.this.start();
+                if (BrightcovePlayerView.this.autoPlay) {
+                    BrightcovePlayerView.this.start();
+                }
             }
-        });
+        };
+        if (this.videoId != null) {
+            this.catalog.findVideoByID(this.videoId, listener);
+        } else if (this.referenceId != null) {
+            this.catalog.findVideoByReferenceID(this.referenceId, listener);
+        }
     }
 
     private void fixVideoLayout() {

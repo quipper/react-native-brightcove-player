@@ -4,7 +4,9 @@ import ReactNative, {
   View,
   requireNativeComponent,
   NativeModules,
-  ViewPropTypes
+  ViewPropTypes,
+  Platform,
+  UIManager
 } from 'react-native';
 
 class BrightcovePlayer extends Component {
@@ -35,14 +37,23 @@ class BrightcovePlayer extends Component {
       />
     );
   }
+}
 
-  seekTo(seconds) {
+BrightcovePlayer.prototype.seekTo = Platform.select({
+  ios: function (seconds) {
     NativeModules.BrightcovePlayerManager.seekTo(
       ReactNative.findNodeHandle(this),
       seconds
     );
+  },
+  android: function (seconds) {
+    UIManager.dispatchViewManagerCommand(
+      ReactNative.findNodeHandle(this._root),
+      UIManager.BrightcovePlayer.Commands.seekTo,
+      [seconds]
+    );
   }
-}
+});
 
 BrightcovePlayer.propTypes = {
   ...(ViewPropTypes || View.propTypes),
