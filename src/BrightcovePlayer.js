@@ -10,6 +10,10 @@ import ReactNative, {
 } from 'react-native';
 
 class BrightcovePlayer extends Component {
+  state = {
+    fullscreen: false
+  };
+
   setNativeProps = nativeProps => {
     if (this._root) {
       this._root.setNativeProps(nativeProps);
@@ -21,6 +25,17 @@ class BrightcovePlayer extends Component {
       <NativeBrightcovePlayer
         ref={e => (this._root = e)}
         {...this.props}
+        style={[
+          this.props.style,
+          this.state.fullscreen && {
+            position: 'absolute',
+            zIndex: 9999,
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%'
+          }
+        ]}
         onReady={event =>
           this.props.onReady && this.props.onReady(event.nativeEvent)
         }
@@ -33,6 +48,9 @@ class BrightcovePlayer extends Component {
         onEnd={event => this.props.onEnd && this.props.onEnd(event.nativeEvent)}
         onProgress={event =>
           this.props.onProgress && this.props.onProgress(event.nativeEvent)
+        }
+        onFullscreen={event =>
+          this.setState({ fullscreen: !this.state.fullscreen })
         }
       />
     );

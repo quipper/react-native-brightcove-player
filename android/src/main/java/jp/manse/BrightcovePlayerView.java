@@ -1,13 +1,18 @@
 package jp.manse;
 
 import android.graphics.Color;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.event.Event;
+import com.brightcove.player.event.EventEmitter;
 import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
@@ -20,7 +25,8 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
-public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
+public class BrightcovePlayerView extends RelativeLayout {
+    private BrightcoveExoPlayerVideoView playerVideoView;
     private String policyKey;
     private String accountId;
     private String videoId;
@@ -36,15 +42,21 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
         this.setBackgroundColor(Color.BLACK);
-        this.finishInitialization();
-        this.setMediaController(new BrightcoveMediaController(this));
-        this.getEventEmitter().on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
+        this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
+        this.addView(this.playerVideoView);
+        this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        this.playerVideoView.finishInitialization();
+        this.playerVideoView.setMediaController(new BrightcoveMediaController(this.playerVideoView));
+        ViewCompat.setTranslationZ(this, 9999);
+
+        EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
+        eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 fixVideoLayout();
             }
         });
-        this.getEventEmitter().on(EventType.READY_TO_PLAY, new EventListener() {
+        eventEmitter.on(EventType.READY_TO_PLAY, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
@@ -52,7 +64,7 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_READY, event);
             }
         });
-        this.getEventEmitter().on(EventType.DID_PLAY, new EventListener() {
+        eventEmitter.on(EventType.DID_PLAY, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 BrightcovePlayerView.this.playing = true;
@@ -61,7 +73,7 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PLAY, event);
             }
         });
-        this.getEventEmitter().on(EventType.DID_PAUSE, new EventListener() {
+        eventEmitter.on(EventType.DID_PAUSE, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 BrightcovePlayerView.this.playing = false;
@@ -70,7 +82,7 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PAUSE, event);
             }
         });
-        this.getEventEmitter().on(EventType.COMPLETED, new EventListener() {
+        eventEmitter.on(EventType.COMPLETED, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
@@ -78,7 +90,7 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_END, event);
             }
         });
-        this.getEventEmitter().on(EventType.PROGRESS, new EventListener() {
+        eventEmitter.on(EventType.PROGRESS, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
@@ -86,6 +98,22 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
                 event.putDouble("currentTime", playhead / 1000d);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
+            }
+        });
+        eventEmitter.on(EventType.ENTER_FULL_SCREEN, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_FULLSCREEN, event);
+            }
+        });
+        eventEmitter.on(EventType.EXIT_FULL_SCREEN, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_FULLSCREEN, event);
             }
         });
     }
@@ -123,15 +151,19 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
     public void setPlay(Boolean play) {
         if (this.playing == play) return;
         if (play) {
-            this.start();
+            this.playerVideoView.start();
         } else {
-            this.pause();
+            this.playerVideoView.pause();
         }
+    }
+
+    public void seekTo(int time) {
+        this.playerVideoView.seekTo(time);
     }
 
     private void setupCatalog() {
         if (this.catalog != null || this.policyKey == null || this.accountId == null) return;
-        this.catalog = new Catalog(this.getEventEmitter(), this.accountId, this.policyKey);
+        this.catalog = new Catalog(this.playerVideoView.getEventEmitter(), this.accountId, this.policyKey);
     }
 
     private void loadMovie() {
@@ -140,10 +172,10 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
 
             @Override
             public void onVideo(Video video) {
-                BrightcovePlayerView.this.clear();
-                BrightcovePlayerView.this.add(video);
+                BrightcovePlayerView.this.playerVideoView.clear();
+                BrightcovePlayerView.this.playerVideoView.add(video);
                 if (BrightcovePlayerView.this.autoPlay) {
-                    BrightcovePlayerView.this.start();
+                    BrightcovePlayerView.this.playerVideoView.start();
                 }
             }
         };
@@ -157,7 +189,7 @@ public class BrightcovePlayerView extends BrightcoveExoPlayerVideoView {
     private void fixVideoLayout() {
         int viewWidth = this.getMeasuredWidth();
         int viewHeight = this.getMeasuredHeight();
-        SurfaceView surfaceView = (SurfaceView) this.getRenderView();
+        SurfaceView surfaceView = (SurfaceView) this.playerVideoView.getRenderView();
         surfaceView.measure(viewWidth, viewHeight);
         int surfaceWidth = surfaceView.getMeasuredWidth();
         int surfaceHeight = surfaceView.getMeasuredHeight();

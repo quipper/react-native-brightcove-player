@@ -20,6 +20,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_PAUSE = "pause";
     public static final String EVENT_END = "end";
     public static final String EVENT_PROGRESS = "progress";
+    public static final String EVENT_FULLSCREEN = "fullscreen";
 
     private static ThemedReactContext context;
 
@@ -97,7 +98,9 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
                 EVENT_END,
                 (Object) MapBuilder.of("registrationName", "onEnd"),
                 EVENT_PROGRESS,
-                (Object) MapBuilder.of("registrationName", "onProgress")
+                (Object) MapBuilder.of("registrationName", "onProgress"),
+                EVENT_FULLSCREEN,
+                (Object) MapBuilder.of("registrationName", "onFullscreen")
         );
     }
 }
