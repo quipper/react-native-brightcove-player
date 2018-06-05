@@ -49,6 +49,18 @@ class BrightcovePlayer extends Component {
         onProgress={event =>
           this.props.onProgress && this.props.onProgress(event.nativeEvent)
         }
+        onChangeDuration={event =>
+          this.props.onChangeDuration &&
+          this.props.onChangeDuration(event.nativeEvent)
+        }
+        onEnterFullscreen={event =>
+          this.props.onEnterFullscreen &&
+          this.props.onEnterFullscreen(event.nativeEvent)
+        }
+        onExitFullscreen={event =>
+          this.props.onExitFullscreen &&
+          this.props.onExitFullscreen(event.nativeEvent)
+        }
         onFullscreen={event =>
           this.setState({ fullscreen: !this.state.fullscreen })
         }
@@ -58,13 +70,13 @@ class BrightcovePlayer extends Component {
 }
 
 BrightcovePlayer.prototype.seekTo = Platform.select({
-  ios: function (seconds) {
+  ios: function(seconds) {
     NativeModules.BrightcovePlayerManager.seekTo(
       ReactNative.findNodeHandle(this),
       seconds
     );
   },
-  android: function (seconds) {
+  android: function(seconds) {
     UIManager.dispatchViewManagerCommand(
       ReactNative.findNodeHandle(this._root),
       UIManager.BrightcovePlayer.Commands.seekTo,
@@ -81,11 +93,15 @@ BrightcovePlayer.propTypes = {
   videoId: PropTypes.string,
   autoPlay: PropTypes.bool,
   play: PropTypes.bool,
+  fullscreen: PropTypes.bool,
   onReady: PropTypes.func,
   onPlay: PropTypes.func,
   onPause: PropTypes.func,
   onEnd: PropTypes.func,
-  onProgress: PropTypes.func
+  onProgress: PropTypes.func,
+  onChangeDuration: PropTypes.func,
+  onEnterFullscreen: PropTypes.func,
+  onExitFullscreen: PropTypes.func
 };
 
 BrightcovePlayer.defaultProps = {};
