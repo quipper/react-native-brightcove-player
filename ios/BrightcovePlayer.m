@@ -121,7 +121,7 @@
 }
 
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
-    if (self.onProgress && progress > 0) {
+    if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
                           @"currentTime": @(progress)
                           });
