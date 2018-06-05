@@ -15,7 +15,8 @@ export default class App extends Component {
     currentTime: 0,
     duration: 0,
     bufferProgress: 0,
-    fullscreen: false
+    fullscreen: false,
+    disableControl: false
   };
 
   render() {
@@ -27,6 +28,7 @@ export default class App extends Component {
           play={this.state.playing}
           autoPlay={true}
           fullscreen={this.state.fullscreen}
+          disableDefaultControl={this.state.disableControl}
           accountId="3636334163001"
           videoId="3666678807001"
           policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
@@ -66,10 +68,20 @@ export default class App extends Component {
               title="-10s"
               onPress={() => this.player.seekTo(this.state.currentTime - 10)}
             />
+          </View>
+          <View style={styles.control}>
             <Button
-              title="Fullscreen"
+              title="Enter Fullscreen"
               onPress={() =>
                 this.setState({ fullscreen: !this.state.fullscreen })
+              }
+            />
+            <Button
+              title={`${
+                this.state.disableControl ? 'Enable' : 'Disable'
+              } Control`}
+              onPress={() =>
+                this.setState({ disableControl: !this.state.disableControl })
               }
             />
           </View>
