@@ -11,7 +11,7 @@ import ReactNative, {
 
 class BrightcovePlayer extends Component {
   state = {
-    fullscreen: false
+    androidFullscreen: false
   };
 
   setNativeProps = nativeProps => {
@@ -27,7 +27,7 @@ class BrightcovePlayer extends Component {
         {...this.props}
         style={[
           this.props.style,
-          this.state.fullscreen && {
+          this.state.androidFullscreen && {
             position: 'absolute',
             zIndex: 9999,
             top: 0,
@@ -65,9 +65,21 @@ class BrightcovePlayer extends Component {
           this.props.onExitFullscreen &&
           this.props.onExitFullscreen(event.nativeEvent)
         }
-        onFullscreen={event =>
-          this.setState({ fullscreen: !this.state.fullscreen })
-        }
+        onToggleAndroidFullscreen={event => {
+          const fullscreen =
+            typeof event.nativeEvent.fullscreen === 'boolean'
+              ? event.nativeEvent.fullscreen
+              : !this.state.androidFullscreen;
+          if (fullscreen === this.state.androidFullscreen) return;
+          this.setState({ androidFullscreen: fullscreen });
+          if (fullscreen) {
+            this.props.onEnterFullscreen &&
+              this.props.onEnterFullscreen(event.nativeEvent);
+          } else {
+            this.props.onExitFullscreen &&
+              this.props.onExitFullscreen(event.nativeEvent);
+          }
+        }}
       />
     );
   }
