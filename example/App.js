@@ -32,17 +32,36 @@ export default class App extends Component {
           accountId="3636334163001"
           videoId="3666678807001"
           policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
-          onReady={() => console.log('ready')}
-          onPlay={() => this.setState({ playing: true })}
-          onPause={() => this.setState({ playing: false })}
-          onEnd={() => console.log('end')}
-          onProgress={({ currentTime }) => this.setState({ currentTime })}
-          onUpdateBufferProgress={({ bufferProgress }) =>
-            this.setState({ bufferProgress })
-          }
-          onChangeDuration={({ duration }) => this.setState({ duration })}
-          onEnterFullscreen={() => this.setState({ fullscreen: true })}
-          onExitFullscreen={() => this.setState({ fullscreen: false })}
+          onReady={() => console.log('onReady')}
+          onPlay={() => {
+            console.log('onPlay');
+            this.setState({ playing: true });
+          }}
+          onPause={() => {
+            console.log('onPause');
+            this.setState({ playing: false });
+          }}
+          onEnd={() => console.log('onEnd')}
+          onProgress={({ currentTime }) => {
+            console.log('onProgress', currentTime);
+            this.setState({ currentTime });
+          }}
+          onUpdateBufferProgress={({ bufferProgress }) => {
+            console.log('onUpdateBufferProgress', bufferProgress);
+            this.setState({ bufferProgress });
+          }}
+          onChangeDuration={({ duration }) => {
+            console.log('onChangeDuration', duration);
+            this.setState({ duration });
+          }}
+          onEnterFullscreen={() => {
+            console.log('onEnterFullscreen');
+            this.setState({ fullscreen: true });
+          }}
+          onExitFullscreen={() => {
+            console.log('onExitFullscreen');
+            this.setState({ fullscreen: false });
+          }}
         />
         <View style={styles.content}>
           <Text style={styles.title}>React Native Brightcove Player</Text>
@@ -112,6 +131,7 @@ const styles = StyleSheet.create({
   },
   control: {
     flexDirection: 'row',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    marginTop: 15
   }
 });
