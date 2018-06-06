@@ -145,9 +145,14 @@
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
-                          @"bufferProgress": @(_playerView.controlsView.progressSlider.bufferProgress),
-                          @"duration": @(_playerView.controlsView.progressSlider.duration),
                           @"currentTime": @(progress)
+                          });
+    }
+    float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
+    if (_lastBufferProgress != bufferProgress) {
+        _lastBufferProgress = bufferProgress;
+        self.onUpdateBufferProgress(@{
+                          @"bufferProgress": @(bufferProgress),
                           });
     }
 }

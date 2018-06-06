@@ -36,8 +36,9 @@ export default class App extends Component {
           onPlay={() => this.setState({ playing: true })}
           onPause={() => this.setState({ playing: false })}
           onEnd={() => console.log('end')}
-          onProgress={({ currentTime, duration, bufferProgress }) =>
-            this.setState({ currentTime, duration, bufferProgress })
+          onProgress={({ currentTime }) => this.setState({ currentTime })}
+          onUpdateBufferProgress={({ bufferProgress }) =>
+            this.setState({ bufferProgress })
           }
           onChangeDuration={({ duration }) => this.setState({ duration })}
           onEnterFullscreen={() => this.setState({ fullscreen: true })}
