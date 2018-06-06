@@ -189,6 +189,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     }
 
     public void setDefaultControlDisabled(boolean disabled) {
+        this.mediaController.hide();
         this.mediaController.setShowHideTimeout(disabled ? 1 : 4000);
     }
 
