@@ -1,6 +1,6 @@
 #import "BrightcovePlayer.h"
 
-@interface BrightcovePlayer () <BCOVPlaybackControllerDelegate>
+@interface BrightcovePlayer () <BCOVPlaybackControllerDelegate, BCOVPUIPlayerViewDelegate>
 
 @end
 
@@ -18,10 +18,12 @@
     _playbackController.delegate = self;
     _playbackController.autoPlay = YES;
     _playbackController.autoAdvance = YES;
-
+    
     _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+    _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
+    
     [self addSubview:_playerView];
 }
 
@@ -93,12 +95,24 @@
     }
 }
 
+- (void)setFullscreen:(BOOL)fullscreen {
+    if (fullscreen) {
+        [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeFull];
+    } else {
+        [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeNormal];
+    }
+}
+
+- (void)setDisableDefaultControl:(BOOL)disable {
+    _playerView.controlsView.hidden = disable;
+}
+
 - (void)seekTo:(NSNumber *)time {
     [_playbackController seekToTime:CMTimeMakeWithSeconds([time floatValue], NSEC_PER_SEC) completionHandler:^(BOOL finished) {
     }];
 }
 
--(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
+- (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         if (self.onReady) {
             self.onReady(@{});
@@ -120,11 +134,38 @@
     }
 }
 
+- (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didChangeDuration:(NSTimeInterval)duration {
+    if (self.onChangeDuration) {
+        self.onChangeDuration(@{
+                                @"duration": @(duration)
+                                });
+    }
+}
+
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
-    if (self.onProgress && progress > 0) {
+    if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
                           @"currentTime": @(progress)
                           });
+    }
+    float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
+    if (_lastBufferProgress != bufferProgress) {
+        _lastBufferProgress = bufferProgress;
+        self.onUpdateBufferProgress(@{
+                          @"bufferProgress": @(bufferProgress),
+                          });
+    }
+}
+
+-(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {
+    if (screenMode == BCOVPUIScreenModeNormal) {
+        if (self.onExitFullscreen) {
+            self.onExitFullscreen(@{});
+        }
+    } else if (screenMode == BCOVPUIScreenModeFull) {
+        if (self.onEnterFullscreen) {
+            self.onEnterFullscreen(@{});
+        }
     }
 }
 

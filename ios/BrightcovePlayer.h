@@ -7,6 +7,7 @@
 #import <BrightcovePlayerSDK/BCOVPlayerSDKManager.h>
 #import <BrightcovePlayerSDK/BCOVPUIBasicControlView.h>
 #import <BrightcovePlayerSDK/BCOVPlaybackSession.h>
+#import <BrightcovePlayerSDK/BCOVPUISlider.h>
 #import <React/RCTBridge.h>
 #import <React/UIView+React.h>
 
@@ -16,6 +17,7 @@
 @property (nonatomic) id<BCOVPlaybackController> playbackController;
 @property (nonatomic) BCOVPUIPlayerView *playerView;
 @property (nonatomic) BOOL playing;
+@property (nonatomic) float lastBufferProgress;
 
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;
@@ -26,6 +28,10 @@
 @property (nonatomic, copy) RCTDirectEventBlock onPause;
 @property (nonatomic, copy) RCTDirectEventBlock onEnd;
 @property (nonatomic, copy) RCTDirectEventBlock onProgress;
+@property (nonatomic, copy) RCTDirectEventBlock onChangeDuration;
+@property (nonatomic, copy) RCTDirectEventBlock onUpdateBufferProgress;
+@property (nonatomic, copy) RCTDirectEventBlock onEnterFullscreen;
+@property (nonatomic, copy) RCTDirectEventBlock onExitFullscreen;
 
 -(void) seekTo:(NSNumber *)time;
 

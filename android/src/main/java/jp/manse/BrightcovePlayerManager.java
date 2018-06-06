@@ -9,6 +9,7 @@ import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -20,7 +21,9 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_PAUSE = "pause";
     public static final String EVENT_END = "end";
     public static final String EVENT_PROGRESS = "progress";
-    public static final String EVENT_FULLSCREEN = "fullscreen";
+    public static final String EVENT_TOGGLE_ANDROID_FULLSCREEN = "toggle_android_fullscreen";
+    public static final String EVENT_CHANGE_DURATION = "change_duration";
+    public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
 
     private static ThemedReactContext context;
 
@@ -57,13 +60,23 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     }
 
     @ReactProp(name = "autoPlay")
-    public void setAutoPlay(BrightcovePlayerView view, Boolean autoPlay) {
+    public void setAutoPlay(BrightcovePlayerView view, boolean autoPlay) {
         view.setAutoPlay(autoPlay);
     }
 
     @ReactProp(name = "play")
-    public void setPlay(BrightcovePlayerView view, Boolean play) {
+    public void setPlay(BrightcovePlayerView view, boolean play) {
         view.setPlay(play);
+    }
+
+    @ReactProp(name = "disableDefaultControl")
+    public void setDefaultControlDisabled(BrightcovePlayerView view, boolean disableDefaultControl) {
+        view.setDefaultControlDisabled(disableDefaultControl);
+    }
+
+    @ReactProp(name = "fullscreen")
+    public void setFullscreen(BrightcovePlayerView view, boolean fullscreen) {
+        view.setFullscreen(fullscreen);
     }
 
     @Override
@@ -88,19 +101,15 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
 
     @Override
     public @Nullable Map <String,Object> getExportedCustomDirectEventTypeConstants() {
-        return MapBuilder.of(
-                EVENT_READY,
-                (Object) MapBuilder.of("registrationName", "onReady"),
-                EVENT_PLAY,
-                (Object) MapBuilder.of("registrationName", "onPlay"),
-                EVENT_PAUSE,
-                (Object) MapBuilder.of("registrationName", "onPause"),
-                EVENT_END,
-                (Object) MapBuilder.of("registrationName", "onEnd"),
-                EVENT_PROGRESS,
-                (Object) MapBuilder.of("registrationName", "onProgress"),
-                EVENT_FULLSCREEN,
-                (Object) MapBuilder.of("registrationName", "onFullscreen")
-        );
+        Map<String, Object> map = new HashMap<>();
+        map.put(EVENT_READY, (Object) MapBuilder.of("registrationName", "onReady"));
+        map.put(EVENT_PLAY, (Object) MapBuilder.of("registrationName", "onPlay"));
+        map.put(EVENT_PAUSE, (Object) MapBuilder.of("registrationName", "onPause"));
+        map.put(EVENT_END, (Object) MapBuilder.of("registrationName", "onEnd"));
+        map.put(EVENT_PROGRESS, (Object) MapBuilder.of("registrationName", "onProgress"));
+        map.put(EVENT_CHANGE_DURATION, (Object) MapBuilder.of("registrationName", "onChangeDuration"));
+        map.put(EVENT_UPDATE_BUFFER_PROGRESS, (Object) MapBuilder.of("registrationName", "onUpdateBufferProgress"));
+        map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, (Object) MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
+        return map;
     }
 }

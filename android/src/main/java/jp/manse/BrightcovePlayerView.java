@@ -1,12 +1,12 @@
 package jp.manse;
 
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceView;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.edge.Catalog;
@@ -25,15 +25,20 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
+import java.util.Map;
+
 public class BrightcovePlayerView extends RelativeLayout {
+    private ThemedReactContext context;
     private BrightcoveExoPlayerVideoView playerVideoView;
+    private BrightcoveMediaController mediaController;
     private String policyKey;
     private String accountId;
     private String videoId;
     private String referenceId;
     private Catalog catalog;
-    private Boolean autoPlay = true;
-    private Boolean playing = false;
+    private boolean autoPlay = true;
+    private boolean playing = false;
+    private boolean fullscreen = false;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -41,12 +46,16 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
         this.setBackgroundColor(Color.BLACK);
-        this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
+
+        this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
         this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
-        this.playerVideoView.setMediaController(new BrightcoveMediaController(this.playerVideoView));
+        this.mediaController = new BrightcoveMediaController(this.playerVideoView);
+        this.playerVideoView.setMediaController(this.mediaController);
+        this.requestLayout();
         ViewCompat.setTranslationZ(this, 9999);
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
@@ -103,17 +112,39 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.ENTER_FULL_SCREEN, new EventListener() {
             @Override
             public void processEvent(Event e) {
+                mediaController.show();
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_FULLSCREEN, event);
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
             }
         });
         eventEmitter.on(EventType.EXIT_FULL_SCREEN, new EventListener() {
             @Override
             public void processEvent(Event e) {
+                mediaController.show();
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_FULLSCREEN, event);
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
+            }
+        });
+        eventEmitter.on(EventType.VIDEO_DURATION_CHANGED, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                Integer duration = (Integer)e.properties.get(Event.VIDEO_DURATION);
+                WritableMap event = Arguments.createMap();
+                event.putDouble("duration", duration / 1000d);
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_CHANGE_DURATION, event);
+            }
+        });
+        eventEmitter.on(EventType.BUFFERED_UPDATE, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                Integer percentComplete = (Integer)e.properties.get(Event.PERCENT_COMPLETE);
+                WritableMap event = Arguments.createMap();
+                event.putDouble("bufferProgress", percentComplete / 100d);
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
         });
     }
@@ -144,17 +175,30 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.loadMovie();
     }
 
-    public void setAutoPlay(Boolean autoPlay) {
+    public void setAutoPlay(boolean autoPlay) {
         this.autoPlay = autoPlay;
     }
 
-    public void setPlay(Boolean play) {
+    public void setPlay(boolean play) {
         if (this.playing == play) return;
         if (play) {
             this.playerVideoView.start();
         } else {
             this.playerVideoView.pause();
         }
+    }
+
+    public void setDefaultControlDisabled(boolean disabled) {
+        this.mediaController.hide();
+        this.mediaController.setShowHideTimeout(disabled ? 1 : 4000);
+    }
+
+    public void setFullscreen(boolean fullscreen) {
+        this.mediaController.show();
+        WritableMap event = Arguments.createMap();
+        event.putBoolean("fullscreen", fullscreen);
+        ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
     }
 
     public void seekTo(int time) {
@@ -196,5 +240,12 @@ public class BrightcovePlayerView extends RelativeLayout {
         int leftOffset = (viewWidth - surfaceWidth) / 2;
         int topOffset = (viewHeight - surfaceHeight) / 2;
         surfaceView.layout(leftOffset, topOffset, leftOffset + surfaceWidth, topOffset + surfaceHeight);
+    }
+
+    private void printKeys(Map<String, Object> map) {
+        Log.d("debug", "-----------");
+        for(Map.Entry<String, Object> entry : map.entrySet()) {
+            Log.d("debug", entry.getKey());
+        }
     }
 }

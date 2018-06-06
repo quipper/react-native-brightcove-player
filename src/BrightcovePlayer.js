@@ -11,7 +11,7 @@ import ReactNative, {
 
 class BrightcovePlayer extends Component {
   state = {
-    fullscreen: false
+    androidFullscreen: false
   };
 
   setNativeProps = nativeProps => {
@@ -27,7 +27,7 @@ class BrightcovePlayer extends Component {
         {...this.props}
         style={[
           this.props.style,
-          this.state.fullscreen && {
+          this.state.androidFullscreen && {
             position: 'absolute',
             zIndex: 9999,
             top: 0,
@@ -49,22 +49,50 @@ class BrightcovePlayer extends Component {
         onProgress={event =>
           this.props.onProgress && this.props.onProgress(event.nativeEvent)
         }
-        onFullscreen={event =>
-          this.setState({ fullscreen: !this.state.fullscreen })
+        onChangeDuration={event =>
+          this.props.onChangeDuration &&
+          this.props.onChangeDuration(event.nativeEvent)
         }
+        onUpdateBufferProgress={event =>
+          this.props.onUpdateBufferProgress &&
+          this.props.onUpdateBufferProgress(event.nativeEvent)
+        }
+        onEnterFullscreen={event =>
+          this.props.onEnterFullscreen &&
+          this.props.onEnterFullscreen(event.nativeEvent)
+        }
+        onExitFullscreen={event =>
+          this.props.onExitFullscreen &&
+          this.props.onExitFullscreen(event.nativeEvent)
+        }
+        onToggleAndroidFullscreen={event => {
+          const fullscreen =
+            typeof event.nativeEvent.fullscreen === 'boolean'
+              ? event.nativeEvent.fullscreen
+              : !this.state.androidFullscreen;
+          if (fullscreen === this.state.androidFullscreen) return;
+          this.setState({ androidFullscreen: fullscreen });
+          if (fullscreen) {
+            this.props.onEnterFullscreen &&
+              this.props.onEnterFullscreen(event.nativeEvent);
+          } else {
+            this.props.onExitFullscreen &&
+              this.props.onExitFullscreen(event.nativeEvent);
+          }
+        }}
       />
     );
   }
 }
 
 BrightcovePlayer.prototype.seekTo = Platform.select({
-  ios: function (seconds) {
+  ios: function(seconds) {
     NativeModules.BrightcovePlayerManager.seekTo(
       ReactNative.findNodeHandle(this),
       seconds
     );
   },
-  android: function (seconds) {
+  android: function(seconds) {
     UIManager.dispatchViewManagerCommand(
       ReactNative.findNodeHandle(this._root),
       UIManager.BrightcovePlayer.Commands.seekTo,
@@ -81,11 +109,17 @@ BrightcovePlayer.propTypes = {
   videoId: PropTypes.string,
   autoPlay: PropTypes.bool,
   play: PropTypes.bool,
+  fullscreen: PropTypes.bool,
+  disableDefaultControl: PropTypes.bool,
   onReady: PropTypes.func,
   onPlay: PropTypes.func,
   onPause: PropTypes.func,
   onEnd: PropTypes.func,
-  onProgress: PropTypes.func
+  onProgress: PropTypes.func,
+  onChangeDuration: PropTypes.func,
+  onUpdateBufferProgress: PropTypes.func,
+  onEnterFullscreen: PropTypes.func,
+  onExitFullscreen: PropTypes.func
 };
 
 BrightcovePlayer.defaultProps = {};
