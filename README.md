@@ -14,6 +14,7 @@ react-native link react-native-brightcove-player
 ### iOS
 
 - Make `Podfile` like below and `pod install`
+
 ```rb
 source 'https://github.com/brightcove/BrightcoveSpecs.git'
 
@@ -28,6 +29,7 @@ end
 ### Android
 
 - Add following lines in `android/app/build.gradle`
+
 ```gradle
 repositories {
     maven {
@@ -42,18 +44,18 @@ repositories {
 import { BrightcovePlayer } from 'react-native-brightcove-player';
 
 export default class App extends Component {
-    render() {
-        return (
-            <View style={styles.container}>
-                <BrightcovePlayer
-                    style={styles.player}
-                    accountId="3636334163001"
-                    videoId="3666678807001"
-                    policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
-                />
-            </View>
-        );
-    }
+  render() {
+    return (
+      <View style={styles.container}>
+        <BrightcovePlayer
+          style={styles.player}
+          accountId="3636334163001"
+          videoId="3666678807001"
+          policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
+        />
+      </View>
+    );
+  }
 }
 ```
 
@@ -62,21 +64,26 @@ export default class App extends Component {
 - It may not work on Android simulator, in that case please run on device.
 - For a more detailed example, please see [example/App.js](https://github.com/manse/react-native-brightcove-player/blob/master/example/App.js).
 
-| Prop | Type | Required | Note |
-| ---- | ---- | -------- | ---- |
-| accountId | string | y | Brightcove AccountId |
-| policyKey | string | y | Brightcove PolicyKey |
-| videoId | string | y* | Brightcove VideoId. *Either videoId or referenceId is required |
-| referenceId | string | y* | Brightcove ReferenceId. *Either videoId or referenceId is required |
-| autoPlay | boolean | n | Whether to play automatically when video loaded |
-| play | boolean | n | Control playback and pause |
-| onReady | Function | n | Indicates the video can be played back |
-| onPlay | Function | n | Indicates the video playback starts |
-| onPause | Function | n | Indicates the video is paused |
-| onEnd | Function | n | Indicates the video is played to the end |
-| onProgress | Function | n | Indicates the playback head of the video advances. The playback info is passed as the first argument; `{ currentTime: number }` |
+| Prop                   | Type     | Description                                                                     | Event Object                 |
+| ---------------------- | -------- | ------------------------------------------------------------------------------- | ---------------------------- |
+| accountId              | string   | Brightcove AccountId                                                            |                              |
+| policyKey              | string   | Brightcove PolicyKey                                                            |                              |
+| videoId                | string   | Brightcove VideoId. \*Either videoId or referenceId is required                 |                              |
+| referenceId            | string   | Brightcove ReferenceId. \*Either videoId or referenceId is required             |                              |
+| autoPlay               | boolean  | Whether to play automatically when video loaded                                 |                              |
+| play                   | boolean  | Control playback and pause                                                      |                              |
+| fullscreen             | boolean  | Control full screen state                                                       |                              |
+| disableDefaultControl  | boolean  | Disable default player control. Set true if you implement own video controller. |                              |
+| onReady                | Function | Indicates the video can be played back                                          |                              |
+| onPlay                 | Function | Indicates the video playback starts                                             |                              |
+| onPause                | Function | Indicates the video is paused                                                   |                              |
+| onEnd                  | Function | Indicates the video is played to the end                                        |                              |
+| onProgress             | Function | Indicates the playback head of the video advances.                              | `{ currentTime: number }`    |
+| onChangeDuration       | Function | Indicates the video length is changed                                           | `{ duration: number }`       |
+| onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                   | `{ bufferProgress: number }` |
+| onEnterFullscreen      | Function | Indicates the player enters full screen                                         |                              |
+| onExitFullscreen       | Function | Indicates the player exit full screen                                           |                              |
 
-| Method | Note |
-| ------ | ---- |
+| Method                                | Description                       |
+| ------------------------------------- | --------------------------------- |
 | seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
-
