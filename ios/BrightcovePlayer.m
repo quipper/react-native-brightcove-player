@@ -6,8 +6,11 @@
 
 @implementation BrightcovePlayer
 
+BOOL _resizeAspectFill;
+
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        _resizeAspectFill = true;
         [self setup];
     }
     return self;
@@ -54,6 +57,10 @@
     BCOVBasicSessionProviderOptions *options = [BCOVBasicSessionProviderOptions alloc];
     BCOVBasicSessionProvider *provider = [[BCOVPlayerSDKManager sharedManager] createBasicSessionProviderWithOptions:options];
     return [BCOVPlayerSDKManager.sharedManager createPlaybackControllerWithSessionProvider:provider viewStrategy:nil];
+}
+
+- (void)setResizeAspectFill:(BOOL)resizeAspectFill {
+    _resizeAspectFill = resizeAspectFill;
 }
 
 - (void)setReferenceId:(NSString *)referenceId {
@@ -113,6 +120,11 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
+
+    if(_resizeAspectFill) {
+        session.playerLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    }
+
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         if (self.onReady) {
             self.onReady(@{});
