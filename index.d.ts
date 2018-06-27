@@ -14,7 +14,7 @@ export type Props = {
   onEnd?: () => void;
   onProgress?: ({ currentTime: number }) => void;
   style?: ViewStyle;
-  resizeAspectFill: boolean;
+  resizeAspectFill?: boolean;
 };
 
 export class BrightcovePlayer extends React.Component<Props, {}> {
