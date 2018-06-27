@@ -119,7 +119,8 @@ BrightcovePlayer.propTypes = {
   onChangeDuration: PropTypes.func,
   onUpdateBufferProgress: PropTypes.func,
   onEnterFullscreen: PropTypes.func,
-  onExitFullscreen: PropTypes.func
+  onExitFullscreen: PropTypes.func,
+  resizeAspectFill: PropTypes.bool
 };
 
 BrightcovePlayer.defaultProps = {};
