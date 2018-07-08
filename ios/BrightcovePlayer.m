@@ -129,19 +129,109 @@ BOOL _resizeAspectFill;
         if (self.onReady) {
             self.onReady(@{});
         }
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackReady")
+                                 });
+        }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
         if (self.onPlay) {
             self.onPlay(@{});
+        }
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackPlay")
+                                 });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
         _playing = false;
         if (self.onPause) {
             self.onPause(@{});
         }
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackPause")
+                                 });
+        }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
         if (self.onEnd) {
             self.onEnd(@{});
+        }
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackEnd")
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("loadFail"),
+                                 @"error": lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError]
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("failedToPlayToEndTime"),
+                                 @"error": lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError]
+                                 });
+        }
+    }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeBegin) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("resumeAttemptBegin")
+                                 });
+        }
+    }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeComplete) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("resumeAttemptComplete")
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeFail) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("resumeAttemptFail")
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
+        // name non-standard to avoid conflict with RCTVideo event PlaybackStalled
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackStalled")
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackRecovered")
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackBufferEmpty")
+                                 });
+        }
+    }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playbackBufferLikelyToKeepUp")
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventTerminate) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playerTerminated")
+                                 });
+        }
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
+        if (self.onStatusEvent) {
+            self.onStatusEvent(@{
+                                 @"type": @("playerTerminated"),
+                                 @"error": lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError]
+                                 });
         }
     }
 }
