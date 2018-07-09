@@ -42,6 +42,13 @@ BOOL _resizeAspectFill;
         [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
                 [self.playbackController setVideos: @[ video ]];
+            }  else {
+                if (self.onStatusEvent) {
+                    self.onStatusEvent(@{
+                                         @"type": @("loadFail"),
+                                         @"error": [NSString stringWithFormat:@"Could not find video with videoId: %@",  _videoId]
+                                         });
+                }
             }
         }];
     } else if (_referenceId) {
