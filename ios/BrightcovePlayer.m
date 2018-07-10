@@ -154,7 +154,6 @@ BOOL _resizeAspectFill;
             self.onPlay(@{});
         }
         if (self.onStatusEvent) {
-            
             self.onStatusEvent(@{
                                  @"type": @("play")
                                  });
