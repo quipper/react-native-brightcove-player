@@ -46,7 +46,7 @@ BOOL _resizeAspectFill;
                 if (self.onStatusEvent) {
                     self.onStatusEvent(@{
                                          @"type": @("loadFail"),
-                                         @"error": [NSString stringWithFormat:@"Could not find video with videoId: %@",  _videoId]
+                                         @"error": [NSString stringWithFormat:@"Could not find video with videoId: %@ with error: `%@`",  _videoId, error]
                                          });
                 }
             }
@@ -59,7 +59,7 @@ BOOL _resizeAspectFill;
                 if (self.onStatusEvent) {
                     self.onStatusEvent(@{
                                          @"type": @("loadFail"),
-                                         @"error": [NSString stringWithFormat:@"Could not find video with referenceId: %@",  _referenceId]
+                                         @"error": [NSString stringWithFormat:@"Could not find video with referenceId: %@ with error: `%@`",  _referenceId, error]
                                          });
                 }
             }
@@ -145,7 +145,7 @@ BOOL _resizeAspectFill;
         }
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("playbackReady")
+                                 @"type": @("ready")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
@@ -155,7 +155,7 @@ BOOL _resizeAspectFill;
         }
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("playbackPlay")
+                                 @"type": @("play")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
@@ -165,7 +165,7 @@ BOOL _resizeAspectFill;
         }
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("playbackPause")
+                                 @"type": @("pause")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
@@ -174,39 +174,39 @@ BOOL _resizeAspectFill;
         }
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("playbackEnd")
+                                 @"type": @("end")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("loadFail"),
-                                 @"error": lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError]
+                                 @"type": @("fail"),
+                                 @"error":  [lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionLifecycleEventError] != nil   ? lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError] :  [NSNull null]
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
                                  @"type": @("failedToPlayToEndTime"),
-                                 @"error": lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError]
+                                 @"error":  [lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionLifecycleEventError] != nil   ? lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError] :  [NSNull null]
                                  });
         }
     }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeBegin) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("resumeAttemptBegin")
+                                 @"type": @("resumeBegin")
                                  });
         }
     }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeComplete) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("resumeAttemptComplete")
+                                 @"type": @("resumeComplete")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeFail) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("resumeAttemptFail")
+                                 @"type": @("resumeFail")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
@@ -231,20 +231,20 @@ BOOL _resizeAspectFill;
     }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("playbackBufferLikelyToKeepUp")
+                                 @"type": @("playbackLikelyToKeepUp")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventTerminate) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("playerTerminated")
+                                 @"type": @("terminate")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
-                                 @"type": @("playerTerminated"),
-                                 @"error": lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError]
+                                 @"type": @("error"),
+                                  @"error":  [lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionLifecycleEventError] != nil   ? lifecycleEvent.properties[kBCOVPlaybackSessionLifecycleEventError] :  [NSNull null]
                                  });
         }
     }

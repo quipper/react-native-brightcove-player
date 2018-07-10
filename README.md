@@ -84,6 +84,7 @@ export default class App extends Component {
 | onEnterFullscreen      | Function |   | ✅ | ✅ | Indicates the player enters full screen                                         |                              |
 | onExitFullscreen       | Function |   | ✅ | ✅ | Indicates the player exit full screen                                           |                              |
 | resizeAspectFill       | boolean  | true  | ✅ | ❌ | Specifies that the player should preserve the video’s aspect ratio and fill the layer’s bounds. See: [AVFoundation > AVPlayerLayer > videoGravity ](https://developer.apple.com/documentation/avfoundation/avplayerlayer/1388915-videogravity?language=objc) | |
+| onStatusEvent          | Function |   | ✅ | ✅ | Indicates playback status event has fired                                      | `{ info: string, error?: string }` |
 
 | Method                                | Description                       |
 | ------------------------------------- | --------------------------------- |
