@@ -73,6 +73,7 @@ export default class App extends Component {
 | autoPlay               | boolean  | Whether to play automatically when video loaded                                 |                              |
 | play                   | boolean  | Control playback and pause                                                      |                              |
 | fullscreen             | boolean  | Control full screen state                                                       |                              |
+| volume                 | number   | Set audio volume (0.0 - 1.0)                                                    |                              |
 | disableDefaultControl  | boolean  | Disable default player control. Set true if you implement own video controller. |                              |
 | onReady                | Function | Indicates the video can be played back                                          |                              |
 | onPlay                 | Function | Indicates the video playback starts                                             |                              |
