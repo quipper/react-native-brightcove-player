@@ -111,6 +111,7 @@ BrightcovePlayer.propTypes = {
   play: PropTypes.bool,
   fullscreen: PropTypes.bool,
   disableDefaultControl: PropTypes.bool,
+  volume: PropTypes.number,
   onReady: PropTypes.func,
   onPlay: PropTypes.func,
   onPause: PropTypes.func,
