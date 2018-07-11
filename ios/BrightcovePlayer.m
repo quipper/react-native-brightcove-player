@@ -180,26 +180,26 @@ BOOL _resizeAspectFill;
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
         if (self.onStatusEvent) {
             
-            NSString* error = @"";
+             NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
             
             self.onStatusEvent(@{
                                  @"type": @("fail"),
-                                 @"error":  [error length] != 0 ? error : [NSNull null]
+                                 @"error":  error ? error : [NSNull null]
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
         if (self.onStatusEvent) {
-            NSString* error = @"";
+             NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
             
             self.onStatusEvent(@{
                                  @"type": @("failedToPlayToEndTime"),
-                                 @"error":  [error length] != 0 ? error : [NSNull null]
+                                 @"error":  error ? error : [NSNull null]
                                  });
         }
     }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeBegin) {
@@ -253,14 +253,14 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
         if (self.onStatusEvent) {
-            NSString* error = @"";
+            NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
             
             self.onStatusEvent(@{
                                  @"type": @("error"),
-                                  @"error":  [error length] != 0 ? error : [NSNull null]
+                                  @"error": error ? error : [NSNull null]
                                  });
         }
     }
