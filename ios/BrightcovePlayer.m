@@ -187,7 +187,7 @@ BOOL _resizeAspectFill;
             
             self.onStatusEvent(@{
                                  @"type": @("fail"),
-                                 @"error":  error
+                                 @"error":  [error length] != 0 ? error : [NSNull null]
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
@@ -199,7 +199,7 @@ BOOL _resizeAspectFill;
             
             self.onStatusEvent(@{
                                  @"type": @("failedToPlayToEndTime"),
-                                 @"error":  error
+                                 @"error":  [error length] != 0 ? error : [NSNull null]
                                  });
         }
     }  else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventResumeBegin) {
@@ -260,7 +260,7 @@ BOOL _resizeAspectFill;
             
             self.onStatusEvent(@{
                                  @"type": @("error"),
-                                 @"error":  error
+                                  @"error":  [error length] != 0 ? error : [NSNull null]
                                  });
         }
     }
