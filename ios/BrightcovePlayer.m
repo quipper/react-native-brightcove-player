@@ -24,6 +24,8 @@
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
     
+    _targetVolume = 1.0;
+    
     [self addSubview:_playerView];
 }
 
@@ -103,6 +105,16 @@
     }
 }
 
+- (void)setVolume:(NSNumber*)volume {
+    _targetVolume = volume.doubleValue;
+    [self refreshVolume];
+}
+
+- (void)refreshVolume {
+    if (!_playbackSession) return;
+    _playbackSession.player.volume = _targetVolume;
+}
+
 - (void)setDisableDefaultControl:(BOOL)disable {
     _playerView.controlsView.hidden = disable;
 }
@@ -155,6 +167,11 @@
                           @"bufferProgress": @(bufferProgress),
                           });
     }
+}
+
+- (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session {
+    _playbackSession = session;
+    [self refreshVolume];
 }
 
 -(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {

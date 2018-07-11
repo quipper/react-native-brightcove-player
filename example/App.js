@@ -16,7 +16,8 @@ export default class App extends Component {
     duration: 0,
     bufferProgress: 0,
     fullscreen: false,
-    disableControl: false
+    disableControl: false,
+    volume: 1
   };
 
   render() {
@@ -29,6 +30,7 @@ export default class App extends Component {
           autoPlay={true}
           fullscreen={this.state.fullscreen}
           disableDefaultControl={this.state.disableControl}
+          volume={this.state.volume}
           accountId="3636334163001"
           videoId="3666678807001"
           policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
@@ -88,6 +90,17 @@ export default class App extends Component {
               title="-10s"
               onPress={() => this.player.seekTo(this.state.currentTime - 10)}
             />
+          </View>
+          <View style={styles.control}>
+            <Button
+              title="Volume 1.0"
+              onPress={() => this.setState({ volume: 1 })}
+            />
+            <Button
+              title="0.5"
+              onPress={() => this.setState({ volume: 0.5 })}
+            />
+            <Button title="0.0" onPress={() => this.setState({ volume: 0 })} />
           </View>
           <View style={styles.control}>
             <Button
