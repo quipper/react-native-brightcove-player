@@ -25,6 +25,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
@@ -199,6 +200,12 @@ public class BrightcovePlayerView extends RelativeLayout {
         event.putBoolean("fullscreen", fullscreen);
         ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
+    }
+
+    public void setVolume(float volume) {
+        Map<String, Object> details = new HashMap<>();
+        details.put(Event.VOLUME, volume);
+        this.playerVideoView.getEventEmitter().emit(EventType.SET_VOLUME, details);
     }
 
     public void seekTo(int time) {
