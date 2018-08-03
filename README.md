@@ -4,6 +4,12 @@ A React Native implementation of Brightcove Player SDK.
 
 <img src="https://user-images.githubusercontent.com/443965/40413410-b9963158-5eb0-11e8-924f-9f61df58fa04.jpg" width="500">
 
+## Supported Version
+
+- iOS 11 >=
+- Android 5.0 >=
+  - _also works on 4.4 (19), but it seems to crash on some devices_
+
 ## Installation
 
 ```console
