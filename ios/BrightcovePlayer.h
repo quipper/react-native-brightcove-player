@@ -8,6 +8,7 @@
 #import <BrightcovePlayerSDK/BCOVPUIBasicControlView.h>
 #import <BrightcovePlayerSDK/BCOVPlaybackSession.h>
 #import <BrightcovePlayerSDK/BCOVPUISlider.h>
+#import <BrightcovePlayerSDK/BCOVPlaybackSession.h>
 #import <React/RCTBridge.h>
 #import <React/UIView+React.h>
 

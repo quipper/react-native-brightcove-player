@@ -133,6 +133,17 @@ BOOL _resizeAspectFill;
     }];
 }
 
+- (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didPassCuePoints:(NSDictionary *)cuePointInfo{
+    
+    NSLog(@"Cuepoint hit!");
+    
+    BCOVCuePointCollection *collection = cuePointInfo[kBCOVPlaybackSessionEventKeyCuePoints];
+    
+    for(BCOVCuePoint *point in collection){
+        NSLog(@"Cuepoint Type %@ with Position %f", [point type], CMTimeGetSeconds([point position]));
+    }
+}
+
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
 
     if(_resizeAspectFill) {
