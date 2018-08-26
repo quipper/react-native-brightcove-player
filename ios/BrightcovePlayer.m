@@ -141,6 +141,16 @@ BOOL _resizeAspectFill;
     
     for(BCOVCuePoint *point in collection){
         NSLog(@"Cuepoint Type %@ with Position %f", [point type], CMTimeGetSeconds([point position]));
+        if (self.onCuePoint) {
+            self.onCuePoint(@{
+                                 @"type": [point type],
+                                 @"id" :[point.properties valueForKey:@"id"] ? [point.properties valueForKey:@"id"] : nil,
+                                 @"position" : @(CMTimeGetSeconds([point position])),
+                                 @"name" : [point.properties valueForKey:@"name"] ? [point.properties valueForKey:@"name"] : nil,
+                                 @"metadata" : [point.properties valueForKey:@"metadata"] ? [point.properties valueForKey:@"metadata"] : nil,
+                                 @"forceStop" : [point.properties valueForKey:@"force_stop"] ? [point.properties valueForKey:@"force_stop"] : nil,
+                                 });
+        }
     }
 }
 
