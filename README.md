@@ -64,25 +64,27 @@ export default class App extends Component {
 - It may not work on Android simulator, in that case please run on device.
 - For a more detailed example, please see [example/App.js](https://github.com/manse/react-native-brightcove-player/blob/master/example/App.js).
 
-| Prop                   | Type     | Description                                                                     | Event Object                 |
-| ---------------------- | -------- | ------------------------------------------------------------------------------- | ---------------------------- |
-| accountId              | string   | Brightcove AccountId                                                            |                              |
-| policyKey              | string   | Brightcove PolicyKey                                                            |                              |
-| videoId                | string   | Brightcove VideoId. \*Either videoId or referenceId is required                 |                              |
-| referenceId            | string   | Brightcove ReferenceId. \*Either videoId or referenceId is required             |                              |
-| autoPlay               | boolean  | Whether to play automatically when video loaded                                 |                              |
-| play                   | boolean  | Control playback and pause                                                      |                              |
-| fullscreen             | boolean  | Control full screen state                                                       |                              |
-| disableDefaultControl  | boolean  | Disable default player control. Set true if you implement own video controller. |                              |
-| onReady                | Function | Indicates the video can be played back                                          |                              |
-| onPlay                 | Function | Indicates the video playback starts                                             |                              |
-| onPause                | Function | Indicates the video is paused                                                   |                              |
-| onEnd                  | Function | Indicates the video is played to the end                                        |                              |
-| onProgress             | Function | Indicates the playback head of the video advances.                              | `{ currentTime: number }`    |
-| onChangeDuration       | Function | Indicates the video length is changed                                           | `{ duration: number }`       |
-| onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                   | `{ bufferProgress: number }` |
-| onEnterFullscreen      | Function | Indicates the player enters full screen                                         |                              |
-| onExitFullscreen       | Function | Indicates the player exit full screen                                           |                              |
+| Prop                   | Type     | Default | iOS | Android |  Description                                                        | Event Object                 |
+| ---------------------- | -------- | - |- | - | ---------------------------------------------------------------------------- | ---------------------------- |
+| accountId              | string   |   | ✅ | ✅ | Brightcove AccountId                                                            |                              |
+| policyKey              | string   |   | ✅ | ✅ | Brightcove PolicyKey                                                            |                              |
+| videoId                | string   |   | ✅ | ✅ | Brightcove VideoId. \*Either videoId or referenceId is required                 |                              |
+| referenceId            | string   |   | ✅ | ✅ | Brightcove ReferenceId. \*Either videoId or referenceId is required             |                              |
+| autoPlay               | boolean  |   | ✅ | ✅ | Whether to play automatically when video loaded                                 |                              |
+| play                   | boolean  |   | ✅ | ✅ | Control playback and pause                                                      |                              |
+| fullscreen             | boolean  |   | ✅ | ✅ | Control full screen state                                                       |                              |
+| disableDefaultControl  | boolean  |   | ✅ | ✅ | Disable default player control. Set true if you implement own video controller. |                              |
+| onReady                | Function |   | ✅ | ✅ | Indicates the video can be played back                                          |                              |
+| onPlay                 | Function |   | ✅ | ✅ | Indicates the video playback starts                                             |                              |
+| onPause                | Function |   | ✅ | ✅ | Indicates the video is paused                                                   |                              |
+| onEnd                  | Function |   | ✅ | ✅ | Indicates the video is played to the end                                        |                              |
+| onProgress             | Function |   | ✅ | ✅ | Indicates the playback head of the video advances.                              | `{ currentTime: number }`    |
+| onChangeDuration       | Function |   | ✅ | ✅ | Indicates the video length is changed                                           | `{ duration: number }`       |
+| onUpdateBufferProgress | Function |   | ✅ | ✅ | Indicates the video loading buffer is updated                                   | `{ bufferProgress: number }` |
+| onEnterFullscreen      | Function |   | ✅ | ✅ | Indicates the player enters full screen                                         |                              |
+| onExitFullscreen       | Function |   | ✅ | ✅ | Indicates the player exit full screen                                           |                              |
+| resizeAspectFill       | boolean  | true  | ✅ | ❌ | Specifies that the player should preserve the video’s aspect ratio and fill the layer’s bounds. See: [AVFoundation > AVPlayerLayer > videoGravity ](https://developer.apple.com/documentation/avfoundation/avplayerlayer/1388915-videogravity?language=objc) | |
+| onStatusEvent          | Function |   | ✅ | ✅ | Indicates playback status event has fired                                      | `{ info: string, error?: string }` |
 
 | Method                                | Description                       |
 | ------------------------------------- | --------------------------------- |

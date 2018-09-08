@@ -8,6 +8,8 @@
 #import <BrightcovePlayerSDK/BCOVPUIBasicControlView.h>
 #import <BrightcovePlayerSDK/BCOVPlaybackSession.h>
 #import <BrightcovePlayerSDK/BCOVPUISlider.h>
+#import <BrightcovePlayerSDK/BCOVPlaybackSession.h>
+#import <BrightcovePlayerSDK/BCOVCuePointCollection.h>
 #import <React/RCTBridge.h>
 #import <React/UIView+React.h>
 
@@ -33,6 +35,8 @@
 @property (nonatomic, copy) RCTDirectEventBlock onUpdateBufferProgress;
 @property (nonatomic, copy) RCTDirectEventBlock onEnterFullscreen;
 @property (nonatomic, copy) RCTDirectEventBlock onExitFullscreen;
+@property (nonatomic, copy) RCTDirectEventBlock onStatusEvent;
+@property (nonatomic, copy) RCTDirectEventBlock onCuePoint;
 
 -(void) seekTo:(NSNumber *)time;
 
