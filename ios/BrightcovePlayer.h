@@ -19,6 +19,7 @@
 @property (nonatomic) BOOL playing;
 @property (nonatomic) float lastBufferProgress;
 
+@property (nonatomic, copy) NSString *playbackUrl;
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;
 @property (nonatomic, copy) NSString *accountId;

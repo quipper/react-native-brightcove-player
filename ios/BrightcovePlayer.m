@@ -35,7 +35,12 @@
 
 - (void)loadMovie {
     if (!_playbackService) return;
-    if (_videoId) {
+    if (_playbackUrl) {
+        NSURL *videoURL = [NSURL URLWithString:_playbackUrl];
+        BCOVSource *source = [[BCOVSource alloc] initWithURL:videoURL deliveryMethod:kBCOVSourceDeliveryHLS properties:nil];
+        BCOVVideo *video = [[BCOVVideo alloc] initWithSource:source cuePoints:nil properties:nil];
+        [self.playbackController setVideos:@[video]];
+    } else if (_videoId) {
         [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
                 [self.playbackController setVideos: @[ video ]];
