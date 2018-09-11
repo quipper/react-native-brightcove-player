@@ -2,6 +2,8 @@
 
 @interface BrightcovePlayer () <BCOVPlaybackControllerDelegate, BCOVPUIPlayerViewDelegate>
 
+@property (nonatomic, weak) AVPlayer *currentPlayer;
+
 @end
 
 @implementation BrightcovePlayer
@@ -173,6 +175,11 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
+        
+        NSTimeInterval duration = CMTimeGetSeconds(session.player.currentItem.duration);
+        
+        [session.player addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
+        
         if (self.onPlay) {
             self.onPlay(@{});
         }
@@ -298,6 +305,7 @@ BOOL _resizeAspectFill;
 }
 
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
+   
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
                           @"currentTime": @(progress)
@@ -323,5 +331,23 @@ BOOL _resizeAspectFill;
         }
     }
 }
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    
+    if ([keyPath isEqualToString:@"timedMetadata"])
+    {
+        AVPlayerItem* playerItem = object;
+        
+        for (AVMetadataItem* metadata in playerItem.timedMetadata)
+        {
+            
+            if([metadata.commonKey isEqualToString:@"title"]){
+                
+                NSLog(@"%@",metadata.stringValue);
+            }
+        }
+    }
+}
+
 
 @end
