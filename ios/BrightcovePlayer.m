@@ -178,7 +178,7 @@ BOOL _resizeAspectFill;
         
         NSTimeInterval duration = CMTimeGetSeconds(session.player.currentItem.duration);
         
-        [session.player addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
+        [session.player.currentItem addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
         
         if (self.onPlay) {
             self.onPlay(@{});
@@ -341,9 +341,19 @@ BOOL _resizeAspectFill;
         for (AVMetadataItem* metadata in playerItem.timedMetadata)
         {
             
-            if([metadata.commonKey isEqualToString:@"title"]){
+            if([metadata.key isEqual:@"CREW"]){
                 
-                NSLog(@"%@",metadata.stringValue);
+                NSString* valueString;
+                valueString = [[NSString alloc] initWithData:metadata.dataValue encoding:NSASCIIStringEncoding];
+            
+                if (self.onMetadata) {
+                    self.onMetadata(@{
+                                         @"type": @("metadata"),
+                                         @"key": metadata.key,
+                                         @"value": valueString,
+                                         @"time": @(CMTimeGetSeconds(metadata.time))
+                                         });
+                }
             }
         }
     }
