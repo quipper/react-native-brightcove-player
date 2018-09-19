@@ -37,7 +37,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onExitFullscreen;
 @property (nonatomic, copy) RCTDirectEventBlock onStatusEvent;
 @property (nonatomic, copy) RCTDirectEventBlock onCuePoint;
-@property (nonatomic, copy) RCTDirectEventBlock onMetadata;
+@property (nonatomic, copy) RCTDirectEventBlock onID3Metadata;
 
 -(void) seekTo:(NSNumber *)time;
 

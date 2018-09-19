@@ -346,8 +346,8 @@ BOOL _resizeAspectFill;
                 NSString* valueString;
                 valueString = [[NSString alloc] initWithData:metadata.dataValue encoding:NSASCIIStringEncoding];
             
-                if (self.onMetadata) {
-                    self.onMetadata(@{
+                if (self.onID3Metadata) {
+                    self.onID3Metadata(@{
                                          @"type": @("metadata"),
                                          @"key": metadata.key,
                                          @"value": valueString,

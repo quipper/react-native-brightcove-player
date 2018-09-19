@@ -88,10 +88,10 @@ class BrightcovePlayer extends Component {
           this.props.onCuePoint &&
           this.props.onCuePoint(event.nativeEvent)
         }
-        onMetadata={event =>
+        onID3Metadata={event =>
           { 
-            this.props.onMetadata &&
-          this.props.onMetadata(event.nativeEvent)
+            this.props.onID3Metadata &&
+          this.props.onID3Metadata(event.nativeEvent)
           }
         }
       />
@@ -138,7 +138,7 @@ BrightcovePlayer.propTypes = {
   resizeAspectFill: PropTypes.bool,
   onStatusEvent: PropTypes.func,
   onCuePoint: PropTypes.func,
-  onMetadata: PropTypes.func,
+  onID3Metadata: PropTypes.func,
 };
 
 BrightcovePlayer.defaultProps = {};
