@@ -176,8 +176,6 @@ BOOL _resizeAspectFill;
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
         
-        NSTimeInterval duration = CMTimeGetSeconds(session.player.currentItem.duration);
-        
         [session.player.currentItem addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
         
         if (self.onPlay) {

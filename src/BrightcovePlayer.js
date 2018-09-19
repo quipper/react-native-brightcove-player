@@ -88,11 +88,10 @@ class BrightcovePlayer extends Component {
           this.props.onCuePoint &&
           this.props.onCuePoint(event.nativeEvent)
         }
-        onID3Metadata={event =>
-          { 
-            this.props.onID3Metadata &&
-          this.props.onID3Metadata(event.nativeEvent)
-          }
+        onID3Metadata={event => {
+          this.props.onID3Metadata &&
+            this.props.onID3Metadata(event.nativeEvent)
+        }
         }
       />
     );
@@ -100,13 +99,13 @@ class BrightcovePlayer extends Component {
 }
 
 BrightcovePlayer.prototype.seekTo = Platform.select({
-  ios: function(seconds) {
+  ios: function (seconds) {
     NativeModules.BrightcovePlayerManager.seekTo(
       ReactNative.findNodeHandle(this),
       seconds
     );
   },
-  android: function(seconds) {
+  android: function (seconds) {
     UIManager.dispatchViewManagerCommand(
       ReactNative.findNodeHandle(this._root),
       UIManager.BrightcovePlayer.Commands.seekTo,
