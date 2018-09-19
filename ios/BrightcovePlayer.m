@@ -40,7 +40,7 @@ BOOL _resizeAspectFill;
 
 - (void)loadMovie {
     if (!_playbackService) return;
-    if (_playbackUrl) {
+    if (_playbackUrl && [_playbackUrl length] > 0) {
         NSURL *videoURL = [NSURL URLWithString:_playbackUrl];
         BCOVSource *source = [[BCOVSource alloc] initWithURL:videoURL deliveryMethod:kBCOVSourceDeliveryHLS properties:nil];
         BCOVVideo *video = [[BCOVVideo alloc] initWithSource:source cuePoints:nil properties:nil];
