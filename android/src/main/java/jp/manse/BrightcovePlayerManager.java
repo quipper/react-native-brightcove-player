@@ -1,6 +1,7 @@
 package jp.manse;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReadableArray;
@@ -52,6 +53,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     @ReactProp(name = "videoId")
     public void setVideoId(BrightcovePlayerView view, String videoId) {
         view.setVideoId(videoId);
+    }
+
+    @ReactProp(name = "playbackUrl")
+    public void setPlaybackUrl(BrightcovePlayerView view, String playbackUrl) {
+        view.setPlaybackUrl(playbackUrl);
     }
 
     @ReactProp(name = "referenceId")
