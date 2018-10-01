@@ -303,6 +303,7 @@ BOOL _resizeAspectFill;
 }
 
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
+
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
                           @"currentTime": @(progress)
@@ -337,16 +338,14 @@ BOOL _resizeAspectFill;
 
         for (AVMetadataItem* metadata in playerItem.timedMetadata)
         {
-            if([metadata.key isEqual:@"CREW"]){
-                NSString* valueString = [[NSString alloc] initWithData:metadata.dataValue encoding:NSASCIIStringEncoding];
-                if (self.onID3Metadata) {
-                    self.onID3Metadata(@{
-                                         @"type": @("metadata"),
-                                         @"key": metadata.key,
-                                         @"value": valueString,
-                                         @"time": @(CMTimeGetSeconds(metadata.time))
-                                         });
-                }
+            NSString* valueString = [[NSString alloc] initWithData:metadata.dataValue encoding:NSASCIIStringEncoding];
+            if (self.onID3Metadata) {
+                self.onID3Metadata(@{
+                                     @"type": @("metadata"),
+                                     @"key": metadata.key,
+                                     @"value": valueString,
+                                     @"time": @(CMTimeGetSeconds(metadata.time))
+                                     });
             }
         }
     }
