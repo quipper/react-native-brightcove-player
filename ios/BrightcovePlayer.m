@@ -23,12 +23,12 @@ BOOL _resizeAspectFill;
     _playbackController.delegate = self;
     _playbackController.autoPlay = YES;
     _playbackController.autoAdvance = YES;
-    
+
     _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
-    
+
     [self addSubview:_playerView];
 }
 
@@ -141,9 +141,9 @@ BOOL _resizeAspectFill;
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didPassCuePoints:(NSDictionary *)cuePointInfo{
-    
+
     BCOVCuePointCollection *collection = cuePointInfo[kBCOVPlaybackSessionEventKeyCuePoints];
-    
+
     for(BCOVCuePoint *point in collection){
         if (self.onCuePoint) {
             self.onCuePoint(@{
@@ -159,11 +159,11 @@ BOOL _resizeAspectFill;
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
-    
+
     if(_resizeAspectFill) {
         session.playerLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     }
-    
+
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         if (self.onReady) {
             self.onReady(@{});
@@ -175,9 +175,9 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
-        
+
         [session.player.currentItem addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
-        
+
         if (self.onPlay) {
             self.onPlay(@{});
         }
@@ -207,12 +207,12 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
         if (self.onStatusEvent) {
-            
+
             NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
-            
+
             self.onStatusEvent(@{
                                  @"type": @("fail"),
                                  @"error":  error ? error : [NSNull null]
@@ -224,7 +224,7 @@ BOOL _resizeAspectFill;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
-            
+
             self.onStatusEvent(@{
                                  @"type": @("failedToPlayToEndTime"),
                                  @"error":  error ? error : [NSNull null]
@@ -285,7 +285,7 @@ BOOL _resizeAspectFill;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
-            
+
             self.onStatusEvent(@{
                                  @"type": @("error"),
                                  @"error": error ? error : [NSNull null]
@@ -303,7 +303,7 @@ BOOL _resizeAspectFill;
 }
 
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
-    
+
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
                           @"currentTime": @(progress)
@@ -331,11 +331,11 @@ BOOL _resizeAspectFill;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    
+
     if ([keyPath isEqualToString:@"timedMetadata"])
     {
         AVPlayerItem* playerItem = object;
-        
+
         for (AVMetadataItem* metadata in playerItem.timedMetadata)
         {
             NSString* valueString = [[NSString alloc] initWithData:metadata.dataValue encoding:NSASCIIStringEncoding];
