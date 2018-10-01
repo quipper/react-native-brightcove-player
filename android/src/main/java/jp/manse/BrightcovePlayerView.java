@@ -227,7 +227,6 @@ public class BrightcovePlayerView extends RelativeLayout {
     private void loadMovie() {
         if (this.catalog == null) return;
         if (this.playbackUrl != null) {
-            Log.i("TIM", this.context.getExternalFilesDir(null).toString());
             this.playerVideoView.clear();
             Video video = Video.createVideo(this.playbackUrl);
             this.playerVideoView.add(video);
