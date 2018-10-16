@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
+import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.event.Event;
 import com.brightcove.player.event.EventEmitter;
 import com.brightcove.player.event.EventListener;
@@ -20,6 +21,9 @@ import com.brightcove.player.mediacontroller.BrightcoveMediaController;
 import com.brightcove.player.model.Source;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
+import com.google.android.exoplayer2.metadata.Metadata;
+import com.google.android.exoplayer2.metadata.id3.Id3Frame;
+import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -31,6 +35,7 @@ import java.io.File;
 import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
+
     private ThemedReactContext context;
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
@@ -63,6 +68,27 @@ public class BrightcovePlayerView extends RelativeLayout {
         ViewCompat.setTranslationZ(this, 9999);
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
+        final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
+                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+
+        eventEmitter.on(EventType.DID_SET_SOURCE, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                exoPlayerVideoDisplayComponent.setMetadataListener(new ExoPlayerVideoDisplayComponent.MetadataListener() {
+                    @Override
+                    public void onMetadata(Metadata metadata) {
+                        for(int i = 0; i < metadata.length(); i++) {
+                            Metadata.Entry entry = metadata.get(i);
+                            if (entry instanceof Id3Frame) {
+                                BinaryFrame binaryFrame = (BinaryFrame) entry;
+                                sendEvent(binaryFrame);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
             @Override
             public void processEvent(Event e) {
@@ -151,6 +177,15 @@ public class BrightcovePlayerView extends RelativeLayout {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
         });
+    }
+
+    private void sendEvent(BinaryFrame binaryFrame) {
+        WritableMap event = Arguments.createMap();
+        event.putString("key", binaryFrame.id);
+        event.putString("value", new String(binaryFrame.data));
+        event.putString("type", "metadata");
+        ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_ID3_METADATA, event);
     }
 
     public void setPolicyKey(String policyKey) {
