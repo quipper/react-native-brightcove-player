@@ -40,6 +40,5 @@
 @property (nonatomic, copy) RCTDirectEventBlock onID3Metadata;
 
 -(void) seekTo:(NSNumber *)time;
--(void) seekToEnd;
 
 @end
