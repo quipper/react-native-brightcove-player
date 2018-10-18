@@ -113,6 +113,18 @@ BrightcovePlayer.prototype.seekTo = Platform.select({
     }
 });
 
+BrightcovePlayer.prototype.seekToEnd = Platform.select({
+    ios: function () {
+        NativeModules.BrightcovePlayerManager.seekToEnd(
+            ReactNative.findNodeHandle(this)
+        );
+    },
+    android: function () {
+        // Not implemented for Android
+        return;
+    }
+});
+
 BrightcovePlayer.propTypes = {
     ...(ViewPropTypes || View.propTypes),
     policyKey: PropTypes.string,

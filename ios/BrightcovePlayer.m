@@ -135,6 +135,17 @@ BOOL _resizeAspectFill;
     _playerView.controlsView.hidden = disable;
 }
 
+- (void)seekToEnd {
+    if (_currentPlayer) {
+        CMTimeRange seekableRange = [_currentPlayer.currentItem.seekableTimeRanges.lastObject CMTimeRangeValue];
+        CGFloat seekableStart = CMTimeGetSeconds(seekableRange.start);
+        CGFloat seekableDuration = CMTimeGetSeconds(seekableRange.duration);
+        CGFloat livePosition = seekableStart + seekableDuration;
+        
+        [_currentPlayer seekToTime:CMTimeMake(livePosition, 1)];
+    }
+}
+
 - (void)seekTo:(NSNumber *)time {
     [_playbackController seekToTime:CMTimeMakeWithSeconds([time floatValue], NSEC_PER_SEC) completionHandler:^(BOOL finished) {
     }];
@@ -165,6 +176,7 @@ BOOL _resizeAspectFill;
     }
 
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+        _currentPlayer = session.player;
         if (self.onReady) {
             self.onReady(@{});
         }
