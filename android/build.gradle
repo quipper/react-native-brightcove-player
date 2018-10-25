@@ -9,7 +9,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:3.2.0'
     }
 }
 
@@ -50,6 +50,6 @@ android {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'
-    compile 'com.brightcove.player:exoplayer2:6.3.2'
+    implementation 'com.facebook.react:react-native:0.55.3'
+    implementation 'com.brightcove.player:exoplayer2:6.3.2'
 }
