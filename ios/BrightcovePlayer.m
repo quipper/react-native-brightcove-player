@@ -18,6 +18,10 @@ BOOL _resizeAspectFill;
     return self;
 }
 
+- (void)dealloc {
+    [self removeKVOObserver];
+}
+
 - (void)setup {
     _playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
     _playbackController.delegate = self;
@@ -159,6 +163,7 @@ BOOL _resizeAspectFill;
 }
 - (void) removeKVOObserver {
     if (_currentPlayer) {
+        NSLog(@"Brightcove removing KVOObserver");
         [_currentPlayer.currentItem removeObserver:self forKeyPath:@"timedMetadata"];
     }
    
@@ -183,6 +188,7 @@ BOOL _resizeAspectFill;
         _playing = true;
 
         [self removeKVOObserver];
+        _currentPlayer = session.player;
         [session.player.currentItem addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
 
         if (self.onPlay) {
@@ -195,6 +201,7 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
         _playing = false;
+         [self removeKVOObserver];
         if (self.onPause) {
             self.onPause(@{});
         }
