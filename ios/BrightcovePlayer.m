@@ -18,10 +18,6 @@ BOOL _resizeAspectFill;
     return self;
 }
 
-- (void)dealloc {
-    [self removeKVOObserver];
-}
-
 - (void)setup {
     _playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
     _playbackController.delegate = self;
