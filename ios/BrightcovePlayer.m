@@ -18,6 +18,10 @@ BOOL _resizeAspectFill;
     return self;
 }
 
+- (void)dealloc {
+    [self removeKVOObserver];
+}
+
 - (void)setup {
     _playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
     _playbackController.delegate = self;
@@ -157,6 +161,13 @@ BOOL _resizeAspectFill;
         }
     }
 }
+- (void) removeKVOObserver {
+    if (_currentPlayer) {
+        NSLog(@"Brightcove removing KVOObserver");
+        [_currentPlayer.currentItem removeObserver:self forKeyPath:@"timedMetadata"];
+    }
+   
+}
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
 
@@ -176,6 +187,8 @@ BOOL _resizeAspectFill;
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
 
+        [self removeKVOObserver];
+        _currentPlayer = session.player;
         [session.player.currentItem addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
 
         if (self.onPlay) {
@@ -188,6 +201,7 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
         _playing = false;
+         [self removeKVOObserver];
         if (self.onPause) {
             self.onPause(@{});
         }
@@ -197,6 +211,8 @@ BOOL _resizeAspectFill;
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
+        [self removeKVOObserver];
+        
         if (self.onEnd) {
             self.onEnd(@{});
         }
@@ -274,12 +290,14 @@ BOOL _resizeAspectFill;
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventTerminate) {
+        [self removeKVOObserver];
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
                                  @"type": @("terminate")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
+        [self removeKVOObserver];
         if (self.onStatusEvent) {
             NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
