@@ -34,6 +34,10 @@ BOOL _KVOisActive;
     [self addSubview:_playerView];
 }
 
+- (void)dealloc {
+    [self removeKVOObserver];
+}
+
 - (void)setupService {
     if (!_playbackService && _accountId && _policyKey) {
         _playbackService = [[BCOVPlaybackService alloc] initWithAccountId:_accountId policyKey:_policyKey];
