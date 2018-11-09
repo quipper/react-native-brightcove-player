@@ -9,6 +9,7 @@
 @implementation BrightcovePlayer
 
 BOOL _resizeAspectFill;
+BOOL _KVOisActive;
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
@@ -28,8 +29,13 @@ BOOL _resizeAspectFill;
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
-
+    _KVOisActive = false;
+    
     [self addSubview:_playerView];
+}
+
+- (void)dealloc {
+    [self removeKVOObserverIfNeeded];
 }
 
 - (void)setupService {
@@ -157,9 +163,10 @@ BOOL _resizeAspectFill;
         }
     }
 }
-- (void) removeKVOObserver {
-    if (_currentPlayer) {
+- (void) removeKVOObserverIfNeeded {
+    if (_currentPlayer && _KVOisActive) {
         NSLog(@"Brightcove removing KVOObserver");
+         _KVOisActive = false;
         [_currentPlayer.currentItem removeObserver:self forKeyPath:@"timedMetadata"];
     }
    
@@ -183,8 +190,9 @@ BOOL _resizeAspectFill;
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
 
-        [self removeKVOObserver];
+        [self removeKVOObserverIfNeeded];
         _currentPlayer = session.player;
+        _KVOisActive = true;
         [session.player.currentItem addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
 
         if (self.onPlay) {
@@ -197,7 +205,7 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
         _playing = false;
-         [self removeKVOObserver];
+         [self removeKVOObserverIfNeeded];
         if (self.onPause) {
             self.onPause(@{});
         }
@@ -207,7 +215,7 @@ BOOL _resizeAspectFill;
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
-        [self removeKVOObserver];
+        [self removeKVOObserverIfNeeded];
         
         if (self.onEnd) {
             self.onEnd(@{});
@@ -286,14 +294,14 @@ BOOL _resizeAspectFill;
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventTerminate) {
-        [self removeKVOObserver];
+        [self removeKVOObserverIfNeeded];
         if (self.onStatusEvent) {
             self.onStatusEvent(@{
                                  @"type": @("terminate")
                                  });
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
-        [self removeKVOObserver];
+        [self removeKVOObserverIfNeeded];
         if (self.onStatusEvent) {
             NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
