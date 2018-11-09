@@ -9,6 +9,7 @@
 @implementation BrightcovePlayer
 
 BOOL _resizeAspectFill;
+BOOL _KVOisActive;
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
@@ -28,7 +29,8 @@ BOOL _resizeAspectFill;
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
-
+    _KVOisActive = false;
+    
     [self addSubview:_playerView];
 }
 
@@ -158,8 +160,9 @@ BOOL _resizeAspectFill;
     }
 }
 - (void) removeKVOObserver {
-    if (_currentPlayer) {
+    if (_currentPlayer && _KVOisActive) {
         NSLog(@"Brightcove removing KVOObserver");
+         _KVOisActive = false;
         [_currentPlayer.currentItem removeObserver:self forKeyPath:@"timedMetadata"];
     }
    
@@ -185,6 +188,7 @@ BOOL _resizeAspectFill;
 
         [self removeKVOObserver];
         _currentPlayer = session.player;
+        _KVOisActive = true;
         [session.player.currentItem addObserver:self forKeyPath:@"timedMetadata" options:NSKeyValueObservingOptionNew context:NULL];
 
         if (self.onPlay) {
