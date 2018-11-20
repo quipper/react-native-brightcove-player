@@ -236,14 +236,14 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../example/ios/**",
-					"$(SRCROOT)/../../../ios/**",
+					"$(SRCROOT)/../example/Pods/Brightcove-Player-Core/**",
+					"$(SRCROOT)/../../../ios/Pods/Brightcove-Player-Core/**",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(BUILT_PRODUCTS_DIR)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../example/ios/**",
-					"$(SRCROOT)/../../../ios/**",
+					"$(SRCROOT)/../example/ios/Pods/Brightcove-Player-Core/**",
+					"$(SRCROOT)/../../../ios/Pods/Brightcove-Player-Core/**",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -260,14 +260,14 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(SRCROOT)/../example/ios/**",
-					"$(SRCROOT)/../../../ios/**",
+					"$(SRCROOT)/../example/Pods/Brightcove-Player-Core/**",
+					"$(SRCROOT)/../../../ios/Pods/Brightcove-Player-Core/**",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(BUILT_PRODUCTS_DIR)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
-					"$(SRCROOT)/../example/ios/**",
-					"$(SRCROOT)/../../../ios/**",
+					"$(SRCROOT)/../example/ios/Pods/Brightcove-Player-Core/**",
+					"$(SRCROOT)/../../../ios/Pods/Brightcove-Player-Core/**",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
