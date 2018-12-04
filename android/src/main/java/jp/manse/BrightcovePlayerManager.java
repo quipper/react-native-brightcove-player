@@ -81,6 +81,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         view.setDefaultControlDisabled(disableDefaultControl);
     }
 
+    @ReactProp(name = "volume")
+    public void setVolume(BrightcovePlayerView view, float volume) {
+        view.setVolume(volume);
+    }
+
     @ReactProp(name = "fullscreen")
     public void setFullscreen(BrightcovePlayerView view, boolean fullscreen) {
         view.setFullscreen(fullscreen);

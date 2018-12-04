@@ -4,6 +4,12 @@ A React Native implementation of Brightcove Player SDK.
 
 <img src="https://user-images.githubusercontent.com/443965/40413410-b9963158-5eb0-11e8-924f-9f61df58fa04.jpg" width="500">
 
+## Supported Version
+
+- iOS 11 >=
+- Android 5.0 >=
+  - _also works on 4.4 (19), but it seems to crash on some devices_
+
 ## Installation
 
 ```console
@@ -16,13 +22,35 @@ react-native link react-native-brightcove-player
 - Make `Podfile` like below and `pod install`
 
 ```rb
+source 'https://github.com/CocoaPods/Specs.git'
 source 'https://github.com/brightcove/BrightcoveSpecs.git'
 
-platform :ios, '8.0'
+platform :ios, '11.0'
 use_frameworks!
+inhibit_all_warnings!
 
 target 'Your-Project-Name' do
-    pod 'Brightcove-Player-Core'
+  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga/yoga.podspec'
+  pod 'React', :path => '../node_modules/react-native', :subspecs => [
+    'Core',
+    'CxxBridge',
+    'DevSupport',
+    'RCTActionSheet',
+    'RCTAnimation',
+    'RCTGeolocation',
+    'RCTImage',
+    'RCTLinkingIOS',
+    'RCTNetwork',
+    'RCTSettings',
+    'RCTText',
+    'RCTVibration',
+    'RCTWebSocket',
+  ]
+  pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
+  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+
+  pod 'Brightcove-Player-Core'
 end
 ```
 
@@ -63,7 +91,6 @@ export default class App extends Component {
 - Size of the player must be non-zero.
 - It may not work on Android simulator, in that case please run on device.
 - For a more detailed example, please see [example/App.js](https://github.com/manse/react-native-brightcove-player/blob/master/example/App.js).
-
 | Prop                   | Type     | Default | iOS | Android |  Description                                                        | Event Object                 |
 | ---------------------- | -------- | - |- | - | ---------------------------------------------------------------------------- | ---------------------------- |
 | accountId              | string   |   | ✅ | ✅ | Brightcove AccountId                                                            |                              |
@@ -73,6 +100,7 @@ export default class App extends Component {
 | autoPlay               | boolean  |   | ✅ | ✅ | Whether to play automatically when video loaded                                 |                              |
 | play                   | boolean  |   | ✅ | ✅ | Control playback and pause                                                      |                              |
 | fullscreen             | boolean  |   | ✅ | ✅ | Control full screen state                                                       |                              |
+| volume                 | number   |   | ✅ | ✅ | Set audio volume (0.0 - 1.0)                                                    |                              |
 | disableDefaultControl  | boolean  |   | ✅ | ✅ | Disable default player control. Set true if you implement own video controller. |                              |
 | onReady                | Function |   | ✅ | ✅ | Indicates the video can be played back                                          |                              |
 | onPlay                 | Function |   | ✅ | ✅ | Indicates the video playback starts                                             |                              |

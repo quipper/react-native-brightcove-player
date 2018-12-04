@@ -31,6 +31,8 @@ BOOL _KVOisActive;
     _playerView.backgroundColor = UIColor.blackColor;
     _KVOisActive = false;
     
+    _targetVolume = 1.0;
+    
     [self addSubview:_playerView];
 }
 
@@ -135,6 +137,16 @@ BOOL _KVOisActive;
     } else {
         [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeNormal];
     }
+}
+
+- (void)setVolume:(NSNumber*)volume {
+    _targetVolume = volume.doubleValue;
+    [self refreshVolume];
+}
+
+- (void)refreshVolume {
+    if (!_playbackSession) return;
+    _playbackSession.player.volume = _targetVolume;
 }
 
 - (void)setDisableDefaultControl:(BOOL)disable {
@@ -338,6 +350,11 @@ BOOL _KVOisActive;
                                       @"bufferProgress": @(bufferProgress),
                                       });
     }
+}
+
+- (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session {
+    _playbackSession = session;
+    [self refreshVolume];
 }
 
 -(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {

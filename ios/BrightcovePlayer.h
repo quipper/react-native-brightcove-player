@@ -17,9 +17,11 @@
 
 @property (nonatomic) BCOVPlaybackService *playbackService;
 @property (nonatomic) id<BCOVPlaybackController> playbackController;
+@property (nonatomic) id<BCOVPlaybackSession> playbackSession;
 @property (nonatomic) BCOVPUIPlayerView *playerView;
 @property (nonatomic) BOOL playing;
 @property (nonatomic) float lastBufferProgress;
+@property (nonatomic) float targetVolume;
 
 @property (nonatomic, copy) NSString *playbackUrl;
 @property (nonatomic, copy) NSString *referenceId;
