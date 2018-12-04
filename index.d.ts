@@ -21,6 +21,7 @@ export type Props = {
   onEnterFullscreen?: () => void;
   onExitFullscreen?: () => void;
   style?: ViewStyle;
+  resizeAspectFill: boolean;
 };
 
 export class BrightcovePlayer extends React.Component<Props, {}> {

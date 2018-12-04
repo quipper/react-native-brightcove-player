@@ -3,9 +3,13 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:3.2.0'
     }
 }
 
@@ -17,6 +21,10 @@ allprojects {
         }
         maven {
             url 'http://repo.brightcove.com/releases'
+        }
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
         }
     }
 }
@@ -42,6 +50,6 @@ android {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'
-    compile 'com.brightcove.player:exoplayer2:6.+'
+    implementation 'com.facebook.react:react-native:0.55.3'
+    implementation 'com.brightcove.player:exoplayer2:6.3.2'
 }
