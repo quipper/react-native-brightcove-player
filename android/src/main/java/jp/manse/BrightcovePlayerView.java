@@ -198,7 +198,9 @@ public class BrightcovePlayerView extends RelativeLayout {
         final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
                 (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
         playerVideoView.removeListeners();
-        exoPlayerVideoDisplayComponent.getExoPlayer().release();
+        if (exoPlayerVideoDisplayComponent.getExoPlayer() != null) {
+            exoPlayerVideoDisplayComponent.getExoPlayer().release();
+        }
         exoPlayerVideoDisplayComponent.removeListeners();
         exoPlayerVideoDisplayComponent.setMetadataListener((ExoPlayerVideoDisplayComponent.MetadataListener)null);
 
