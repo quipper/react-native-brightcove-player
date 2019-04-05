@@ -51,5 +51,5 @@ android {
 
 dependencies {
     implementation 'com.facebook.react:react-native:0.55.3'
-    implementation 'com.brightcove.player:exoplayer2:6.4.0'
+    implementation 'com.brightcove.player:exoplayer2:6.6.0'
 }
