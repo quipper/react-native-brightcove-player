@@ -1,13 +1,10 @@
 package jp.manse;
 
 import android.graphics.Color;
-import android.os.Environment;
-import android.os.Handler;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.edge.Catalog;
@@ -18,7 +15,6 @@ import com.brightcove.player.event.EventEmitter;
 import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
-import com.brightcove.player.model.Source;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 import com.google.android.exoplayer2.metadata.Metadata;
@@ -32,7 +28,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 import java.util.HashMap;
-import java.io.File;
 import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
@@ -108,6 +103,9 @@ public class BrightcovePlayerView extends RelativeLayout {
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_READY, event);
+                WritableMap statusEvent = Arguments.createMap();
+                statusEvent.putString("type", "ready");
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_STATUS, statusEvent);
             }
         });
         eventEmitter.on(EventType.DID_PLAY, new EventListener() {
@@ -117,6 +115,9 @@ public class BrightcovePlayerView extends RelativeLayout {
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PLAY, event);
+                WritableMap statusEvent = Arguments.createMap();
+                statusEvent.putString("type", "play");
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_STATUS, statusEvent);
             }
         });
         eventEmitter.on(EventType.DID_PAUSE, new EventListener() {
@@ -126,6 +127,9 @@ public class BrightcovePlayerView extends RelativeLayout {
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PAUSE, event);
+                WritableMap statusEvent = Arguments.createMap();
+                statusEvent.putString("type", "pause");
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_STATUS, statusEvent);
             }
         });
         eventEmitter.on(EventType.COMPLETED, new EventListener() {
@@ -134,6 +138,9 @@ public class BrightcovePlayerView extends RelativeLayout {
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_END, event);
+                WritableMap statusEvent = Arguments.createMap();
+                statusEvent.putString("type", "end");
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_STATUS, statusEvent);
             }
         });
         eventEmitter.on(EventType.PROGRESS, new EventListener() {
@@ -183,6 +190,17 @@ public class BrightcovePlayerView extends RelativeLayout {
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
+        });
+        eventEmitter.on(EventType.ERROR, (Event e) -> {
+                WritableMap event = Arguments.createMap();
+                event.putString("type", "fail");
+                if (e.properties.containsKey("kBCOVPlaybackSessionEventKeyError")) {
+                    event.putString("error", String.valueOf(e.properties.get("kBCOVPlaybackSessionEventKeyError")));
+                } else {
+                    event.putString("error", null);
+                }
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_STATUS, event);
         });
     }
 
@@ -316,8 +334,16 @@ public class BrightcovePlayerView extends RelativeLayout {
             };
             if (this.videoId != null) {
                 this.catalog.findVideoByID(this.videoId, listener);
+                if (this.playerVideoView.getCurrentVideo() == null) {
+                    this.sendStatusError("loadFail", "Could not find video with videoId: " + this.videoId);
+                }
             } else if (this.referenceId != null) {
                 this.catalog.findVideoByReferenceID(this.referenceId, listener);
+                if (this.playerVideoView.getCurrentVideo() == null) {
+                    this.sendStatusError("loadFail", "Could not find video with refereceId: " + this.referenceId);
+                }
+            } else {
+                this.sendStatusError("loadFail", "Could not find video: videoId and referenceId both null");
             }
         }
     }
@@ -336,8 +362,18 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     private void printKeys(Map<String, Object> map) {
         Log.d("debug", "-----------");
-        for(Map.Entry<String, Object> entry : map.entrySet()) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
             Log.d("debug", entry.getKey());
         }
+    }
+
+    private void sendStatusError(String type, String error) {
+        WritableMap event = Arguments.createMap();
+        event.putString("type", type);
+        if (error != null) {
+            event.putString("error", error);
+        }
+        ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_STATUS, event);
     }
 }
