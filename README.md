@@ -22,36 +22,28 @@ react-native link react-native-brightcove-player
 - Make `Podfile` like below and `pod install`
 
 ```rb
-source 'https://github.com/CocoaPods/Specs.git'
 source 'https://github.com/brightcove/BrightcoveSpecs.git'
 
-platform :ios, '11.0'
+platform :ios, '8.0'
 use_frameworks!
-inhibit_all_warnings!
 
-target 'Your-Project-Name' do
-  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga/yoga.podspec'
-  pod 'React', :path => '../node_modules/react-native', :subspecs => [
-    'Core',
-    'CxxBridge',
-    'DevSupport',
-    'RCTActionSheet',
-    'RCTAnimation',
-    'RCTGeolocation',
-    'RCTImage',
-    'RCTLinkingIOS',
-    'RCTNetwork',
-    'RCTSettings',
-    'RCTText',
-    'RCTVibration',
-    'RCTWebSocket',
-  ]
-  pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
-  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
-  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-
-  pod 'Brightcove-Player-Core'
+target 'example' do
+    pod 'Brightcove-Player-Core'
 end
+```
+
+- Add `resolver` entry into `metro.config.js`
+  - See `example/metro.config.js` for more details
+  - note: It seems to be a [workaround](https://github.com/facebook/react-native/issues/21242#issuecomment-445784118), so you should remove when it's no longer needed
+
+```js
+const blacklist = require('metro-config/src/defaults/blacklist');
+
+module.exports = {
+  resolver: {
+    blacklistRE: blacklist([/node_modules\/.*\/node_modules\/react-native\/.*/])
+  }
+}
 ```
 
 ### Android
@@ -59,10 +51,12 @@ end
 - Add following lines in `android/app/build.gradle`
 
 ```gradle
-repositories {
-    maven {
-        url 'http://repo.brightcove.com/releases'
-    }
+allprojects {
+  repositories {
+      maven {
+          url 'http://repo.brightcove.com/releases'
+      }
+  }
 }
 ```
 

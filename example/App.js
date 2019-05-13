@@ -1,12 +1,5 @@
 import React, { Component } from 'react';
-import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  Image,
-  View,
-  Button
-} from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import { BrightcovePlayer } from 'react-native-brightcove-player';
 
 export default class App extends Component {
