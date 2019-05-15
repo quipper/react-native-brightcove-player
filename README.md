@@ -6,15 +6,28 @@ A React Native implementation of Brightcove Player SDK.
 
 ## Supported Version
 
-- iOS 11 >=
+- iOS 10 >=
 - Android 5.0 >=
-  - _also works on 4.4 (19), but it seems to crash on some devices_
 
 ## Installation
 
 ```console
 yarn add react-native-brightcove-player
 react-native link react-native-brightcove-player
+```
+
+- Add `resolver` entry into `metro.config.js` or `rn-cli.config.js`
+  - See example app for more details
+  - note: It is [workaround](https://github.com/facebook/react-native/issues/21242#issuecomment-445784118), so you should remove when it's no longer needed
+
+```js
+const blacklist = require('metro-config/src/defaults/blacklist');
+
+module.exports = {
+  resolver: {
+    blacklistRE: blacklist([/node_modules\/.*\/node_modules\/react-native\/.*/])
+  }
+};
 ```
 
 ### iOS
@@ -24,26 +37,12 @@ react-native link react-native-brightcove-player
 ```rb
 source 'https://github.com/brightcove/BrightcoveSpecs.git'
 
-platform :ios, '8.0'
+platform :ios, '10.0'
 use_frameworks!
 
 target 'example' do
     pod 'Brightcove-Player-Core'
 end
-```
-
-- Add `resolver` entry into `metro.config.js`
-  - See `example/metro.config.js` for more details
-  - note: It seems to be a [workaround](https://github.com/facebook/react-native/issues/21242#issuecomment-445784118), so you should remove when it's no longer needed
-
-```js
-const blacklist = require('metro-config/src/defaults/blacklist');
-
-module.exports = {
-  resolver: {
-    blacklistRE: blacklist([/node_modules\/.*\/node_modules\/react-native\/.*/])
-  }
-}
 ```
 
 ### Android
@@ -82,31 +81,36 @@ export default class App extends Component {
 ```
 
 - Specifying `accountId`, `policyKey`, and `videoId` or `referenceId` will load the video.
-- Size of the player must be non-zero.
 - It may not work on Android simulator, in that case please run on device.
 - For a more detailed example, please see [example/App.js](https://github.com/manse/react-native-brightcove-player/blob/master/example/App.js).
 
-| Prop                   | Type     | Description                                                                     | Event Object                 |
-| ---------------------- | -------- | ------------------------------------------------------------------------------- | ---------------------------- |
-| accountId              | string   | Brightcove AccountId                                                            |                              |
-| policyKey              | string   | Brightcove PolicyKey                                                            |                              |
-| videoId                | string   | Brightcove VideoId. \*Either videoId or referenceId is required                 |                              |
-| referenceId            | string   | Brightcove ReferenceId. \*Either videoId or referenceId is required             |                              |
-| autoPlay               | boolean  | Whether to play automatically when video loaded                                 |                              |
-| play                   | boolean  | Control playback and pause                                                      |                              |
-| fullscreen             | boolean  | Control full screen state                                                       |                              |
-| volume                 | number   | Set audio volume (0.0 - 1.0)                                                    |                              |
-| disableDefaultControl  | boolean  | Disable default player control. Set true if you implement own video controller. |                              |
-| onReady                | Function | Indicates the video can be played back                                          |                              |
-| onPlay                 | Function | Indicates the video playback starts                                             |                              |
-| onPause                | Function | Indicates the video is paused                                                   |                              |
-| onEnd                  | Function | Indicates the video is played to the end                                        |                              |
-| onProgress             | Function | Indicates the playback head of the video advances.                              | `{ currentTime: number }`    |
-| onChangeDuration       | Function | Indicates the video length is changed                                           | `{ duration: number }`       |
-| onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                   | `{ bufferProgress: number }` |
-| onEnterFullscreen      | Function | Indicates the player enters full screen                                         |                              |
-| onExitFullscreen       | Function | Indicates the player exit full screen                                           |                              |
+| Prop                   | Type     | Description                                                                         | Event Object                 |
+| ---------------------- | -------- | ----------------------------------------------------------------------------------- | ---------------------------- |
+| accountId              | string   | Brightcove AccountId. Required                                                      |                              |
+| policyKey              | string   | Brightcove PolicyKey. Required                                                      |                              |
+| videoId                | string   | Brightcove VideoId. \*Either `videoId` or `referenceId` is required                 |                              |
+| referenceId            | string   | Brightcove ReferenceId. \*Either `videoId` or `referenceId` is required             |                              |
+| autoPlay               | boolean  | Set `true` to play automatically                                                    |                              |
+| play                   | boolean  | Control playback and pause                                                          |                              |
+| fullscreen             | boolean  | Control full screen state                                                           |                              |
+| volume                 | number   | Set audio volume (`0.0 ~ 1.0`)                                                      |                              |
+| bitRate                | number   | Set maximum buffering bitrate. Set `0` to automatic quality                         |                              |
+| playbackRate           | number   | Set playback speed scale. Default is `1`                                            |                              |
+| disableDefaultControl  | boolean  | Disable default player control. Set `true` when you implement own video controller. |                              |
+| onReady                | Function | Indicates the video can be played back                                              |                              |
+| onPlay                 | Function | Indicates the video playback starts                                                 |                              |
+| onPause                | Function | Indicates the video is paused                                                       |                              |
+| onEnd                  | Function | Indicates the video is played to the end                                            |                              |
+| onProgress             | Function | Indicates the playback head of the video advances.                                  | `{ currentTime: number }`    |
+| onChangeDuration       | Function | Indicates the video length is changed                                               | `{ duration: number }`       |
+| onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                       | `{ bufferProgress: number }` |
+| onEnterFullscreen      | Function | Indicates the player enters full screen                                             |                              |
+| onExitFullscreen       | Function | Indicates the player exit full screen                                               |                              |
 
 | Method                                | Description                       |
 | ------------------------------------- | --------------------------------- |
 | seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
+
+## Lisence
+
+MIT

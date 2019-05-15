@@ -23,7 +23,7 @@
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
-    
+
     _targetVolume = 1.0;
     
     [self addSubview:_playerView];
@@ -110,9 +110,31 @@
     [self refreshVolume];
 }
 
+- (void)setBitRate:(NSNumber*)bitRate {
+    _targetBitRate = bitRate.doubleValue;
+    [self refreshBitRate];
+}
+
+- (void)setPlaybackRate:(NSNumber*)playbackRate {
+    _targetPlaybackRate = playbackRate.doubleValue;
+    [self refreshPlaybackRate];
+}
+
 - (void)refreshVolume {
     if (!_playbackSession) return;
     _playbackSession.player.volume = _targetVolume;
+}
+
+- (void)refreshBitRate {
+    if (!_playbackSession) return;
+    AVPlayerItem *item = _playbackSession.player.currentItem;
+    if (!item) return;
+    item.preferredPeakBitRate = _targetBitRate;
+}
+
+- (void)refreshPlaybackRate {
+    if (!_playbackSession) return;
+    _playbackSession.player.rate = _targetPlaybackRate;
 }
 
 - (void)setDisableDefaultControl:(BOOL)disable {
@@ -126,6 +148,7 @@
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+        [self refreshBitRate];
         if (self.onReady) {
             self.onReady(@{});
         }
@@ -172,6 +195,7 @@
 - (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session {
     _playbackSession = session;
     [self refreshVolume];
+    [self refreshPlaybackRate];
 }
 
 -(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {

@@ -20,6 +20,8 @@
 @property (nonatomic) BOOL playing;
 @property (nonatomic) float lastBufferProgress;
 @property (nonatomic) float targetVolume;
+@property (nonatomic) float targetBitRate;
+@property (nonatomic) float targetPlaybackRate;
 
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;

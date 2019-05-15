@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import ReactNative, {
-  View,
-  requireNativeComponent,
   NativeModules,
-  ViewPropTypes,
   Platform,
-  UIManager
+  requireNativeComponent,
+  UIManager,
+  View,
+  ViewPropTypes
 } from 'react-native';
 
 class BrightcovePlayer extends Component {
@@ -112,6 +112,8 @@ BrightcovePlayer.propTypes = {
   fullscreen: PropTypes.bool,
   disableDefaultControl: PropTypes.bool,
   volume: PropTypes.number,
+  bitRate: PropTypes.number,
+  playbackRate: PropTypes.number,
   onReady: PropTypes.func,
   onPlay: PropTypes.func,
   onPause: PropTypes.func,

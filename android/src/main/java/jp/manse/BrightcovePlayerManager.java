@@ -79,6 +79,16 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         view.setVolume(volume);
     }
 
+    @ReactProp(name = "bitRate")
+    public void setBitRate(BrightcovePlayerView view, float bitRate) {
+        view.setBitRate((int)bitRate);
+    }
+
+    @ReactProp(name = "playbackRate")
+    public void setPlaybackRate(BrightcovePlayerView view, float playbackRate) {
+        view.setPlaybackRate(playbackRate);
+    }
+
     @ReactProp(name = "fullscreen")
     public void setFullscreen(BrightcovePlayerView view, boolean fullscreen) {
         view.setFullscreen(fullscreen);

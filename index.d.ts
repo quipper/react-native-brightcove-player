@@ -11,6 +11,8 @@ export type Props = {
   fullscreen?: boolean;
   disableDefaultControl?: boolean;
   volume?: number;
+  bitRate?: number;
+  playbackRate?: number;
   onReady?: () => void;
   onPlay?: () => void;
   onPause?: () => void;

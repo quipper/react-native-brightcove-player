@@ -10,7 +10,9 @@ export default class App extends Component {
     bufferProgress: 0,
     fullscreen: false,
     disableControl: false,
-    volume: 1
+    volume: 1,
+    bitRate: 0,
+    playbackRate: 1
   };
 
   render() {
@@ -24,6 +26,8 @@ export default class App extends Component {
           fullscreen={this.state.fullscreen}
           disableDefaultControl={this.state.disableControl}
           volume={this.state.volume}
+          bitRate={this.state.bitRate}
+          playbackRate={this.state.playbackRate}
           accountId="3636334163001"
           videoId="3666678807001"
           policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
@@ -59,7 +63,6 @@ export default class App extends Component {
           }}
         />
         <View style={styles.content}>
-          <Text style={styles.title}>React Native Brightcove Player</Text>
           <Text>
             {this.state.playing ? 'Playing' : 'Paused'} (
             {Math.floor(this.state.currentTime * 10) / 10}s /{' '}
@@ -84,17 +87,50 @@ export default class App extends Component {
               onPress={() => this.player.seekTo(this.state.currentTime - 10)}
             />
           </View>
+          <Text style={styles.caption}>Volume</Text>
           <View style={styles.control}>
-            <Button
-              title="Volume 1.0"
-              onPress={() => this.setState({ volume: 1 })}
-            />
+            <Button title="1.0" onPress={() => this.setState({ volume: 1 })} />
             <Button
               title="0.5"
               onPress={() => this.setState({ volume: 0.5 })}
             />
             <Button title="0.0" onPress={() => this.setState({ volume: 0 })} />
           </View>
+          <Text style={styles.caption}>Quality</Text>
+          <View style={styles.control}>
+            <Button
+              title="Auto"
+              onPress={() => this.setState({ bitRate: 0 })}
+            />
+            <Button
+              title="Low"
+              onPress={() => this.setState({ bitRate: 159000 })}
+            />
+            <Button
+              title="Medium"
+              onPress={() => this.setState({ bitRate: 432000 })}
+            />
+            <Button
+              title="High"
+              onPress={() => this.setState({ bitRate: 832000 })}
+            />
+          </View>
+          <Text style={styles.caption}>Playback Rate</Text>
+          <View style={styles.control}>
+            <Button
+              title="0.5x"
+              onPress={() => this.setState({ playbackRate: 0.5 })}
+            />
+            <Button
+              title="1x"
+              onPress={() => this.setState({ playbackRate: 1 })}
+            />
+            <Button
+              title="2x"
+              onPress={() => this.setState({ playbackRate: 2 })}
+            />
+          </View>
+          <Text style={styles.caption}>Control</Text>
           <View style={styles.control}>
             <Button
               title="Enter Fullscreen"
@@ -130,14 +166,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20
   },
-  title: {
-    fontSize: 20,
+  caption: {
+    fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 10
+    marginBottom: 5
   },
   control: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 15
+    marginBottom: 15
   }
 });

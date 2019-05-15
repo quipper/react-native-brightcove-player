@@ -9,6 +9,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.event.Event;
@@ -24,6 +25,18 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.RendererCapabilities;
+import com.google.android.exoplayer2.source.TrackGroup;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +52,10 @@ public class BrightcovePlayerView extends RelativeLayout {
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
+    private int bitRate = 0;
+    private float playbackRate = 1;
     private boolean fullscreen = false;
+    private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -64,6 +80,8 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 fixVideoLayout();
+                updateBitRate();
+                updatePlaybackRate();
             }
         });
         eventEmitter.on(EventType.READY_TO_PLAY, new EventListener() {
@@ -104,7 +122,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
-                Long playhead = (Long)e.properties.get(Event.PLAYHEAD_POSITION);
+                Integer playhead = (Integer) e.properties.get(Event.PLAYHEAD_POSITION);
                 event.putDouble("currentTime", playhead / 1000d);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
@@ -131,7 +149,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.VIDEO_DURATION_CHANGED, new EventListener() {
             @Override
             public void processEvent(Event e) {
-                Integer duration = (Integer)e.properties.get(Event.VIDEO_DURATION);
+                Integer duration = (Integer) e.properties.get(Event.VIDEO_DURATION);
                 WritableMap event = Arguments.createMap();
                 event.putDouble("duration", duration / 1000d);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
@@ -141,7 +159,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.BUFFERED_UPDATE, new EventListener() {
             @Override
             public void processEvent(Event e) {
-                Integer percentComplete = (Integer)e.properties.get(Event.PERCENT_COMPLETE);
+                Integer percentComplete = (Integer) e.properties.get(Event.PERCENT_COMPLETE);
                 WritableMap event = Arguments.createMap();
                 event.putDouble("bufferProgress", percentComplete / 100d);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
@@ -208,8 +226,76 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.playerVideoView.getEventEmitter().emit(EventType.SET_VOLUME, details);
     }
 
+    public void setBitRate(int bitRate) {
+        this.bitRate = bitRate;
+        this.updateBitRate();
+    }
+
+    public void setPlaybackRate(float playbackRate) {
+        if (playbackRate == 0) return;
+        this.playbackRate = playbackRate;
+        this.updatePlaybackRate();
+    }
+
     public void seekTo(int time) {
         this.playerVideoView.seekTo(time);
+    }
+
+    private void updateBitRate() {
+        if (this.bitRate == 0) return;
+        ExoPlayerVideoDisplayComponent videoDisplay = ((ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay());
+        ExoPlayer player = videoDisplay.getExoPlayer();
+        DefaultTrackSelector trackSelector = videoDisplay.getTrackSelector();
+        if (player == null) return;
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+        if (mappedTrackInfo == null) return;
+        Integer rendererIndex = null;
+        for (int i = 0; i < mappedTrackInfo.length; i++) {
+            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(i);
+            if (trackGroups.length != 0 && player.getRendererType(i) == C.TRACK_TYPE_VIDEO) {
+                rendererIndex = i;
+                break;
+            }
+        }
+
+        if (rendererIndex == null) return;
+        if (bitRate == 0) {
+            trackSelector.clearSelectionOverrides(rendererIndex);
+            return;
+        }
+        int resultBitRate = -1;
+        int targetGroupIndex = -1;
+        int targetTrackIndex = -1;
+        TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(rendererIndex);
+        for (int groupIndex = 0; groupIndex < trackGroups.length; groupIndex++) {
+            TrackGroup group = trackGroups.get(groupIndex);
+            if (group != null) {
+                for (int trackIndex = 0; trackIndex < group.length; trackIndex++) {
+                    Format format = group.getFormat(trackIndex);
+                    if (format != null && mappedTrackInfo.getTrackFormatSupport(rendererIndex, groupIndex, trackIndex)
+                            == RendererCapabilities.FORMAT_HANDLED) {
+                        if (resultBitRate == -1 ||
+                                (resultBitRate > bitRate ? (format.bitrate < resultBitRate) :
+                                        (format.bitrate <= bitRate && format.bitrate > resultBitRate))) {
+                            targetGroupIndex = groupIndex;
+                            targetTrackIndex = trackIndex;
+                            resultBitRate = format.bitrate;
+                        }
+                    }
+                }
+            }
+        }
+        if (targetGroupIndex != -1 && targetTrackIndex != -1) {
+            trackSelector.setSelectionOverride(rendererIndex, trackGroups,
+                    new DefaultTrackSelector.SelectionOverride(targetGroupIndex, targetTrackIndex));
+        }
+    }
+
+    private void updatePlaybackRate() {
+        ExoPlayer expPlayer = ((ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay()).getExoPlayer();
+        if (expPlayer != null) {
+            expPlayer.setPlaybackParameters(new PlaybackParameters(playbackRate, 1f));
+        }
     }
 
     private void setupCatalog() {
@@ -251,7 +337,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     private void printKeys(Map<String, Object> map) {
         Log.d("debug", "-----------");
-        for(Map.Entry<String, Object> entry : map.entrySet()) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
             Log.d("debug", entry.getKey());
         }
     }
