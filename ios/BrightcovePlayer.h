@@ -8,10 +8,11 @@
 #import <BrightcovePlayerSDK/BCOVPUIBasicControlView.h>
 #import <BrightcovePlayerSDK/BCOVPlaybackSession.h>
 #import <BrightcovePlayerSDK/BCOVPUISlider.h>
+#import <BrightcovePlayerSDK/BCOVOfflineVideoManager.h>
 #import <React/RCTBridge.h>
 #import <React/UIView+React.h>
 
-@interface BrightcovePlayer : UIView
+@interface BrightcovePlayer : UIView<BCOVOfflineVideoManagerDelegate>
 
 @property (nonatomic) BCOVPlaybackService *playbackService;
 @property (nonatomic) id<BCOVPlaybackController> playbackController;
@@ -25,6 +26,7 @@
 
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;
+@property (nonatomic, copy) NSString *videoToken;
 @property (nonatomic, copy) NSString *accountId;
 @property (nonatomic, copy) NSString *policyKey;
 @property (nonatomic, copy) RCTDirectEventBlock onReady;

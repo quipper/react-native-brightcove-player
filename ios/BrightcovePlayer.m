@@ -1,4 +1,5 @@
 #import "BrightcovePlayer.h"
+#import "BrightcovePlayerOfflineVideoManager.h"
 
 @interface BrightcovePlayer () <BCOVPlaybackControllerDelegate, BCOVPUIPlayerViewDelegate>
 
@@ -16,14 +17,14 @@
 - (void)setup {
     _playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
     _playbackController.delegate = self;
-    _playbackController.autoPlay = YES;
+    _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
     
     _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
-
+    
     _targetVolume = 1.0;
     
     [self addSubview:_playerView];
@@ -36,6 +37,13 @@
 }
 
 - (void)loadMovie {
+    if (_videoToken) {
+        BCOVVideo *video = [[BrightcovePlayerOfflineVideoManager sharedManager] videoObjectFromOfflineVideoToken:_videoToken];
+        if (video) {
+            [self.playbackController setVideos: @[ video ]];
+        }
+        return;
+    }
     if (!_playbackService) return;
     if (_videoId) {
         [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
@@ -69,6 +77,11 @@
     _videoId = videoId;
     _referenceId = NULL;
     [self setupService];
+    [self loadMovie];
+}
+
+- (void)setVideoToken:(NSString *)videoToken {
+    _videoToken = videoToken;
     [self loadMovie];
 }
 
@@ -148,12 +161,15 @@
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+        _playbackSession = session;
+        [self refreshVolume];
         [self refreshBitRate];
         if (self.onReady) {
             self.onReady(@{});
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
+        [self refreshPlaybackRate];
         if (self.onPlay) {
             self.onPlay(@{});
         }
@@ -187,15 +203,9 @@
     if (_lastBufferProgress != bufferProgress) {
         _lastBufferProgress = bufferProgress;
         self.onUpdateBufferProgress(@{
-                          @"bufferProgress": @(bufferProgress),
-                          });
+                                      @"bufferProgress": @(bufferProgress),
+                                      });
     }
-}
-
-- (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session {
-    _playbackSession = session;
-    [self refreshVolume];
-    [self refreshPlaybackRate];
 }
 
 -(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {

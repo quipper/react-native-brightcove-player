@@ -111,6 +111,6 @@ export default class App extends Component {
 | ------------------------------------- | --------------------------------- |
 | seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
 
-## Lisence
+## License
 
 MIT
