@@ -148,12 +148,15 @@
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+        _playbackSession = session;
+        [self refreshVolume];
         [self refreshBitRate];
         if (self.onReady) {
             self.onReady(@{});
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
+        [self refreshPlaybackRate];
         if (self.onPlay) {
             self.onPlay(@{});
         }
@@ -190,12 +193,6 @@
                           @"bufferProgress": @(bufferProgress),
                           });
     }
-}
-
-- (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session {
-    _playbackSession = session;
-    [self refreshVolume];
-    [self refreshPlaybackRate];
 }
 
 -(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {
