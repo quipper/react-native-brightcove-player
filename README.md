@@ -16,9 +16,8 @@ yarn add react-native-brightcove-player
 react-native link react-native-brightcove-player
 ```
 
-- Add `resolver` entry into `metro.config.js` or `rn-cli.config.js`
-  - See example app for more details
-  - note: It is [workaround](https://github.com/facebook/react-native/issues/21242#issuecomment-445784118), so you should remove when it's no longer needed
+- Add `resolver` entry into `metro.config.js` or `rn-cli.config.js` if it does not work.
+  - Note that it is [workaround](https://github.com/facebook/react-native/issues/21242#issuecomment-445784118), so you should remove when it's no longer needed
 
 ```js
 const blacklist = require('metro-config/src/defaults/blacklist');
@@ -40,7 +39,7 @@ source 'https://github.com/brightcove/BrightcoveSpecs.git'
 platform :ios, '10.0'
 use_frameworks!
 
-target 'example' do
+target 'YOUR PROJECT ID' do
     pod 'Brightcove-Player-Core'
 end
 ```
@@ -59,7 +58,9 @@ allprojects {
 }
 ```
 
-## Usage
+## API
+
+### BrightcovePlayer
 
 ```jsx
 import { BrightcovePlayer } from 'react-native-brightcove-player';
@@ -80,36 +81,81 @@ export default class App extends Component {
 }
 ```
 
-- Specifying `accountId`, `policyKey`, and `videoId` or `referenceId` will load the video.
-- It may not work on Android simulator, in that case please run on device.
-- For a more detailed example, please see [example/App.js](https://github.com/manse/react-native-brightcove-player/blob/master/example/App.js).
+- It may not work on Android simulator.
+- For a more detailed example, please see [example](https://github.com/manse/react-native-brightcove-player/blob/master/example/).
 
-| Prop                   | Type     | Description                                                                         | Event Object                 |
-| ---------------------- | -------- | ----------------------------------------------------------------------------------- | ---------------------------- |
-| accountId              | string   | Brightcove AccountId. Required                                                      |                              |
-| policyKey              | string   | Brightcove PolicyKey. Required                                                      |                              |
-| videoId                | string   | Brightcove VideoId. \*Either `videoId` or `referenceId` is required                 |                              |
-| referenceId            | string   | Brightcove ReferenceId. \*Either `videoId` or `referenceId` is required             |                              |
-| autoPlay               | boolean  | Set `true` to play automatically                                                    |                              |
-| play                   | boolean  | Control playback and pause                                                          |                              |
-| fullscreen             | boolean  | Control full screen state                                                           |                              |
-| volume                 | number   | Set audio volume (`0.0 ~ 1.0`)                                                      |                              |
-| bitRate                | number   | Set maximum buffering bitrate. Set `0` to automatic quality                         |                              |
-| playbackRate           | number   | Set playback speed scale. Default is `1`                                            |                              |
-| disableDefaultControl  | boolean  | Disable default player control. Set `true` when you implement own video controller. |                              |
-| onReady                | Function | Indicates the video can be played back                                              |                              |
-| onPlay                 | Function | Indicates the video playback starts                                                 |                              |
-| onPause                | Function | Indicates the video is paused                                                       |                              |
-| onEnd                  | Function | Indicates the video is played to the end                                            |                              |
-| onProgress             | Function | Indicates the playback head of the video advances.                                  | `{ currentTime: number }`    |
-| onChangeDuration       | Function | Indicates the video length is changed                                               | `{ duration: number }`       |
-| onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                       | `{ bufferProgress: number }` |
-| onEnterFullscreen      | Function | Indicates the player enters full screen                                             |                              |
-| onExitFullscreen       | Function | Indicates the player exit full screen                                               |                              |
+| Prop                   | Type     | Description                                                                                                                                                                                                                       | Event Object                 |
+| ---------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| accountId              | string   | Brightcove AccountId. Required                                                                                                                                                                                                    |                              |
+| policyKey              | string   | Brightcove PolicyKey. Required                                                                                                                                                                                                    |                              |
+| videoId                | string   | Brightcove VideoId to playback.                                                                                                                                                                                                   |                              |
+| referenceId            | string   | Brightcove ReferenceId to playback.                                                                                                                                                                                               |                              |
+| videoToken             | string   | Offline video token that generated by [BrightcovePlayerUtil](#BrightcovePlayerUtil). Video download session must be completed before setting prop and playback. If set `videoToken`, `videoId` and `referenceId` will be ignored. |                              |
+| autoPlay               | boolean  | Set `true` to play automatically                                                                                                                                                                                                  |                              |
+| play                   | boolean  | Control playback and pause                                                                                                                                                                                                        |                              |
+| fullscreen             | boolean  | Control full screen state                                                                                                                                                                                                         |                              |
+| volume                 | number   | Set audio volume (`0.0 ~ 1.0`)                                                                                                                                                                                                    |                              |
+| bitRate                | number   | Set maximum buffering bitrate. Set `0` to automatic quality                                                                                                                                                                       |                              |
+| playbackRate           | number   | Set playback speed scale. Default is `1`                                                                                                                                                                                          |                              |
+| disableDefaultControl  | boolean  | Disable default player control. Set `true` when you implement own video controller.                                                                                                                                               |                              |
+| onReady                | Function | Indicates the video can be played back                                                                                                                                                                                            |                              |
+| onPlay                 | Function | Indicates the video playback starts                                                                                                                                                                                               |                              |
+| onPause                | Function | Indicates the video is paused                                                                                                                                                                                                     |                              |
+| onEnd                  | Function | Indicates the video is played to the end                                                                                                                                                                                          |                              |
+| onProgress             | Function | Indicates the playback head of the video advances.                                                                                                                                                                                | `{ currentTime: number }`    |
+| onChangeDuration       | Function | Indicates the video length is changed                                                                                                                                                                                             | `{ duration: number }`       |
+| onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                                                                                                                                                                     | `{ bufferProgress: number }` |
+| onEnterFullscreen      | Function | Indicates the player enters full screen                                                                                                                                                                                           |                              |
+| onExitFullscreen       | Function | Indicates the player exit full screen                                                                                                                                                                                             |                              |
 
 | Method                                | Description                       |
 | ------------------------------------- | --------------------------------- |
 | seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
+
+### BrightcovePlayerUtil
+
+- Promise for all methods may be invoke `reject`. Be sure to catch the exception.
+
+#### requestDownloadVideoWithVideoId, requestDownloadVideoWithReferenceId
+
+```ts
+BrightcovePlayerUtil.requestDownloadVideoWithVideoId(accountId: string, policyKey: string, videoId: string, bitRate?: number): Promise<string>
+BrightcovePlayerUtil.requestDownloadVideoWithReferenceId(accountId: string, policyKey: string, referenceId: string, bitRate?: number): Promise<string>
+```
+
+- Starts downloading the specified video with `videoId` or `referenceId`
+- Returns `VideoToken` in string wrapped with `Promise`. This value will be used for offline playback with `BrightcovePlayer`, acquisition for download status or deletion of offline videos.
+  - Note that this promise resolves the download start, not the download complete.
+  - In case that specified video has already been downloaded or the download session has being started, `Promise` will be rejected.
+- Does not work properly on simulator.
+- `bitrate` controls the quality of the downloading video in `bps`.
+  - Downloads a rendition with the largest bitrate less than or equal to this value.
+  - If no rendition can be found with a bitrate that is smaller than or equal to this bitrate, the lowest rendition will be downloaded.
+  - If this value is `0` or not specified, the lowest rendition with video will be downloaded.
+
+
+#### getOfflineVideoStatuses
+
+```ts
+BrightcovePlayerUtil.getOfflineVideoStatuses(accountId: string, policyKey: string): Promise<{
+  videoToken: string;
+  downloadProgress: number;
+}[]>
+```
+
+- Lists offline videos and downloading progresses.
+- `downloadProgress` equals `1` indicates that offline playback available.
+  - Otherwise the download is in progress and the value shows the progress ratio in `0.0 ~ 1.0`.
+- Note that iOS returns offline videos for all accounts but Android only returns for the specified account. In other words iOS does not consider `accountId` and `policyKey`.
+
+#### deleteOfflineVideo
+
+```ts
+BrightcovePlayerUtil.deleteOfflineVideo(accountId: string, policyKey: string, videoToken: string): Promise<void>
+```
+
+- Deletes offline videos or abort the ongoing download session.
+
 
 ## License
 
