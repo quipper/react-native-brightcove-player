@@ -33,23 +33,30 @@ export class BrightcovePlayer extends React.Component<Props, {}> {
 }
 
 export namespace BrightcovePlayerUtil {
-  export function requestDownloadVideoByReferenceId(
+  export function requestDownloadVideoWithReferenceId(
     accountId: string,
     policyKey: string,
     referenceId: string,
     bitRate?: number
   ): Promise<VideoToken>;
-  export function requestDownloadVideoByVideoId(
+  export function requestDownloadVideoWithVideoId(
     accountId: string,
     policyKey: string,
     videoId: string,
     bitRate?: number
   ): Promise<VideoToken>;
-  export function getOfflineVideoStatuses(): Promise<
+  export function getOfflineVideoStatuses(
+    accountId: string,
+    policyKey: string
+  ): Promise<
     {
       downloadProgress: number;
       videoToken: VideoToken;
     }[]
   >;
-  export function deleteOfflineVideo(videoToken: VideoToken): Promise<void>;
+  export function deleteOfflineVideo(
+    accountId: string,
+    policyKey: string,
+    videoToken: VideoToken
+  ): Promise<void>;
 }

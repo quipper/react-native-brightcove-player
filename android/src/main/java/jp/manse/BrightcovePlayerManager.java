@@ -59,6 +59,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         view.setReferenceId(referenceId);
     }
 
+    @ReactProp(name = "videoToken")
+    public void setVideoToken(BrightcovePlayerView view, String videoToken) {
+        view.setVideoToken(videoToken);
+    }
+
     @ReactProp(name = "autoPlay")
     public void setAutoPlay(BrightcovePlayerView view, boolean autoPlay) {
         view.setAutoPlay(autoPlay);

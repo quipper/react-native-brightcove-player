@@ -1,48 +1,51 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 
-const requestDownloadVideoByReferenceId = Platform.select({
-  ios: function(accountId, policyKey, referenceId, bitRate) {
-    return NativeModules.BrightcovePlayerUtil.requestDownloadVideoWithReferenceId(
-      referenceId,
-      accountId,
-      policyKey,
-      bitRate || 0
-    );
-  },
-  android: function(accountId, policyKey, referenceId) {}
-});
+const requestDownloadVideoWithReferenceId = function(
+  accountId,
+  policyKey,
+  referenceId,
+  bitRate
+) {
+  return NativeModules.BrightcovePlayerUtil.requestDownloadVideoWithReferenceId(
+    referenceId,
+    accountId,
+    policyKey,
+    bitRate || 0
+  );
+};
 
-const requestDownloadVideoByVideoId = Platform.select({
-  ios: function(accountId, policyKey, videoId, bitRate) {
-    return NativeModules.BrightcovePlayerUtil.requestDownloadVideoWithVideoId(
-      videoId,
-      accountId,
-      policyKey,
-      bitRate || 0
-    );
-  },
-  android: function(accountId, policyKey, videoId) {}
-});
+const requestDownloadVideoWithVideoId = function(
+  accountId,
+  policyKey,
+  videoId,
+  bitRate
+) {
+  return NativeModules.BrightcovePlayerUtil.requestDownloadVideoWithVideoId(
+    videoId,
+    accountId,
+    policyKey,
+    bitRate || 0
+  );
+};
 
-const getOfflineVideoStatuses = Platform.select({
-  ios: function() {
-    return NativeModules.BrightcovePlayerUtil.getOfflineVideoStatuses();
-  },
-  android: function(accountId, policyKey, videoId) {}
-});
+const getOfflineVideoStatuses = function(accountId, policyKey) {
+  return NativeModules.BrightcovePlayerUtil.getOfflineVideoStatuses(
+    accountId,
+    policyKey
+  );
+};
 
-const deleteOfflineVideo = Platform.select({
-  ios: function(videoToken) {
-    return NativeModules.BrightcovePlayerUtil.deleteOfflineVideoWithVideoToken(
-      videoToken
-    );
-  },
-  android: function(accountId, policyKey, videoId) {}
-});
+const deleteOfflineVideo = function(accountId, policyKey, videoToken) {
+  return NativeModules.BrightcovePlayerUtil.deleteOfflineVideoWithVideoToken(
+    accountId,
+    policyKey,
+    videoToken
+  );
+};
 
 module.exports = {
-  requestDownloadVideoByReferenceId,
-  requestDownloadVideoByVideoId,
+  requestDownloadVideoWithReferenceId,
+  requestDownloadVideoWithVideoId,
   getOfflineVideoStatuses,
   deleteOfflineVideo
 };

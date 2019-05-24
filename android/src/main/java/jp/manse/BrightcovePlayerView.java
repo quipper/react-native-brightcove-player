@@ -1,16 +1,16 @@
 package jp.manse;
 
 import android.graphics.Color;
-import android.os.Handler;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.edge.Catalog;
+import com.brightcove.player.edge.OfflineCallback;
+import com.brightcove.player.edge.OfflineCatalog;
 import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.event.Event;
 import com.brightcove.player.event.EventEmitter;
@@ -19,7 +19,6 @@ import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
-
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
@@ -36,7 +35,6 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +47,9 @@ public class BrightcovePlayerView extends RelativeLayout {
     private String accountId;
     private String videoId;
     private String referenceId;
+    private String videoToken;
     private Catalog catalog;
+    private OfflineCatalog offlineCatalog;
     private boolean autoPlay = true;
     private boolean playing = false;
     private int bitRate = 0;
@@ -170,28 +170,29 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     public void setPolicyKey(String policyKey) {
         this.policyKey = policyKey;
-        this.setupCatalog();
-        this.loadMovie();
+        this.loadVideo();
     }
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
-        this.setupCatalog();
-        this.loadMovie();
+        this.loadVideo();
     }
 
     public void setVideoId(String videoId) {
         this.videoId = videoId;
         this.referenceId = null;
-        this.setupCatalog();
-        this.loadMovie();
+        this.loadVideo();
     }
 
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
         this.videoId = null;
-        this.setupCatalog();
-        this.loadMovie();
+        this.loadVideo();
+    }
+
+    public void setVideoToken(String videoToken) {
+        this.videoToken = videoToken;
+        this.loadVideo();
     }
 
     public void setAutoPlay(boolean autoPlay) {
@@ -298,28 +299,37 @@ public class BrightcovePlayerView extends RelativeLayout {
         }
     }
 
-    private void setupCatalog() {
-        if (this.catalog != null || this.policyKey == null || this.accountId == null) return;
-        this.catalog = new Catalog(this.playerVideoView.getEventEmitter(), this.accountId, this.policyKey);
-    }
-
-    private void loadMovie() {
-        if (this.catalog == null) return;
+    private void loadVideo() {
+        if (this.videoToken != null && !this.videoToken.equals("")) {
+            this.offlineCatalog = new OfflineCatalog(this.context, this.playerVideoView.getEventEmitter(), this.accountId, this.policyKey);
+            try {
+                Video video = this.offlineCatalog.findOfflineVideoById(this.videoToken);
+                if (video != null) {
+                    playVideo(video);
+                }
+            } catch (Exception e) {
+            }
+            return;
+        }
         VideoListener listener = new VideoListener() {
-
             @Override
             public void onVideo(Video video) {
-                BrightcovePlayerView.this.playerVideoView.clear();
-                BrightcovePlayerView.this.playerVideoView.add(video);
-                if (BrightcovePlayerView.this.autoPlay) {
-                    BrightcovePlayerView.this.playerVideoView.start();
-                }
+                playVideo(video);
             }
         };
+        this.catalog = new Catalog(this.playerVideoView.getEventEmitter(), this.accountId, this.policyKey);
         if (this.videoId != null) {
             this.catalog.findVideoByID(this.videoId, listener);
         } else if (this.referenceId != null) {
             this.catalog.findVideoByReferenceID(this.referenceId, listener);
+        }
+    }
+
+    private void playVideo(Video video) {
+        BrightcovePlayerView.this.playerVideoView.clear();
+        BrightcovePlayerView.this.playerVideoView.add(video);
+        if (BrightcovePlayerView.this.autoPlay) {
+            BrightcovePlayerView.this.playerVideoView.start();
         }
     }
 
