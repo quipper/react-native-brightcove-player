@@ -113,7 +113,7 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
     private NativeArray collectNativeOfflineVideoStatuses() {
         WritableNativeArray statuses = new WritableNativeArray();
         for (OfflineVideoDownloadSession session: this.offlineVideoDownloadSessions) {
-            if (session.videoId == null || session.downloadProgress == 0) continue;
+            if (session.videoId == null) continue;
             WritableNativeMap map = new WritableNativeMap();
             map.putString(CALLBACK_KEY_VIDEO_TOKEN, session.videoId);
             map.putDouble(CALLBACK_KEY_DOWNLOAD_PROGRESS, session.downloadProgress);
