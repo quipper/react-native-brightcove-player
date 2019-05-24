@@ -59,7 +59,7 @@ RCT_EXPORT_METHOD(getOfflineVideoStatuses:(NSString *)accountId policyKey:(NSStr
 RCT_EXPORT_METHOD(deleteOfflineVideo:(NSString *)accountId policyKey:(NSString *)policyKey videoToken:(NSString *)videoToken resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[BrightcovePlayerOfflineVideoManager sharedManager] cancelVideoDownload:videoToken];
     [[BrightcovePlayerOfflineVideoManager sharedManager] deleteOfflineVideo:videoToken];
-    resolve([self collecteOfflineVideoStatuses]);
+    resolve(nil);
 }
 
 - (NSArray *)collecteOfflineVideoStatuses {
