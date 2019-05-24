@@ -52,7 +52,17 @@ RCT_EXPORT_METHOD(requestDownloadVideoWithVideoId:(NSString *)videoId accountId:
     }];
 }
 
-RCT_EXPORT_METHOD(getOfflineVideoStatuses:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getOfflineVideoStatuses:(NSString *)accountId policyKey:(NSString *)policyKey resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    resolve([self collecteOfflineVideoStatuses]);
+}
+
+RCT_EXPORT_METHOD(deleteOfflineVideo:(NSString *)accountId policyKey:(NSString *)policyKey videoToken:(NSString *)videoToken resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    [[BrightcovePlayerOfflineVideoManager sharedManager] cancelVideoDownload:videoToken];
+    [[BrightcovePlayerOfflineVideoManager sharedManager] deleteOfflineVideo:videoToken];
+    resolve([self collecteOfflineVideoStatuses]);
+}
+
+- (NSArray *)collecteOfflineVideoStatuses {
     NSArray* statuses = [[BrightcovePlayerOfflineVideoManager sharedManager] offlineVideoStatus];
     NSMutableArray *results = [[NSMutableArray alloc] init];
     for (BCOVOfflineVideoStatus *status in statuses) {
@@ -62,16 +72,10 @@ RCT_EXPORT_METHOD(getOfflineVideoStatuses:(RCTPromiseResolveBlock)resolve reject
            @"videoToken": status.offlineVideoToken
            }];
     }
-    resolve(results);
+    return results;
 }
 
-RCT_EXPORT_METHOD(deleteOfflineVideoWithVideoToken:(NSString *)videoToken resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    [[BrightcovePlayerOfflineVideoManager sharedManager] cancelVideoDownload:videoToken];
-    [[BrightcovePlayerOfflineVideoManager sharedManager] deleteOfflineVideo:videoToken];
-    resolve(nil);
-}
-
-- (NSDictionary *) generateDownloadParameterWithBitRate:(NSNumber*)bitRate {
+- (NSDictionary *)generateDownloadParameterWithBitRate:(NSNumber*)bitRate {
     return
     @{
       kBCOVOfflineVideoManagerRequestedBitrateKey: bitRate

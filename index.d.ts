@@ -58,5 +58,10 @@ export namespace BrightcovePlayerUtil {
     accountId: string,
     policyKey: string,
     videoToken: VideoToken
-  ): Promise<void>;
+  ): Promise<
+    {
+      downloadProgress: number;
+      videoToken: VideoToken;
+    }[]
+  >;
 }

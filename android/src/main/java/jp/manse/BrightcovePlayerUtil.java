@@ -56,7 +56,7 @@ public class BrightcovePlayerUtil extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void deleteOfflineVideoWithVideoToken(String accountId, String policyKey, String videoId, final Promise promise) {
+    public void deleteOfflineVideo(String accountId, String policyKey, String videoId, final Promise promise) {
         OfflineVideoOwner owner = this.getOfflineVideoOwner(accountId, policyKey);
         if (owner == null) {
             promise.reject(ERROR_CODE, ERROR_MESSAGE_MISSING_ARGUMENTS);

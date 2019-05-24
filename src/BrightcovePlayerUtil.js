@@ -36,7 +36,7 @@ const getOfflineVideoStatuses = function(accountId, policyKey) {
 };
 
 const deleteOfflineVideo = function(accountId, policyKey, videoToken) {
-  return NativeModules.BrightcovePlayerUtil.deleteOfflineVideoWithVideoToken(
+  return NativeModules.BrightcovePlayerUtil.deleteOfflineVideo(
     accountId,
     policyKey,
     videoToken
