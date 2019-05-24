@@ -1,6 +1,6 @@
 {
   "name": "react-native-brightcove-player",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "A React Native implementation of Brightcove Player SDK.",
   "main": "index.js",
   "repository": {
