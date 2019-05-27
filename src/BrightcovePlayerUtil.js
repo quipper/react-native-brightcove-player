@@ -43,9 +43,27 @@ const deleteOfflineVideo = function(accountId, policyKey, videoToken) {
   );
 };
 
+const getPlaylistWithReferenceId = function(accountId, policyKey, referenceId) {
+  return NativeModules.BrightcovePlayerUtil.getPlaylistWithReferenceId(
+    referenceId,
+    accountId,
+    policyKey
+  );
+};
+
+const getPlaylistWithPlaylistId = function(accountId, policyKey, playlistId) {
+  return NativeModules.BrightcovePlayerUtil.getPlaylistWithPlaylistId(
+    playlistId,
+    accountId,
+    policyKey
+  );
+};
+
 module.exports = {
   requestDownloadVideoWithReferenceId,
   requestDownloadVideoWithVideoId,
   getOfflineVideoStatuses,
-  deleteOfflineVideo
+  deleteOfflineVideo,
+  getPlaylistWithReferenceId,
+  getPlaylistWithPlaylistId
 };

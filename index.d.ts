@@ -3,9 +3,9 @@ import { ViewStyle } from 'react-native';
 
 type VideoToken = string;
 
-export type Props = {
-  policyKey: string;
-  accountId: string;
+export type BrightcovePlayerProps = {
+  policyKey?: string;
+  accountId?: string;
   referenceId?: string;
   videoId?: string;
   videoToken?: VideoToken;
@@ -28,11 +28,37 @@ export type Props = {
   style?: ViewStyle;
 };
 
-export class BrightcovePlayer extends React.Component<Props, {}> {
+export class BrightcovePlayer extends React.Component<
+  BrightcovePlayerProps,
+  {}
+> {
   seekTo(position: number): {};
 }
 
+export type BrightcovePlayerPosterProps = {
+  policyKey?: string;
+  accountId?: string;
+  referenceId?: string;
+  videoId?: string;
+  videoToken?: VideoToken;
+  style?: ViewStyle;
+};
+
+export class BrightcovePlayerPoster extends React.Component<
+  BrightcovePlayerPosterProps,
+  {}
+> {}
+
 export namespace BrightcovePlayerUtil {
+  type PlaylistVideo = {
+    accountId: String;
+    videoId: String;
+    referenceId: String;
+    name: String;
+    description: String;
+    duration: number;
+  };
+
   export function requestDownloadVideoWithReferenceId(
     accountId: string,
     policyKey: string,
@@ -64,4 +90,14 @@ export namespace BrightcovePlayerUtil {
       videoToken: VideoToken;
     }[]
   >;
+  export function getPlaylistWithReferenceId(
+    accountId: string,
+    policyKey: string,
+    referenceId: string
+  ): Promise<PlaylistVideo[]>;
+  export function getPlaylistWithPlaylistId(
+    accountId: string,
+    policyKey: string,
+    playlistId: string
+  ): Promise<PlaylistVideo[]>;
 }

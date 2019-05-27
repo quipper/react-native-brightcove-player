@@ -23,6 +23,7 @@
 @property (nonatomic) float targetVolume;
 @property (nonatomic) float targetBitRate;
 @property (nonatomic) float targetPlaybackRate;
+@property (nonatomic) BOOL playbackServiceDirty;
 
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;

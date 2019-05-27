@@ -31,7 +31,8 @@
 }
 
 - (void)setupService {
-    if (!_playbackService && _accountId && _policyKey) {
+    if ((!_playbackService || _playbackServiceDirty) && _accountId && _policyKey) {
+        _playbackServiceDirty = NO;
         _playbackService = [[BCOVPlaybackService alloc] initWithAccountId:_accountId policyKey:_policyKey];
     }
 }
@@ -87,12 +88,14 @@
 
 - (void)setAccountId:(NSString *)accountId {
     _accountId = accountId;
+    _playbackServiceDirty = YES;
     [self setupService];
     [self loadMovie];
 }
 
 - (void)setPolicyKey:(NSString *)policyKey {
     _policyKey = policyKey;
+    _playbackServiceDirty = YES;
     [self setupService];
     [self loadMovie];
 }

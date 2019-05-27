@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		71074C442297F82000C48E27 /* BrightcovePlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 71074C3E2297F81F00C48E27 /* BrightcovePlayer.m */; };
-		71074C452297F82000C48E27 /* BrightcovePlayerOfflineVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 71074C3F2297F81F00C48E27 /* BrightcovePlayerOfflineVideoManager.m */; };
-		71074C462297F82000C48E27 /* BrightcovePlayerUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 71074C402297F81F00C48E27 /* BrightcovePlayerUtil.m */; };
-		71074C472297F82000C48E27 /* BrightcovePlayerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 71074C422297F82000C48E27 /* BrightcovePlayerManager.m */; };
+		713443DE229BDB220071B8E4 /* BrightcovePlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 713443D2229BDB220071B8E4 /* BrightcovePlayer.m */; };
+		713443DF229BDB220071B8E4 /* BrightcovePlayerOfflineVideoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 713443D4229BDB220071B8E4 /* BrightcovePlayerOfflineVideoManager.m */; };
+		713443E0229BDB220071B8E4 /* BrightcovePlayerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 713443D5229BDB220071B8E4 /* BrightcovePlayerManager.m */; };
+		713443E1229BDB220071B8E4 /* BrightcovePlayerPosterManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 713443DA229BDB220071B8E4 /* BrightcovePlayerPosterManager.m */; };
+		713443E2229BDB220071B8E4 /* BrightcovePlayerUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 713443DB229BDB220071B8E4 /* BrightcovePlayerUtil.m */; };
+		713443E3229BDB220071B8E4 /* BrightcovePlayerPoster.m in Sources */ = {isa = PBXBuildFile; fileRef = 713443DC229BDB220071B8E4 /* BrightcovePlayerPoster.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,14 +29,18 @@
 
 /* Begin PBXFileReference section */
 		7100FCB320A432C40014A205 /* libreact-native-brightcove-player.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libreact-native-brightcove-player.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		71074C3C2297F81F00C48E27 /* BrightcovePlayerOfflineVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerOfflineVideoManager.h; sourceTree = "<group>"; };
-		71074C3D2297F81F00C48E27 /* BrightcovePlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayer.h; sourceTree = "<group>"; };
-		71074C3E2297F81F00C48E27 /* BrightcovePlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayer.m; sourceTree = "<group>"; };
-		71074C3F2297F81F00C48E27 /* BrightcovePlayerOfflineVideoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerOfflineVideoManager.m; sourceTree = "<group>"; };
-		71074C402297F81F00C48E27 /* BrightcovePlayerUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerUtil.m; sourceTree = "<group>"; };
-		71074C412297F81F00C48E27 /* BrightcovePlayerUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerUtil.h; sourceTree = "<group>"; };
-		71074C422297F82000C48E27 /* BrightcovePlayerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerManager.m; sourceTree = "<group>"; };
-		71074C432297F82000C48E27 /* BrightcovePlayerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerManager.h; sourceTree = "<group>"; };
+		713443D2229BDB220071B8E4 /* BrightcovePlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayer.m; sourceTree = "<group>"; };
+		713443D3229BDB220071B8E4 /* BrightcovePlayerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerManager.h; sourceTree = "<group>"; };
+		713443D4229BDB220071B8E4 /* BrightcovePlayerOfflineVideoManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerOfflineVideoManager.m; sourceTree = "<group>"; };
+		713443D5229BDB220071B8E4 /* BrightcovePlayerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerManager.m; sourceTree = "<group>"; };
+		713443D6229BDB220071B8E4 /* BrightcovePlayerUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerUtil.h; sourceTree = "<group>"; };
+		713443D7229BDB220071B8E4 /* BrightcovePlayerPosterManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerPosterManager.h; sourceTree = "<group>"; };
+		713443D8229BDB220071B8E4 /* BrightcovePlayerOfflineVideoManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerOfflineVideoManager.h; sourceTree = "<group>"; };
+		713443D9229BDB220071B8E4 /* BrightcovePlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayer.h; sourceTree = "<group>"; };
+		713443DA229BDB220071B8E4 /* BrightcovePlayerPosterManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerPosterManager.m; sourceTree = "<group>"; };
+		713443DB229BDB220071B8E4 /* BrightcovePlayerUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerUtil.m; sourceTree = "<group>"; };
+		713443DC229BDB220071B8E4 /* BrightcovePlayerPoster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BrightcovePlayerPoster.m; sourceTree = "<group>"; };
+		713443DD229BDB220071B8E4 /* BrightcovePlayerPoster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BrightcovePlayerPoster.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,14 +57,18 @@
 		7100FCAA20A432C40014A205 = {
 			isa = PBXGroup;
 			children = (
-				71074C3D2297F81F00C48E27 /* BrightcovePlayer.h */,
-				71074C3E2297F81F00C48E27 /* BrightcovePlayer.m */,
-				71074C432297F82000C48E27 /* BrightcovePlayerManager.h */,
-				71074C422297F82000C48E27 /* BrightcovePlayerManager.m */,
-				71074C3C2297F81F00C48E27 /* BrightcovePlayerOfflineVideoManager.h */,
-				71074C3F2297F81F00C48E27 /* BrightcovePlayerOfflineVideoManager.m */,
-				71074C412297F81F00C48E27 /* BrightcovePlayerUtil.h */,
-				71074C402297F81F00C48E27 /* BrightcovePlayerUtil.m */,
+				713443D9229BDB220071B8E4 /* BrightcovePlayer.h */,
+				713443D2229BDB220071B8E4 /* BrightcovePlayer.m */,
+				713443D3229BDB220071B8E4 /* BrightcovePlayerManager.h */,
+				713443D5229BDB220071B8E4 /* BrightcovePlayerManager.m */,
+				713443D8229BDB220071B8E4 /* BrightcovePlayerOfflineVideoManager.h */,
+				713443D4229BDB220071B8E4 /* BrightcovePlayerOfflineVideoManager.m */,
+				713443DD229BDB220071B8E4 /* BrightcovePlayerPoster.h */,
+				713443DC229BDB220071B8E4 /* BrightcovePlayerPoster.m */,
+				713443D7229BDB220071B8E4 /* BrightcovePlayerPosterManager.h */,
+				713443DA229BDB220071B8E4 /* BrightcovePlayerPosterManager.m */,
+				713443D6229BDB220071B8E4 /* BrightcovePlayerUtil.h */,
+				713443DB229BDB220071B8E4 /* BrightcovePlayerUtil.m */,
 				7100FCB420A432C40014A205 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -127,10 +137,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				71074C462297F82000C48E27 /* BrightcovePlayerUtil.m in Sources */,
-				71074C472297F82000C48E27 /* BrightcovePlayerManager.m in Sources */,
-				71074C442297F82000C48E27 /* BrightcovePlayer.m in Sources */,
-				71074C452297F82000C48E27 /* BrightcovePlayerOfflineVideoManager.m in Sources */,
+				713443E1229BDB220071B8E4 /* BrightcovePlayerPosterManager.m in Sources */,
+				713443DE229BDB220071B8E4 /* BrightcovePlayer.m in Sources */,
+				713443E3229BDB220071B8E4 /* BrightcovePlayerPoster.m in Sources */,
+				713443E2229BDB220071B8E4 /* BrightcovePlayerUtil.m in Sources */,
+				713443E0229BDB220071B8E4 /* BrightcovePlayerManager.m in Sources */,
+				713443DF229BDB220071B8E4 /* BrightcovePlayerOfflineVideoManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
