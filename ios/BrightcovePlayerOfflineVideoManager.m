@@ -9,9 +9,9 @@ static BOOL initialized = false;
         initialized = true;
         NSDictionary *options =
         @{
-          kBCOVOfflineVideoManagerAllowsCellularDownloadKey: @(NO),
-          kBCOVOfflineVideoManagerAllowsCellularPlaybackKey: @(NO),
-          kBCOVOfflineVideoManagerAllowsCellularAnalyticsKey: @(NO)
+          kBCOVOfflineVideoManagerAllowsCellularDownloadKey: @(YES),
+          kBCOVOfflineVideoManagerAllowsCellularPlaybackKey: @(YES),
+          kBCOVOfflineVideoManagerAllowsCellularAnalyticsKey: @(YES)
           };
         [BCOVOfflineVideoManager initializeOfflineVideoManagerWithDelegate:nil options:options];
     }

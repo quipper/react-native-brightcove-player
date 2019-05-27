@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.brightcove.player.edge.Catalog;
+import com.brightcove.player.edge.OfflineCallback;
 import com.brightcove.player.edge.OfflineCatalog;
 import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.model.Video;
@@ -20,6 +21,7 @@ import jp.manse.DefaultEventEmitter;
 public class OfflineVideoDownloadSession extends VideoListener implements MediaDownloadable.DownloadEventListener {
     final private static String ERROR_CODE = "error";
     final private static String ERROR_MESSAGE_ALREADY_EXISTS = "Offline video already exists";
+    final private static String ERROR_MESSAGE_ALREADY_DOWNLOADING = "Offline video is already downloading";
     final private static String ERROR_MESSAGE_VIDEO_NOT_FOUND = "Could not find the video";
     final private static String ERROR_MESSAGE_DOWNLOAD_CANCEL = "Failed to download video";
     public String videoId;
@@ -28,49 +30,90 @@ public class OfflineVideoDownloadSession extends VideoListener implements MediaD
 
     public Promise promise;
 
-    private boolean hasFinished = false;
-    private OnOfflineVideoDownloadSessionListener listener;
     private Catalog catalog;
     private OfflineCatalog offlineCatalog;
+    private boolean hasFinished = false;
+    private OnOfflineVideoDownloadSessionListener listener;
 
     public interface OnOfflineVideoDownloadSessionListener {
-        void onSuccess(OfflineVideoDownloadSession session);
-
-        void onError(OfflineVideoDownloadSession session);
+        void onCompleted(OfflineVideoDownloadSession session);
     }
 
-    OfflineVideoDownloadSession(ReactApplicationContext context, String accountId, String policyKey, int bitRate, Promise promise, OnOfflineVideoDownloadSessionListener listener) {
-        this.promise = promise;
-        this.listener = listener;
-        this.offlineCatalog = new OfflineCatalog(context, DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
-        this.offlineCatalog.setMeteredDownloadAllowed(false);
-        this.offlineCatalog.setMobileDownloadAllowed(false);
-        this.offlineCatalog.setRoamingDownloadAllowed(false);
-        this.offlineCatalog.setVideoBitrate(bitRate);
-        this.offlineCatalog.addDownloadEventListener(this);
+    OfflineVideoDownloadSession(ReactApplicationContext context, String accountId, String policyKey, OnOfflineVideoDownloadSessionListener listener) {
         this.catalog = new Catalog(DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
+        this.offlineCatalog = new OfflineCatalog(context, DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
+        this.offlineCatalog.setMeteredDownloadAllowed(true);
+        this.offlineCatalog.setMobileDownloadAllowed(true);
+        this.offlineCatalog.setRoamingDownloadAllowed(true);
+        this.offlineCatalog.addDownloadEventListener(this);
+        this.listener = listener;
     }
 
-    public void requestDownloadWithReferenceId(String referenceId) {
+    public void requestDownloadWithReferenceId(String referenceId, int bitRate, Promise promise) {
+        this.promise = promise;
         this.referenceId = referenceId;
+        this.offlineCatalog.setVideoBitrate(bitRate);
         this.catalog.findVideoByReferenceID(referenceId, this);
     }
 
-    public void requestDownloadWithVideoId(String videoId) {
+    public void requestDownloadWithVideoId(String videoId, int bitRate, Promise promise) {
+        this.promise = promise;
         this.videoId = videoId;
+        this.offlineCatalog.setVideoBitrate(bitRate);
         this.catalog.findVideoByID(videoId, this);
+    }
+
+    public void resumeDownload(Video video) {
+        this.onVideo(video);
+    }
+
+    @Override
+    public void onVideo(final Video video) {
+        this.videoId = video.getId();
+        this.referenceId = video.getReferenceId();
+        DownloadStatus status = this.offlineCatalog.getVideoDownloadStatus(video);
+        this.downloadProgress = status.getProgress() * 0.01;
+        switch (status.getCode()) {
+            case DownloadStatus.STATUS_NOT_QUEUED:
+                this.offlineCatalog.downloadVideo(video);
+                this.resolve(video);
+                break;
+            case DownloadStatus.STATUS_DOWNLOADING:
+            case DownloadStatus.STATUS_PENDING:
+                this.rejectWithCallback(ERROR_MESSAGE_ALREADY_DOWNLOADING);
+                break;
+            case DownloadStatus.STATUS_COMPLETE:
+                this.rejectWithCallback(ERROR_MESSAGE_ALREADY_EXISTS);
+                this.listener.onCompleted(this);
+                break;
+            default:
+                this.offlineCatalog.cancelVideoDownload(video);
+                this.offlineCatalog.deleteVideo(video, new OfflineCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean aBoolean) {
+                        offlineCatalog.downloadVideo(video);
+                        resolve(video);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        rejectWithCallback(ERROR_MESSAGE_DOWNLOAD_CANCEL);
+                    }
+                });
+        }
+    }
+
+    @Override
+    public void onError(String error) {
+        this.rejectWithCallback(ERROR_MESSAGE_VIDEO_NOT_FOUND);
     }
 
     @Override
     public void onDownloadRequested(@NonNull Video video) {
-        this.videoId = video.getId();
-        this.referenceId = video.getReferenceId();
     }
 
     @Override
     public void onDownloadStarted(@NonNull Video video, long l, @NonNull Map<String, Serializable> map) {
-        this.videoId = video.getId();
-        this.referenceId = video.getReferenceId();
     }
 
     @Override
@@ -80,54 +123,40 @@ public class OfflineVideoDownloadSession extends VideoListener implements MediaD
 
     @Override
     public void onDownloadPaused(@NonNull Video video, @NonNull DownloadStatus downloadStatus) {
-        this.invokeError(ERROR_MESSAGE_DOWNLOAD_CANCEL);
+        this.listener.onCompleted(this);
     }
 
     @Override
     public void onDownloadCompleted(@NonNull Video video, @NonNull DownloadStatus downloadStatus) {
         this.downloadProgress = 1d;
-        this.invokeSuccess(video);
+        this.listener.onCompleted(this);
     }
 
     @Override
     public void onDownloadCanceled(@NonNull Video video) {
-        this.invokeError(ERROR_MESSAGE_DOWNLOAD_CANCEL);
+        this.listener.onCompleted(this);
     }
 
     @Override
     public void onDownloadDeleted(@NonNull Video video) {
-        this.invokeError(ERROR_MESSAGE_DOWNLOAD_CANCEL);
+        this.listener.onCompleted(this);
     }
 
     @Override
     public void onDownloadFailed(@NonNull Video video, @NonNull DownloadStatus downloadStatus) {
-        this.invokeError(ERROR_MESSAGE_DOWNLOAD_CANCEL);
+        this.listener.onCompleted(this);
     }
 
-    @Override
-    public void onVideo(Video video) {
-        DownloadStatus status = this.offlineCatalog.downloadVideo(video);
-        if (status.getCode() != DownloadStatus.STATUS_NOT_QUEUED) {
-            this.invokeError(ERROR_MESSAGE_ALREADY_EXISTS);
+    private void resolve(Video video) {
+        if (this.promise != null) {
+            this.promise.resolve(video.getId());
         }
     }
 
-    @Override
-    public void onError(String error) {
-        this.invokeError(ERROR_MESSAGE_VIDEO_NOT_FOUND);
-    }
-
-    private void invokeSuccess(Video video) {
-        if (this.hasFinished) return;
-        this.hasFinished = true;
-        this.promise.resolve(video.getId());
-        this.listener.onSuccess(this);
-    }
-
-    private void invokeError(String message) {
-        if (this.hasFinished) return;
-        this.hasFinished = true;
-        this.promise.reject(ERROR_CODE, message);
-        this.listener.onError(this);
+    private void rejectWithCallback(String message) {
+        this.listener.onCompleted(this);
+        if (this.promise != null) {
+            this.promise.reject(ERROR_CODE, message);
+        }
     }
 }

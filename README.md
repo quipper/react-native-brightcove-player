@@ -39,14 +39,15 @@ source 'https://github.com/brightcove/BrightcoveSpecs.git'
 platform :ios, '10.0'
 use_frameworks!
 
-target 'YOUR PROJECT ID' do
+target 'YOUR_PROJECT_ID' do
     pod 'Brightcove-Player-Core'
 end
 ```
 
 ### Android
 
-- Add following lines in `android/app/build.gradle`
+- Add following lines in `android/build.gradle`
+- [Enables multiDex](https://developer.android.com/studio/build/multidex).
 
 ```gradle
 allprojects {
@@ -123,10 +124,10 @@ BrightcovePlayerUtil.requestDownloadVideoWithVideoId(accountId: string, policyKe
 BrightcovePlayerUtil.requestDownloadVideoWithReferenceId(accountId: string, policyKey: string, referenceId: string, bitRate?: number): Promise<string>
 ```
 
-- Starts downloading the specified video with `videoId` or `referenceId`
+- Starts downloading the specified video with `videoId` or `referenceId` for offline playback.
 - Returns `VideoToken` in string wrapped with `Promise`. This value will be used for offline playback with `BrightcovePlayer`, acquisition for download status or deletion of offline videos.
   - Note that this promise resolves the download start, not the download complete.
-  - In case that specified video has already been downloaded or the download session has being started, `Promise` will be rejected.
+  - In case that specified video has already been downloaded or the download session has being started `Promise` will be rejected.
 - Does not work properly on simulator.
 - `bitrate` controls the quality of the downloading video in `bps`.
   - Downloads a rendition with the largest bitrate less than or equal to this value.
@@ -143,7 +144,7 @@ BrightcovePlayerUtil.getOfflineVideoStatuses(accountId: string, policyKey: strin
 }[]>
 ```
 
-- Lists offline videos and downloading progresses.
+- Lists downloaded offline videos and downloading progresses.
 - `downloadProgress` equals `1` indicates that offline playback available.
   - Otherwise the download is in progress and the value shows the progress ratio in `0.0 ~ 1.0`.
 - Note that iOS returns offline videos for all accounts but Android only returns for the specified account. In other words iOS does not consider `accountId` and `policyKey`.

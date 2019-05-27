@@ -1,5 +1,7 @@
 package jp.manse.offlineVideo;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.brightcove.player.edge.OfflineCallback;
@@ -17,7 +19,8 @@ import java.util.List;
 
 import jp.manse.DefaultEventEmitter;
 
-public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineVideoDownloadSessionListener, OfflineCallback<List<Video>> {
+public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineVideoDownloadSessionListener {
+    final private static int FPS = 40;
     final private static String DEBUG_TAG = "brightcoveplayer";
     final private static String ERROR_CODE = "error";
     final private static String ERROR_MESSAGE_DUPLICATE_SESSION = "Offline video or download session already exists";
@@ -29,53 +32,94 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
     public String accountId;
     public String policyKey;
 
-    private List<OfflineVideoStatus> offlineVideoStatuses = new ArrayList<>();
+    private Handler handler;
     private List<OfflineVideoDownloadSession> offlineVideoDownloadSessions = new ArrayList<>();
-    private boolean isOfflineVideoStatusInitialized = false;
-    private boolean isOfflineVideoStatusInitializing = false;
-    private List<Promise> initializeOfflineVideoStatusPromises = new ArrayList<>();
+    private boolean getOfflineVideoStatusesRunning = false;
+    private List<Promise> getOfflineVideoStatusesPendingPromises = new ArrayList<>();
+    private List<Video> allDownloadedVideos;
     private OfflineCatalog offlineCatalog;
 
-    public OfflineVideoOwner(ReactApplicationContext context, String accountId, String policyKey) {
+    public OfflineVideoOwner(final ReactApplicationContext context, final String accountId, final String policyKey) {
         this.context = context;
         this.accountId = accountId;
         this.policyKey = policyKey;
+        handler = new Handler(Looper.myLooper());
         this.offlineCatalog = new OfflineCatalog(context, DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
+        this.offlineCatalog.setMeteredDownloadAllowed(true);
+        this.offlineCatalog.setMobileDownloadAllowed(true);
+        this.offlineCatalog.setRoamingDownloadAllowed(true);
+        this.offlineCatalog.findAllVideoDownload(DownloadStatus.STATUS_DOWNLOADING, new OfflineCallback<List<Video>>() {
+            @Override
+            public void onSuccess(List<Video> videos) {
+                for (Video video : videos) {
+                    OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(context, accountId, policyKey, OfflineVideoOwner.this);
+                    session.resumeDownload(video);
+                    offlineVideoDownloadSessions.add(session);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+            }
+        });
     }
 
     public void requestDownloadWithReferenceId(String referenceId, int bitRate, Promise promise) {
-        if (this.hasOfflineVideoWithReferenceId(referenceId)) {
+        if (this.hasOfflineVideoDownloadSessionWithReferenceId(referenceId)) {
             promise.reject(ERROR_CODE, ERROR_MESSAGE_DUPLICATE_SESSION);
             return;
         }
-        OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, accountId, policyKey, bitRate, promise, this);
-        session.requestDownloadWithReferenceId(referenceId);
+        OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, this.accountId, this.policyKey, this);
+        session.requestDownloadWithReferenceId(referenceId, bitRate, promise);
         this.offlineVideoDownloadSessions.add(session);
     }
 
     public void requestDownloadWithVideoId(String videoId, int bitRate, Promise promise) {
-        if (this.hasOfflineVideoWithVideoId(videoId)) {
+        if (this.hasOfflineVideoDownloadSessionWithVideoId(videoId)) {
             promise.reject(ERROR_CODE, ERROR_MESSAGE_DUPLICATE_SESSION);
             return;
         }
-        OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, accountId, policyKey, bitRate, promise, this);
-        session.requestDownloadWithVideoId(videoId);
+        OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, this.accountId, this.policyKey, this);
+        session.requestDownloadWithVideoId(videoId, bitRate, promise);
         this.offlineVideoDownloadSessions.add(session);
     }
 
     public void getOfflineVideoStatuses(Promise promise) {
-        if (this.isOfflineVideoStatusInitialized) {
+        if (this.getOfflineVideoStatusesRunning) {
+            this.getOfflineVideoStatusesPendingPromises.add(promise);
+            return;
+        }
+        this.getOfflineVideoStatusesRunning = true;
+        this.getOfflineVideoStatusesPendingPromises.clear();
+        this.getOfflineVideoStatusesPendingPromises.add(promise);
+        final Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                sendOfflineVideoStatuses();
+                getOfflineVideoStatusesRunning = false;
+            }
+        };
+        this.offlineCatalog.findAllVideoDownload(DownloadStatus.STATUS_COMPLETE, new OfflineCallback<List<Video>>() {
+            @Override
+            public void onSuccess(List<Video> videos) {
+                allDownloadedVideos = videos;
+                handler.postDelayed(updateRunnable, FPS);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                for (Promise promise : getOfflineVideoStatusesPendingPromises) {
+                    promise.reject(ERROR_CODE, ERROR_CODE);
+                }
+                getOfflineVideoStatusesRunning = false;
+            }
+        });
+    }
+
+    private void sendOfflineVideoStatuses() {
+        for (Promise promise : getOfflineVideoStatusesPendingPromises) {
             promise.resolve(this.collectNativeOfflineVideoStatuses());
-            return;
         }
-        if (this.isOfflineVideoStatusInitializing) {
-            this.initializeOfflineVideoStatusPromises.add(promise);
-            return;
-        }
-        this.initializeOfflineVideoStatusPromises.clear();
-        this.initializeOfflineVideoStatusPromises.add(promise);
-        this.isOfflineVideoStatusInitializing = true;
-        this.offlineCatalog.findAllVideoDownload(DownloadStatus.STATUS_COMPLETE, this);
     }
 
     public void deleteOfflineVideo(String videoId, final Promise promise) {
@@ -83,14 +127,8 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
             this.offlineCatalog.cancelVideoDownload(videoId);
             for (int i = this.offlineVideoDownloadSessions.size() - 1; i >= 0; i--) {
                 OfflineVideoDownloadSession session = this.offlineVideoDownloadSessions.get(i);
-                if (session.videoId.equals(videoId)) {
+                if (videoId.equals(session.videoId)) {
                     this.offlineVideoDownloadSessions.remove(session);
-                }
-            }
-            for (int i = this.offlineVideoStatuses.size() - 1; i >= 0; i--) {
-                OfflineVideoStatus status = this.offlineVideoStatuses.get(i);
-                if (status.videoId.equals(videoId)) {
-                    this.offlineVideoStatuses.remove(status);
                 }
             }
             this.offlineCatalog.deleteVideo(videoId, new OfflineCallback<Boolean>() {
@@ -112,44 +150,38 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
 
     private NativeArray collectNativeOfflineVideoStatuses() {
         WritableNativeArray statuses = new WritableNativeArray();
-        for (OfflineVideoDownloadSession session: this.offlineVideoDownloadSessions) {
-            if (session.videoId == null) continue;
+        for (Video video : this.allDownloadedVideos) {
             WritableNativeMap map = new WritableNativeMap();
-            map.putString(CALLBACK_KEY_VIDEO_TOKEN, session.videoId);
-            map.putDouble(CALLBACK_KEY_DOWNLOAD_PROGRESS, session.downloadProgress);
+            map.putString(CALLBACK_KEY_VIDEO_TOKEN, video.getId());
+            map.putDouble(CALLBACK_KEY_DOWNLOAD_PROGRESS, 1);
             statuses.pushMap(map);
         }
-        for (OfflineVideoStatus status: this.offlineVideoStatuses) {
+        for (OfflineVideoDownloadSession session : this.offlineVideoDownloadSessions) {
+            if (session.videoId == null) continue;
             boolean found = false;
-            for (OfflineVideoDownloadSession session: this.offlineVideoDownloadSessions) {
-                if (status.videoId.equals(session.videoId)) {
+            for (Video video : this.allDownloadedVideos) {
+                if (video.getId().equals(session.videoId)) {
                     found = true;
                     break;
                 }
             }
             if (found) continue;
             WritableNativeMap map = new WritableNativeMap();
-            map.putString(CALLBACK_KEY_VIDEO_TOKEN, status.videoId);
-            map.putDouble(CALLBACK_KEY_DOWNLOAD_PROGRESS, status.downloadProgress);
+            map.putString(CALLBACK_KEY_VIDEO_TOKEN, session.videoId);
+            map.putDouble(CALLBACK_KEY_DOWNLOAD_PROGRESS, session.downloadProgress);
             statuses.pushMap(map);
         }
         return statuses;
     }
 
-    private boolean hasOfflineVideoWithReferenceId(String referenceId) {
-        for (OfflineVideoStatus status : this.offlineVideoStatuses) {
-            if (referenceId.equals(status.referenceId)) return true;
-        }
+    private boolean hasOfflineVideoDownloadSessionWithReferenceId(String referenceId) {
         for (OfflineVideoDownloadSession session : this.offlineVideoDownloadSessions) {
             if (referenceId.equals(session.referenceId)) return true;
         }
         return false;
     }
 
-    private boolean hasOfflineVideoWithVideoId(String videoId) {
-        for (OfflineVideoStatus status : this.offlineVideoStatuses) {
-            if (videoId.equals(status.videoId)) return true;
-        }
+    private boolean hasOfflineVideoDownloadSessionWithVideoId(String videoId) {
         for (OfflineVideoDownloadSession session : this.offlineVideoDownloadSessions) {
             if (videoId.equals(session.videoId)) return true;
         }
@@ -157,31 +189,7 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
     }
 
     @Override
-    public void onSuccess(OfflineVideoDownloadSession session) {
+    public void onCompleted(OfflineVideoDownloadSession session) {
         this.offlineVideoDownloadSessions.remove(session);
-        this.offlineVideoStatuses.add(new OfflineVideoStatus(session.videoId, session.referenceId, session.downloadProgress));
-    }
-
-    @Override
-    public void onError(OfflineVideoDownloadSession session) {
-        this.offlineVideoDownloadSessions.remove(session);
-    }
-
-    @Override
-    public void onSuccess(List<Video> videos) {
-        this.offlineVideoStatuses.clear();
-        for (Video video: videos) {
-            this.offlineVideoStatuses.add(new OfflineVideoStatus(video.getId(), video.getReferenceId(), 1d));
-        }
-        this.isOfflineVideoStatusInitialized = true;
-        NativeArray result = this.collectNativeOfflineVideoStatuses();
-        for (Promise promise: this.initializeOfflineVideoStatusPromises) {
-            promise.resolve(result);
-        }
-    }
-
-    @Override
-    public void onFailure(Throwable throwable) {
-        this.isOfflineVideoStatusInitializing = false;
     }
 }
