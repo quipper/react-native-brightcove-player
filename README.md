@@ -127,7 +127,8 @@ BrightcovePlayerUtil.requestDownloadVideoWithReferenceId(accountId: string, poli
 - Starts downloading the specified video with `videoId` or `referenceId` for offline playback.
 - Returns `VideoToken` in string wrapped with `Promise`. This value will be used for offline playback with `BrightcovePlayer`, acquisition for download status or deletion of offline videos.
   - Note that this promise resolves the download start, not the download complete.
-  - In case that specified video has already been downloaded or the download session has being started `Promise` will be rejected.
+  - In case that specified video has already been downloaded `Promise` will be rejected.
+  - If the download is in progress, the download is retried on iOS and rejected on Android.
 - Does not work properly on simulator.
 - `bitrate` controls the quality of the downloading video in `bps`.
   - Downloads a rendition with the largest bitrate less than or equal to this value.
