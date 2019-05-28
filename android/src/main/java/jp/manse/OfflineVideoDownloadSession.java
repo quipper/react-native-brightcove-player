@@ -1,6 +1,7 @@
 package jp.manse;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.OfflineCallback;
@@ -35,6 +36,8 @@ public class OfflineVideoDownloadSession extends VideoListener implements MediaD
 
     public interface OnOfflineVideoDownloadSessionListener {
         void onCompleted(OfflineVideoDownloadSession session);
+
+        void onProgress();
     }
 
     public OfflineVideoDownloadSession(ReactApplicationContext context, String accountId, String policyKey, OnOfflineVideoDownloadSessionListener listener) {
@@ -70,7 +73,6 @@ public class OfflineVideoDownloadSession extends VideoListener implements MediaD
         this.videoId = video.getId();
         this.referenceId = video.getReferenceId();
         DownloadStatus status = this.offlineCatalog.getVideoDownloadStatus(video);
-        this.downloadProgress = status.getProgress() * 0.01;
         switch (status.getCode()) {
             case DownloadStatus.STATUS_NOT_QUEUED:
                 this.offlineCatalog.downloadVideo(video);
@@ -116,7 +118,8 @@ public class OfflineVideoDownloadSession extends VideoListener implements MediaD
 
     @Override
     public void onDownloadProgress(@NonNull Video video, @NonNull DownloadStatus downloadStatus) {
-        this.downloadProgress = downloadStatus.getProgress() * 0.01;
+        this.listener.onProgress();
+        this.downloadProgress = downloadStatus.getProgress() * 0.01d;
     }
 
     @Override

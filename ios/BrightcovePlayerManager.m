@@ -47,5 +47,14 @@ RCT_EXPORT_METHOD(seekTo:(nonnull NSNumber *)reactTag seconds:(nonnull NSNumber 
     }];
 }
 
+RCT_EXPORT_METHOD(dispose:(nonnull NSNumber *)reactTag) {
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
+        BrightcovePlayer *player = (BrightcovePlayer*)viewRegistry[reactTag];
+        if ([player isKindOfClass:[BrightcovePlayer class]]) {
+            [player dispose];
+        }
+    }];
+}
+
 
 @end

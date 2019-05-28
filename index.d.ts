@@ -59,45 +59,51 @@ export namespace BrightcovePlayerUtil {
     duration: number;
   };
 
+  type OfflineVideoStatus = {
+    accountId: string;
+    videoId: string;
+    downloadProgress: number;
+    videoToken: VideoToken;
+  };
+
   export function requestDownloadVideoWithReferenceId(
     accountId: string,
     policyKey: string,
     referenceId: string,
     bitRate?: number
   ): Promise<VideoToken>;
+
   export function requestDownloadVideoWithVideoId(
     accountId: string,
     policyKey: string,
     videoId: string,
     bitRate?: number
   ): Promise<VideoToken>;
+
   export function getOfflineVideoStatuses(
     accountId: string,
     policyKey: string
-  ): Promise<
-    {
-      downloadProgress: number;
-      videoToken: VideoToken;
-    }[]
-  >;
+  ): Promise<OfflineVideoStatus[]>;
+
   export function deleteOfflineVideo(
     accountId: string,
     policyKey: string,
     videoToken: VideoToken
-  ): Promise<
-    {
-      downloadProgress: number;
-      videoToken: VideoToken;
-    }[]
-  >;
+  ): Promise<void>;
+
   export function getPlaylistWithReferenceId(
     accountId: string,
     policyKey: string,
     referenceId: string
   ): Promise<PlaylistVideo[]>;
+
   export function getPlaylistWithPlaylistId(
     accountId: string,
     policyKey: string,
     playlistId: string
   ): Promise<PlaylistVideo[]>;
+
+  export function addOfflineNotificationListener(
+    callback: (statuses: OfflineVideoStatus[]) => void
+  ): Function;
 }

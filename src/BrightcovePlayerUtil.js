@@ -1,4 +1,8 @@
-import { NativeModules } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
+
+const offlineNotificationEmitter = new NativeEventEmitter(
+  NativeModules.BrightcovePlayerUtil
+);
 
 const requestDownloadVideoWithReferenceId = function(
   accountId,
@@ -59,11 +63,19 @@ const getPlaylistWithPlaylistId = function(accountId, policyKey, playlistId) {
   );
 };
 
+const addOfflineNotificationListener = function(callback) {
+  return offlineNotificationEmitter.addListener(
+    'OfflineNotification',
+    callback
+  );
+};
+
 module.exports = {
   requestDownloadVideoWithReferenceId,
   requestDownloadVideoWithVideoId,
   getOfflineVideoStatuses,
   deleteOfflineVideo,
   getPlaylistWithReferenceId,
-  getPlaylistWithPlaylistId
+  getPlaylistWithPlaylistId,
+  addOfflineNotificationListener
 };

@@ -1,13 +1,19 @@
 # React Native Brightcove Player
 
-A React Native implementation of Brightcove Player SDK.
+- A React Native implementation of Brightcove Player SDK.
+- Supported Features
+  - Brightcove player component
+  - Poster image component
+  - Retrieving playlist
+  - Managing offline playback with Dynamic Delivery
 
-<img src="https://user-images.githubusercontent.com/443965/40413410-b9963158-5eb0-11e8-924f-9f61df58fa04.jpg" width="500">
+<img src="https://user-images.githubusercontent.com/443965/58468251-2e0a5b00-8178-11e9-87b7-0acd15b750ba.jpg" width="500">
 
 ## Supported Version
 
 - iOS 10 >=
 - Android 5.0 >=
+- Brightcove SDK 6.x
 
 ## Installation
 
@@ -31,7 +37,7 @@ module.exports = {
 
 ### iOS
 
-- Make `Podfile` like below and `pod install`
+- Make `Podfile` and `pod install`
 
 ```rb
 source 'https://github.com/brightcove/BrightcoveSpecs.git'
@@ -46,7 +52,7 @@ end
 
 ### Android
 
-- Add following lines in `android/build.gradle`
+- Add maven source to repositories in `android/build.gradle`
 - [Enables multiDex](https://developer.android.com/studio/build/multidex).
 
 ```gradle
@@ -82,6 +88,7 @@ export default class App extends Component {
 }
 ```
 
+- Video player component of Brightcove.
 - It may not work on Android simulator.
 - For a more detailed example, please see [example](https://github.com/manse/react-native-brightcove-player/blob/master/example/).
 
@@ -113,6 +120,40 @@ export default class App extends Component {
 | ------------------------------------- | --------------------------------- |
 | seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
 
+### BrightcovePlayerPoster
+
+```jsx
+import { BrightcovePlayerPoster } from 'react-native-brightcove-player';
+
+export default class App extends Component {
+  render() {
+    return (
+      <View style={styles.container}>
+        <BrightcovePlayerPoster
+          style={styles.player}
+          accountId="3636334163001"
+          videoId="3666678807001"
+          policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+}
+```
+
+- Displays a poster specified by `videoId`, `referenceId` or `videoToken`.
+- Prop is about the same as `BrightcovePlayer`.
+
+| Prop        | Type   | Description                                                                                                                                                                                                                          |
+| ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| accountId   | string | Required                                                                                                                                                                                                                             |
+| policyKey   | string | Required                                                                                                                                                                                                                             |
+| videoId     | string |                                                                                                                                                                                                                                      |
+| referenceId | string |                                                                                                                                                                                                                                      |
+| videoToken  | string |                                                                                                                                                                                                                                      |
+| resizeMode  | string | Set the image resize method. Specifying `cover` or `contain` works the same as CSS keywords of `background-size`. Specifying `fit`, scales to fit the component size without considering aspect ratio of the image. Default value is `cover`. |
+
 ### BrightcovePlayerUtil
 
 - Promise for all methods may be invoke `reject`. Be sure to catch the exception.
@@ -135,11 +176,12 @@ BrightcovePlayerUtil.requestDownloadVideoWithReferenceId(accountId: string, poli
   - If no rendition can be found with a bitrate that is smaller than or equal to this bitrate, the lowest rendition will be downloaded.
   - If this value is `0` or not specified, the lowest rendition with video will be downloaded.
 
-
 #### getOfflineVideoStatuses
 
 ```ts
 BrightcovePlayerUtil.getOfflineVideoStatuses(accountId: string, policyKey: string): Promise<{
+  accountId: string;
+  videoId: string;
   videoToken: string;
   downloadProgress: number;
 }[]>
@@ -158,6 +200,58 @@ BrightcovePlayerUtil.deleteOfflineVideo(accountId: string, policyKey: string, vi
 
 - Deletes offline videos or abort the ongoing download session.
 
+#### addOfflineNotificationListener
+
+```ts
+BrightcovePlayerUtil.addOfflineNotificationListener(callback: (statuses: {
+  accountId: string;
+  videoId: string;
+  videoToken: string;
+  downloadProgress: number;
+}[]) => void): Function
+```
+
+- Register a callback to notify storage changes such as video download progress or deletion of offline video.
+- Make sure call disposer function when callback is no longer needed.
+
+```ts
+class Example extends Component {
+  componentDidMount() {
+    this.disposer = BrightcovePlayerUtil.addOfflineNotificationListener(console.log);
+  }
+
+  componentWillUnmount() {
+    this.disposer();
+  }
+
+  render() {
+    ...
+  }
+}
+```
+
+#### getPlaylistWithPlaylistId, getPlaylistWithReferenceId
+
+```ts
+BrightcovePlayerUtil.getPlaylistWithPlaylistId(accountId: string, policyKey: string, playlistId: string): Promise<{
+  accountId: String;
+  videoId: String;
+  referenceId: String;
+  name: String;
+  description: String;
+  duration: number;
+}[]>;
+BrightcovePlayerUtil.getPlaylistWithReferenceId(accountId: string, policyKey: string, referenceId: string): Promise<{
+  accountId: String;
+  videoId: String;
+  referenceId: String;
+  name: String;
+  description: String;
+  duration: number;
+}[]>;
+```
+
+- Retrieves a playlist specified by `playlistId` or `referenceId`.
 
 ## License
 

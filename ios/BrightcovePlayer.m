@@ -163,8 +163,10 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
-    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
         _playbackSession = session;
+        [self refreshPlaybackRate];
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         [self refreshVolume];
         [self refreshBitRate];
         if (self.onReady) {
@@ -172,7 +174,6 @@
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
-        [self refreshPlaybackRate];
         if (self.onPlay) {
             self.onPlay(@{});
         }
@@ -221,6 +222,10 @@
             self.onEnterFullscreen(@{});
         }
     }
+}
+
+-(void)dispose {
+    [self.playbackController setVideos:@[]];
 }
 
 @end

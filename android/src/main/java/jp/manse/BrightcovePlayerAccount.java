@@ -18,7 +18,9 @@ import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jp.manse.util.DefaultEventEmitter;
 
@@ -46,14 +48,20 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
     private List<OfflineVideoDownloadSession> offlineVideoDownloadSessions = new ArrayList<>();
     private boolean getOfflineVideoStatusesRunning = false;
     private List<Promise> getOfflineVideoStatusesPendingPromises = new ArrayList<>();
-    private List<Video> allDownloadedVideos;
+    private List<Video> allDownloadedVideos = new ArrayList<>();
     private Catalog catalog;
     private OfflineCatalog offlineCatalog;
+    private OnBrightcovePlayerAccountListener listener;
 
-    public BrightcovePlayerAccount(final ReactApplicationContext context, final String accountId, final String policyKey) {
+    public interface OnBrightcovePlayerAccountListener {
+        void onOfflineStorageStateChanged(NativeArray array);
+    }
+
+    public BrightcovePlayerAccount(final ReactApplicationContext context, final String accountId, final String policyKey, OnBrightcovePlayerAccountListener listener) {
         this.context = context;
         this.accountId = accountId;
         this.policyKey = policyKey;
+        this.listener = listener;
         handler = new Handler(Looper.myLooper());
         this.catalog = new Catalog(DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
         this.offlineCatalog = new OfflineCatalog(context, DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
@@ -84,6 +92,7 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
         OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, this.accountId, this.policyKey, this);
         session.requestDownloadWithReferenceId(referenceId, bitRate, promise);
         this.offlineVideoDownloadSessions.add(session);
+        this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
     }
 
     public void requestDownloadWithVideoId(String videoId, int bitRate, Promise promise) {
@@ -94,6 +103,7 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
         OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, this.accountId, this.policyKey, this);
         session.requestDownloadWithVideoId(videoId, bitRate, promise);
         this.offlineVideoDownloadSessions.add(session);
+        this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
     }
 
     public void getOfflineVideoStatuses(Promise promise) {
@@ -134,19 +144,27 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
         }
     }
 
-    public void deleteOfflineVideo(String videoId, final Promise promise) {
+    public void deleteOfflineVideo(final String videoId, final Promise promise) {
         try {
+            if (videoId == null) throw new Exception();
             this.offlineCatalog.cancelVideoDownload(videoId);
             for (int i = this.offlineVideoDownloadSessions.size() - 1; i >= 0; i--) {
                 OfflineVideoDownloadSession session = this.offlineVideoDownloadSessions.get(i);
                 if (videoId.equals(session.videoId)) {
-                    this.offlineVideoDownloadSessions.remove(session);
+                    this.offlineVideoDownloadSessions.remove(i);
                 }
             }
             this.offlineCatalog.deleteVideo(videoId, new OfflineCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean aBoolean) {
                     promise.resolve(null);
+                    for (int i = allDownloadedVideos.size() - 1; i >= 0; i--) {
+                        Video video = allDownloadedVideos.get(i);
+                        if (videoId.equals(video.getId())) {
+                            allDownloadedVideos.remove(i);
+                        }
+                    }
+                    listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
                 }
 
                 @Override
@@ -192,6 +210,8 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
         WritableNativeArray statuses = new WritableNativeArray();
         for (Video video : this.allDownloadedVideos) {
             WritableNativeMap map = new WritableNativeMap();
+            map.putString(CALLBACK_KEY_ACCOUNT_ID, this.accountId);
+            map.putString(CALLBACK_KEY_VIDEO_ID, video.getId());
             map.putString(CALLBACK_KEY_VIDEO_TOKEN, video.getId());
             map.putDouble(CALLBACK_KEY_DOWNLOAD_PROGRESS, 1);
             statuses.pushMap(map);
@@ -200,13 +220,15 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
             if (session.videoId == null) continue;
             boolean found = false;
             for (Video video : this.allDownloadedVideos) {
-                if (video.getId().equals(session.videoId)) {
+                if (session.videoId.equals(video.getId())) {
                     found = true;
                     break;
                 }
             }
             if (found) continue;
             WritableNativeMap map = new WritableNativeMap();
+            map.putString(CALLBACK_KEY_ACCOUNT_ID, this.accountId);
+            map.putString(CALLBACK_KEY_VIDEO_ID, session.videoId);
             map.putString(CALLBACK_KEY_VIDEO_TOKEN, session.videoId);
             map.putDouble(CALLBACK_KEY_DOWNLOAD_PROGRESS, session.downloadProgress);
             statuses.pushMap(map);
@@ -246,5 +268,16 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
     @Override
     public void onCompleted(OfflineVideoDownloadSession session) {
         this.offlineVideoDownloadSessions.remove(session);
+        if (session.downloadProgress == 1) {
+            Map<String, Object> param = new HashMap<>();
+            param.put(Video.Fields.ID, session.videoId);
+            this.allDownloadedVideos.add(new Video(param));
+        }
+        this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
+    }
+
+    @Override
+    public void onProgress() {
+        this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
     }
 }

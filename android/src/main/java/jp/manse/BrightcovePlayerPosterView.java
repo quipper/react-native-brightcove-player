@@ -36,8 +36,7 @@ public class BrightcovePlayerPosterView extends RelativeLayout implements Lifecy
         this.applicationContext.addLifecycleEventListener(this);
         this.imageView = new ImageView(context);
         this.imageView.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        this.imageView.setBackgroundColor(Color.RED);
-        this.imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        this.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         this.addView(imageView);
         this.requestLayout();
     }

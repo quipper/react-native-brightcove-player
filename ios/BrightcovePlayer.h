@@ -41,5 +41,6 @@
 @property (nonatomic, copy) RCTDirectEventBlock onExitFullscreen;
 
 -(void) seekTo:(NSNumber *)time;
+-(void)dispose;
 
 @end

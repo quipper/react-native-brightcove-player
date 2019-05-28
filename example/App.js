@@ -1,153 +1,169 @@
 import React, { Component } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
-import { BrightcovePlayer } from 'react-native-brightcove-player';
+import {
+  FlatList,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import {
+  BrightcovePlayer,
+  BrightcovePlayerPoster,
+  BrightcovePlayerUtil
+} from 'react-native-brightcove-player';
+
+const ACCOUNT_ID = '5434391461001';
+const POLICY_KEY =
+  'BCpkADawqM0T8lW3nMChuAbrcunBBHmh4YkNl5e6ZrKQwPiK_Y83RAOF4DP5tyBF_ONBVgrEjqW6fbV0nKRuHvjRU3E8jdT9WMTOXfJODoPML6NUDCYTwTHxtNlr5YdyGYaCPLhMUZ3Xu61L';
+const PLAYLIST_REF_ID = 'brightcove-native-sdk-plist';
 
 export default class App extends Component {
   state = {
-    playing: false,
-    currentTime: 0,
-    duration: 0,
-    bufferProgress: 0,
-    fullscreen: false,
-    disableControl: false,
-    volume: 1,
-    bitRate: 0,
-    playbackRate: 1
+    videos: [],
+    offlineVideos: [],
+    playback: {
+      referenceId: null,
+      videoToken: null
+    }
   };
+
+  componentDidMount() {
+    BrightcovePlayerUtil.getPlaylistWithReferenceId(
+      ACCOUNT_ID,
+      POLICY_KEY,
+      PLAYLIST_REF_ID
+    )
+      .then(videos => {
+        this.setState({
+          videos
+        });
+      })
+      .catch(console.warn);
+    BrightcovePlayerUtil.getOfflineVideoStatuses(ACCOUNT_ID, POLICY_KEY)
+      .then(offlineVideos => {
+        this.setState({
+          offlineVideos
+        });
+      })
+      .catch(console.warn);
+    this.disposer = BrightcovePlayerUtil.addOfflineNotificationListener(
+      offlineVideos => {
+        this.setState({
+          offlineVideos
+        });
+      }
+    );
+  }
+
+  requestDownload(videoId) {
+    BrightcovePlayerUtil.requestDownloadVideoWithVideoId(
+      ACCOUNT_ID,
+      POLICY_KEY,
+      videoId
+    ).catch(() => {});
+  }
+
+  play(item) {
+    const downloadStatus = this.state.offlineVideos.find(
+      video => video.videoId === item.videoId
+    );
+    this.setState({
+      playback:
+        downloadStatus && downloadStatus.downloadProgress === 1
+          ? {
+              videoToken: downloadStatus.videoToken
+            }
+          : {
+              referenceId: item.referenceId
+            }
+    });
+  }
+
+  delete(videoToken) {
+    BrightcovePlayerUtil.deleteOfflineVideo(
+      ACCOUNT_ID,
+      POLICY_KEY,
+      videoToken
+    ).catch(console.warn);
+  }
+
+  componentWillUnmount() {
+    this.disposer && this.disposer();
+  }
 
   render() {
     return (
       <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
         <BrightcovePlayer
-          ref={ref => (this.player = ref)}
-          style={styles.player}
-          play={this.state.playing}
+          style={styles.video}
+          accountId={ACCOUNT_ID}
+          policyKey={POLICY_KEY}
           autoPlay={true}
-          fullscreen={this.state.fullscreen}
-          disableDefaultControl={this.state.disableControl}
-          volume={this.state.volume}
-          bitRate={this.state.bitRate}
-          playbackRate={this.state.playbackRate}
-          accountId="3636334163001"
-          videoId="3666678807001"
-          policyKey="BCpkADawqM1W-vUOMe6RSA3pA6Vw-VWUNn5rL0lzQabvrI63-VjS93gVUugDlmBpHIxP16X8TSe5LSKM415UHeMBmxl7pqcwVY_AZ4yKFwIpZPvXE34TpXEYYcmulxJQAOvHbv2dpfq-S_cm"
-          onReady={() => console.log('onReady')}
-          onPlay={() => {
-            console.log('onPlay');
-            this.setState({ playing: true });
-          }}
-          onPause={() => {
-            console.log('onPause');
-            this.setState({ playing: false });
-          }}
-          onEnd={() => console.log('onEnd')}
-          onProgress={({ currentTime }) => {
-            console.log('onProgress', currentTime);
-            this.setState({ currentTime });
-          }}
-          onUpdateBufferProgress={({ bufferProgress }) => {
-            console.log('onUpdateBufferProgress', bufferProgress);
-            this.setState({ bufferProgress });
-          }}
-          onChangeDuration={({ duration }) => {
-            console.log('onChangeDuration', duration);
-            this.setState({ duration });
-          }}
-          onEnterFullscreen={() => {
-            console.log('onEnterFullscreen');
-            this.setState({ fullscreen: true });
-          }}
-          onExitFullscreen={() => {
-            console.log('onExitFullscreen');
-            this.setState({ fullscreen: false });
+          {...this.state.playback}
+        />
+        <FlatList
+          style={styles.list}
+          extraData={this.state.offlineVideos}
+          data={this.state.videos}
+          keyExtractor={item => item.referenceId}
+          renderItem={({ item }) => {
+            const downloadStatus = this.state.offlineVideos.find(
+              video => video.videoId === item.videoId
+            );
+            return (
+              <View style={styles.listItem}>
+                <TouchableOpacity
+                  style={styles.mainButton}
+                  onPress={() => this.play(item)}
+                >
+                  <BrightcovePlayerPoster
+                    style={styles.poster}
+                    accountId={ACCOUNT_ID}
+                    policyKey={POLICY_KEY}
+                    referenceId={item.referenceId}
+                  />
+                  <View style={styles.body}>
+                    <Text style={styles.name}>{item.name}</Text>
+                    <Text>{item.description}</Text>
+                    {downloadStatus ? (
+                      <Text style={styles.offlineBanner}>
+                        {downloadStatus.downloadProgress === 1
+                          ? 'OFFLINE PLAYBACK'
+                          : `DOWNLOADING: ${Math.floor(
+                              downloadStatus.downloadProgress * 100
+                            )}%`}
+                      </Text>
+                    ) : null}
+                    <Text style={styles.duration}>
+                      {`0${Math.floor(item.duration / 60000) % 60}`.substr(-2)}:
+                      {`0${Math.floor(item.duration / 1000) % 60}`.substr(-2)}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.downloadButton}
+                  onPress={() => {
+                    if (!downloadStatus) {
+                      this.requestDownload(item.videoId);
+                    } else {
+                      this.delete(downloadStatus.videoToken);
+                    }
+                  }}
+                >
+                  <Text>
+                    {!downloadStatus
+                      ? '💾'
+                      : downloadStatus.downloadProgress === 1
+                      ? '🗑'
+                      : '⏳'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
           }}
         />
-        <View style={styles.content}>
-          <Text>
-            {this.state.playing ? 'Playing' : 'Paused'} (
-            {Math.floor(this.state.currentTime * 10) / 10}s /{' '}
-            {Math.floor(this.state.duration * 10) / 10}s,{' '}
-            {Math.floor(this.state.bufferProgress * 100)}% loaded)
-          </Text>
-          <View style={styles.control}>
-            <Button
-              title="Play"
-              onPress={() => this.setState({ playing: true })}
-            />
-            <Button
-              title="Pause"
-              onPress={() => this.setState({ playing: false })}
-            />
-            <Button
-              title="+10s"
-              onPress={() => this.player.seekTo(this.state.currentTime + 10)}
-            />
-            <Button
-              title="-10s"
-              onPress={() => this.player.seekTo(this.state.currentTime - 10)}
-            />
-          </View>
-          <Text style={styles.caption}>Volume</Text>
-          <View style={styles.control}>
-            <Button title="1.0" onPress={() => this.setState({ volume: 1 })} />
-            <Button
-              title="0.5"
-              onPress={() => this.setState({ volume: 0.5 })}
-            />
-            <Button title="0.0" onPress={() => this.setState({ volume: 0 })} />
-          </View>
-          <Text style={styles.caption}>Quality</Text>
-          <View style={styles.control}>
-            <Button
-              title="Auto"
-              onPress={() => this.setState({ bitRate: 0 })}
-            />
-            <Button
-              title="Low"
-              onPress={() => this.setState({ bitRate: 159000 })}
-            />
-            <Button
-              title="Medium"
-              onPress={() => this.setState({ bitRate: 432000 })}
-            />
-            <Button
-              title="High"
-              onPress={() => this.setState({ bitRate: 832000 })}
-            />
-          </View>
-          <Text style={styles.caption}>Playback Rate</Text>
-          <View style={styles.control}>
-            <Button
-              title="0.5x"
-              onPress={() => this.setState({ playbackRate: 0.5 })}
-            />
-            <Button
-              title="1x"
-              onPress={() => this.setState({ playbackRate: 1 })}
-            />
-            <Button
-              title="2x"
-              onPress={() => this.setState({ playbackRate: 2 })}
-            />
-          </View>
-          <Text style={styles.caption}>Control</Text>
-          <View style={styles.control}>
-            <Button
-              title="Enter Fullscreen"
-              onPress={() =>
-                this.setState({ fullscreen: !this.state.fullscreen })
-              }
-            />
-            <Button
-              title={`${
-                this.state.disableControl ? 'Enable' : 'Disable'
-              } Control`}
-              onPress={() =>
-                this.setState({ disableControl: !this.state.disableControl })
-              }
-            />
-          </View>
-        </View>
       </View>
     );
   }
@@ -156,24 +172,53 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 0,
     flexDirection: 'column'
   },
-  player: {
+  video: {
+    width: '100%',
+    height: 260
+  },
+  list: {
     flex: 1
   },
-  content: {
-    flex: 1,
-    padding: 20
-  },
-  caption: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5
-  },
-  control: {
+  listItem: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 15
+    borderBottomWidth: 1,
+    borderBottomColor: 'lightgray'
+  },
+  mainButton: {
+    flex: 1,
+    flexDirection: 'row'
+  },
+  body: {
+    flex: 1,
+    padding: 10,
+    flexDirection: 'column'
+  },
+  name: {
+    fontSize: 14,
+    fontWeight: 'bold'
+  },
+  offlineBanner: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: 'white',
+    alignSelf: 'flex-start',
+    padding: 3,
+    backgroundColor: 'deepskyblue'
+  },
+  duration: {
+    marginTop: 'auto',
+    opacity: 0.5
+  },
+  poster: {
+    width: 100,
+    height: 100,
+    backgroundColor: 'black'
+  },
+  downloadButton: {
+    padding: 16,
+    marginLeft: 'auto',
+    alignSelf: 'center'
   }
 });

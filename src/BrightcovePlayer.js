@@ -20,6 +20,15 @@ class BrightcovePlayer extends Component {
     }
   };
 
+  componentWillUnmount = Platform.select({
+    ios: function() {
+      NativeModules.BrightcovePlayerManager.dispose(
+        ReactNative.findNodeHandle(this)
+      );
+    },
+    android: function() {}
+  });
+
   render() {
     return (
       <NativeBrightcovePlayer
