@@ -1,4 +1,4 @@
-package jp.manse;
+package jp.manse.util;
 
 import com.brightcove.player.event.Event;
 import com.brightcove.player.event.EventEmitter;

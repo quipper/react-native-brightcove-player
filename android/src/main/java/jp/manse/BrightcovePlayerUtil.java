@@ -8,13 +8,11 @@ import com.facebook.react.bridge.ReactMethod;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.manse.offlineVideo.OfflineVideoOwner;
-
 public class BrightcovePlayerUtil extends ReactContextBaseJavaModule {
     final private static String ERROR_CODE = "error";
     final private static String ERROR_MESSAGE_MISSING_ARGUMENTS = "Both accountId and policyKey must not be null";
 
-    private List<OfflineVideoOwner> offlineVideoOwners = new ArrayList<>();
+    private List<BrightcovePlayerAccount> brightcovePlayerAccounts = new ArrayList<>();
 
     public BrightcovePlayerUtil(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -26,54 +24,74 @@ public class BrightcovePlayerUtil extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void requestDownloadVideoWithReferenceId(String referenceId, final String accountId, final String policyKey, final int bitRate, final Promise promise) {
-        OfflineVideoOwner owner = this.getOfflineVideoOwner(accountId, policyKey);
-        if (owner == null) {
+    public void requestDownloadVideoWithReferenceId(String referenceId, String accountId, String policyKey, int bitRate, Promise promise) {
+        BrightcovePlayerAccount account = this.getBrightcovePlayerAccount(accountId, policyKey);
+        if (account == null) {
             promise.reject(ERROR_CODE, ERROR_MESSAGE_MISSING_ARGUMENTS);
             return;
         }
-        owner.requestDownloadWithReferenceId(referenceId, bitRate, promise);
+        account.requestDownloadWithReferenceId(referenceId, bitRate, promise);
     }
 
     @ReactMethod
-    public void requestDownloadVideoWithVideoId(String videoId, final String accountId, final String policyKey, final int bitRate, final Promise promise) {
-        OfflineVideoOwner owner = this.getOfflineVideoOwner(accountId, policyKey);
-        if (owner == null) {
+    public void requestDownloadVideoWithVideoId(String videoId, String accountId, String policyKey, int bitRate, Promise promise) {
+        BrightcovePlayerAccount account = this.getBrightcovePlayerAccount(accountId, policyKey);
+        if (account == null) {
             promise.reject(ERROR_CODE, ERROR_MESSAGE_MISSING_ARGUMENTS);
             return;
         }
-        owner.requestDownloadWithVideoId(videoId, bitRate, promise);
+        account.requestDownloadWithVideoId(videoId, bitRate, promise);
     }
 
     @ReactMethod
-    public void getOfflineVideoStatuses(String accountId, String policyKey, final Promise promise) {
-        OfflineVideoOwner owner = this.getOfflineVideoOwner(accountId, policyKey);
-        if (owner == null) {
+    public void getOfflineVideoStatuses(String accountId, String policyKey, Promise promise) {
+        BrightcovePlayerAccount account = this.getBrightcovePlayerAccount(accountId, policyKey);
+        if (account == null) {
             promise.reject(ERROR_CODE, ERROR_MESSAGE_MISSING_ARGUMENTS);
             return;
         }
-        owner.getOfflineVideoStatuses(promise);
+        account.getOfflineVideoStatuses(promise);
     }
 
     @ReactMethod
-    public void deleteOfflineVideo(String accountId, String policyKey, String videoId, final Promise promise) {
-        OfflineVideoOwner owner = this.getOfflineVideoOwner(accountId, policyKey);
-        if (owner == null) {
+    public void deleteOfflineVideo(String accountId, String policyKey, String videoId, Promise promise) {
+        BrightcovePlayerAccount account = this.getBrightcovePlayerAccount(accountId, policyKey);
+        if (account == null) {
             promise.reject(ERROR_CODE, ERROR_MESSAGE_MISSING_ARGUMENTS);
             return;
         }
-        owner.deleteOfflineVideo(videoId, promise);
+        account.deleteOfflineVideo(videoId, promise);
     }
 
-    private OfflineVideoOwner getOfflineVideoOwner(String accountId, String policyKey) {
+    @ReactMethod
+    public void getPlaylistWithPlaylistId(String playlistId, String accountId, String policyKey, Promise promise) {
+        BrightcovePlayerAccount account = this.getBrightcovePlayerAccount(accountId, policyKey);
+        if (account == null) {
+            promise.reject(ERROR_CODE, ERROR_MESSAGE_MISSING_ARGUMENTS);
+            return;
+        }
+        account.getPlaylistWithPlaylistId(playlistId, promise);
+    }
+
+    @ReactMethod
+    public void getPlaylistWithReferenceId(String referenceId, String accountId, String policyKey, Promise promise) {
+        BrightcovePlayerAccount account = this.getBrightcovePlayerAccount(accountId, policyKey);
+        if (account == null) {
+            promise.reject(ERROR_CODE, ERROR_MESSAGE_MISSING_ARGUMENTS);
+            return;
+        }
+        account.getPlaylistWithReferenceId(referenceId, promise);
+    }
+
+    private BrightcovePlayerAccount getBrightcovePlayerAccount(String accountId, String policyKey) {
         if (accountId == null || policyKey == null) return null;
-        for (OfflineVideoOwner owner: this.offlineVideoOwners) {
+        for (BrightcovePlayerAccount owner: this.brightcovePlayerAccounts) {
             if (owner.accountId.equals(accountId) && policyKey.equals(policyKey)) {
                 return owner;
             }
         }
-        OfflineVideoOwner owner = new OfflineVideoOwner(this.getReactApplicationContext(), accountId, policyKey);
-        this.offlineVideoOwners.add(owner);
+        BrightcovePlayerAccount owner = new BrightcovePlayerAccount(this.getReactApplicationContext(), accountId, policyKey);
+        this.brightcovePlayerAccounts.add(owner);
         return owner;
     }
 }

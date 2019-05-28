@@ -1,7 +1,6 @@
-package jp.manse.offlineVideo;
+package jp.manse;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.OfflineCallback;
@@ -16,7 +15,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import java.io.Serializable;
 import java.util.Map;
 
-import jp.manse.DefaultEventEmitter;
+import jp.manse.util.DefaultEventEmitter;
 
 public class OfflineVideoDownloadSession extends VideoListener implements MediaDownloadable.DownloadEventListener {
     final private static String ERROR_CODE = "error";
@@ -32,14 +31,13 @@ public class OfflineVideoDownloadSession extends VideoListener implements MediaD
 
     private Catalog catalog;
     private OfflineCatalog offlineCatalog;
-    private boolean hasFinished = false;
     private OnOfflineVideoDownloadSessionListener listener;
 
     public interface OnOfflineVideoDownloadSessionListener {
         void onCompleted(OfflineVideoDownloadSession session);
     }
 
-    OfflineVideoDownloadSession(ReactApplicationContext context, String accountId, String policyKey, OnOfflineVideoDownloadSessionListener listener) {
+    public OfflineVideoDownloadSession(ReactApplicationContext context, String accountId, String policyKey, OnOfflineVideoDownloadSessionListener listener) {
         this.catalog = new Catalog(DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
         this.offlineCatalog = new OfflineCatalog(context, DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
         this.offlineCatalog.setMeteredDownloadAllowed(true);

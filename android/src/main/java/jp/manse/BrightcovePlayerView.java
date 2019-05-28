@@ -2,14 +2,12 @@ package jp.manse;
 
 import android.graphics.Color;
 import android.support.v4.view.ViewCompat;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.edge.Catalog;
-import com.brightcove.player.edge.OfflineCallback;
 import com.brightcove.player.edge.OfflineCatalog;
 import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.event.Event;
@@ -20,6 +18,8 @@ import com.brightcove.player.mediacontroller.BrightcoveMediaController;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -39,8 +39,9 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BrightcovePlayerView extends RelativeLayout {
+public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener {
     private ThemedReactContext context;
+    private ReactApplicationContext applicationContext;
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
     private String policyKey;
@@ -54,16 +55,13 @@ public class BrightcovePlayerView extends RelativeLayout {
     private boolean playing = false;
     private int bitRate = 0;
     private float playbackRate = 1;
-    private boolean fullscreen = false;
     private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
 
-    public BrightcovePlayerView(ThemedReactContext context) {
-        this(context, null);
-    }
-
-    public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
-        super(context, attrs);
+    public BrightcovePlayerView(ThemedReactContext context, ReactApplicationContext applicationContext) {
+        super(context);
         this.context = context;
+        this.applicationContext = applicationContext;
+        this.applicationContext.addLifecycleEventListener(this);
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
@@ -350,5 +348,23 @@ public class BrightcovePlayerView extends RelativeLayout {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Log.d("debug", entry.getKey());
         }
+    }
+
+    @Override
+    public void onHostResume() {
+
+    }
+
+    @Override
+    public void onHostPause() {
+
+    }
+
+    @Override
+    public void onHostDestroy() {
+        this.playerVideoView.destroyDrawingCache();
+        this.playerVideoView.clear();
+        this.removeAllViews();
+        this.applicationContext.removeLifecycleEventListener(this);
     }
 }

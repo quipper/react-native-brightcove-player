@@ -3,6 +3,7 @@ package jp.manse;
 import android.support.annotation.Nullable;
 
 import com.facebook.infer.annotation.Assertions;
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
@@ -25,7 +26,12 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
 
-    private static ThemedReactContext context;
+    private ReactApplicationContext applicationContext;
+
+    public BrightcovePlayerManager(ReactApplicationContext context) {
+        super();
+        this.applicationContext = context;
+    }
 
     @Override
     public String getName() {
@@ -34,8 +40,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
 
     @Override
     public BrightcovePlayerView createViewInstance(ThemedReactContext ctx) {
-        context = ctx;
-        BrightcovePlayerView brightcovePlayerView = new BrightcovePlayerView(ctx);
+        BrightcovePlayerView brightcovePlayerView = new BrightcovePlayerView(ctx, applicationContext);
         return brightcovePlayerView;
     }
 

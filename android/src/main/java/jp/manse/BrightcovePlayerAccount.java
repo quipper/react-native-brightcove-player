@@ -1,11 +1,14 @@
-package jp.manse.offlineVideo;
+package jp.manse;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.OfflineCallback;
 import com.brightcove.player.edge.OfflineCatalog;
+import com.brightcove.player.edge.PlaylistListener;
+import com.brightcove.player.model.Playlist;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.network.DownloadStatus;
 import com.facebook.react.bridge.NativeArray;
@@ -17,16 +20,23 @@ import com.facebook.react.bridge.WritableNativeMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.manse.DefaultEventEmitter;
+import jp.manse.util.DefaultEventEmitter;
 
-public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineVideoDownloadSessionListener {
+public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOfflineVideoDownloadSessionListener {
     final private static int FPS = 40;
     final private static String DEBUG_TAG = "brightcoveplayer";
     final private static String ERROR_CODE = "error";
     final private static String ERROR_MESSAGE_DUPLICATE_SESSION = "Offline video or download session already exists";
     final private static String ERROR_MESSAGE_DELETE = "Could not delete video";
+    final private static String ERROR_MESSAGE_PLAYLIST = "Failed to load playlist";
     final private static String CALLBACK_KEY_VIDEO_TOKEN = "videoToken";
     final private static String CALLBACK_KEY_DOWNLOAD_PROGRESS = "downloadProgress";
+    final private static String CALLBACK_KEY_ACCOUNT_ID = "accountId";
+    final private static String CALLBACK_KEY_VIDEO_ID = "videoId";
+    final private static String CALLBACK_KEY_REFERENCE_ID = "referenceId";
+    final private static String CALLBACK_KEY_NAME = "name";
+    final private static String CALLBACK_KEY_DESCRIPTION = "description";
+    final private static String CALLBACK_KEY_DURATION = "duration";
 
     private ReactApplicationContext context;
     public String accountId;
@@ -37,13 +47,15 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
     private boolean getOfflineVideoStatusesRunning = false;
     private List<Promise> getOfflineVideoStatusesPendingPromises = new ArrayList<>();
     private List<Video> allDownloadedVideos;
+    private Catalog catalog;
     private OfflineCatalog offlineCatalog;
 
-    public OfflineVideoOwner(final ReactApplicationContext context, final String accountId, final String policyKey) {
+    public BrightcovePlayerAccount(final ReactApplicationContext context, final String accountId, final String policyKey) {
         this.context = context;
         this.accountId = accountId;
         this.policyKey = policyKey;
         handler = new Handler(Looper.myLooper());
+        this.catalog = new Catalog(DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
         this.offlineCatalog = new OfflineCatalog(context, DefaultEventEmitter.sharedEventEmitter, accountId, policyKey);
         this.offlineCatalog.setMeteredDownloadAllowed(true);
         this.offlineCatalog.setMobileDownloadAllowed(true);
@@ -52,7 +64,7 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
             @Override
             public void onSuccess(List<Video> videos) {
                 for (Video video : videos) {
-                    OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(context, accountId, policyKey, OfflineVideoOwner.this);
+                    OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(context, accountId, policyKey, BrightcovePlayerAccount.this);
                     session.resumeDownload(video);
                     offlineVideoDownloadSessions.add(session);
                 }
@@ -148,6 +160,34 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
         }
     }
 
+    public void getPlaylistWithPlaylistId(String playlistId, final Promise promise) {
+        catalog.findPlaylistByID(playlistId, new PlaylistListener() {
+            @Override
+            public void onPlaylist(Playlist playlist) {
+                promise.resolve(collectNativePlaylist(accountId, playlist));
+            }
+
+            @Override
+            public void onError(String error) {
+                promise.reject(ERROR_CODE, ERROR_MESSAGE_PLAYLIST);
+            }
+        });
+    }
+
+    public void getPlaylistWithReferenceId(String referenceId, final Promise promise) {
+        catalog.findPlaylistByReferenceID(referenceId, new PlaylistListener() {
+            @Override
+            public void onPlaylist(Playlist playlist) {
+                promise.resolve(collectNativePlaylist(accountId, playlist));
+            }
+
+            @Override
+            public void onError(String error) {
+                promise.reject(ERROR_CODE, ERROR_MESSAGE_PLAYLIST);
+            }
+        });
+    }
+
     private NativeArray collectNativeOfflineVideoStatuses() {
         WritableNativeArray statuses = new WritableNativeArray();
         for (Video video : this.allDownloadedVideos) {
@@ -172,6 +212,21 @@ public class OfflineVideoOwner implements OfflineVideoDownloadSession.OnOfflineV
             statuses.pushMap(map);
         }
         return statuses;
+    }
+
+    private NativeArray collectNativePlaylist(String accountId, Playlist playlist) {
+        WritableNativeArray result = new WritableNativeArray();
+        for (Video video : playlist.getVideos()) {
+            WritableNativeMap map = new WritableNativeMap();
+            map.putString(CALLBACK_KEY_ACCOUNT_ID, accountId);
+            map.putString(CALLBACK_KEY_VIDEO_ID, video.getId());
+            map.putString(CALLBACK_KEY_REFERENCE_ID, video.getReferenceId());
+            map.putString(CALLBACK_KEY_NAME, video.getName());
+            map.putString(CALLBACK_KEY_DESCRIPTION, video.getDescription());
+            map.putInt(CALLBACK_KEY_DURATION, video.getDuration());
+            result.pushMap(map);
+        }
+        return result;
     }
 
     private boolean hasOfflineVideoDownloadSessionWithReferenceId(String referenceId) {
