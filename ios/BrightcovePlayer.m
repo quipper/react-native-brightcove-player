@@ -26,6 +26,7 @@
     _playerView.backgroundColor = UIColor.blackColor;
     
     _targetVolume = 1.0;
+    _autoPlay = NO;
     
     [self addSubview:_playerView];
 }
@@ -101,7 +102,7 @@
 }
 
 - (void)setAutoPlay:(BOOL)autoPlay {
-    _playbackController.autoPlay = autoPlay;
+    _autoPlay = autoPlay;
 }
 
 - (void)setPlay:(BOOL)play {
@@ -163,17 +164,19 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
-    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         _playbackSession = session;
-        [self refreshPlaybackRate];
-    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         [self refreshVolume];
         [self refreshBitRate];
         if (self.onReady) {
             self.onReady(@{});
         }
+        if (_autoPlay) {
+            [_playbackController play];
+        }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlay) {
         _playing = true;
+        [self refreshPlaybackRate];
         if (self.onPlay) {
             self.onPlay(@{});
         }
