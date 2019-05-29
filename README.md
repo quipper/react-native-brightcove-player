@@ -37,7 +37,7 @@ module.exports = {
 
 ### iOS
 
-- Make `Podfile` and `pod install`
+- Make `Podfile` and `pod install && pod update`
 
 ```rb
 source 'https://github.com/brightcove/BrightcoveSpecs.git'
