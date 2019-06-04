@@ -134,7 +134,9 @@
 
 - (void)setPlaybackRate:(NSNumber*)playbackRate {
     _targetPlaybackRate = playbackRate.doubleValue;
-    [self refreshPlaybackRate];
+    if (_playing) {
+        [self refreshPlaybackRate];
+    }
 }
 
 - (void)refreshVolume {
