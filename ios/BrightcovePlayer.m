@@ -164,7 +164,9 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
-    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
+        _playbackSession = nil;
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         _playbackSession = session;
         [self refreshVolume];
         [self refreshBitRate];
@@ -182,7 +184,7 @@
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
         _playing = false;
-        if (self.onPause) {
+        if (self.onPause && _playbackSession) {
             self.onPause(@{});
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
