@@ -152,7 +152,7 @@
 }
 
 - (void)refreshPlaybackRate {
-    if (!_playbackSession) return;
+    if (!_playbackSession || !_targetPlaybackRate) return;
     _playbackSession.player.rate = _targetPlaybackRate;
 }
 
@@ -186,7 +186,7 @@
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
         _playing = false;
-        if (self.onPause && _playbackSession) {
+        if (self.onPause) {
             self.onPause(@{});
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {

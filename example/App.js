@@ -100,6 +100,7 @@ export default class App extends Component {
           style={styles.video}
           accountId={ACCOUNT_ID}
           policyKey={POLICY_KEY}
+          autoPlay
           {...this.state.playback}
         />
         <FlatList
