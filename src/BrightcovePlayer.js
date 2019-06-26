@@ -11,7 +11,8 @@ import ReactNative, {
 
 class BrightcovePlayer extends Component {
   state = {
-    androidFullscreen: false
+    androidFullscreen: false,
+    fullscreen: false
   };
 
   setNativeProps = nativeProps => {
@@ -43,7 +44,8 @@ class BrightcovePlayer extends Component {
             left: 0,
             width: '100%',
             height: '100%'
-          }
+          },
+          this.state.fullscreen && this.props.fullscreenStyle
         ]}
         onReady={event =>
           this.props.onReady && this.props.onReady(event.nativeEvent)
@@ -66,21 +68,23 @@ class BrightcovePlayer extends Component {
           this.props.onUpdateBufferProgress &&
           this.props.onUpdateBufferProgress(event.nativeEvent)
         }
-        onEnterFullscreen={event =>
+        onEnterFullscreen={event => {
+          this.setState({ fullscreen: true });
           this.props.onEnterFullscreen &&
           this.props.onEnterFullscreen(event.nativeEvent)
-        }
-        onExitFullscreen={event =>
+        }}
+        onExitFullscreen={event => {
+          this.setState({ fullscreen: false });
           this.props.onExitFullscreen &&
           this.props.onExitFullscreen(event.nativeEvent)
-        }
+        }}
         onToggleAndroidFullscreen={event => {
           const fullscreen =
             typeof event.nativeEvent.fullscreen === 'boolean'
               ? event.nativeEvent.fullscreen
               : !this.state.androidFullscreen;
           if (fullscreen === this.state.androidFullscreen) return;
-          this.setState({ androidFullscreen: fullscreen });
+          this.setState({ androidFullscreen: fullscreen, fullscreen });
           if (fullscreen) {
             this.props.onEnterFullscreen &&
               this.props.onEnterFullscreen(event.nativeEvent);
@@ -120,6 +124,7 @@ BrightcovePlayer.propTypes = {
   autoPlay: PropTypes.bool,
   play: PropTypes.bool,
   fullscreen: PropTypes.bool,
+  fullscreenStyle: PropTypes.object,
   disableDefaultControl: PropTypes.bool,
   volume: PropTypes.number,
   bitRate: PropTypes.number,
