@@ -133,7 +133,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 mediaController.show();
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_ENTER_FULLSCREEN, event);
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BEFORE_ENTER_FULLSCREEN, Arguments.createMap());
             }
         });
@@ -143,7 +143,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 mediaController.show();
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_EXIT_FULLSCREEN, event);
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BEFORE_EXIT_FULLSCREEN, Arguments.createMap());
             }
         });
@@ -227,7 +227,8 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         WritableMap event = Arguments.createMap();
         event.putBoolean("fullscreen", fullscreen);
         ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), fullscreen ?
+                BrightcovePlayerManager.EVENT_ENTER_FULLSCREEN : BrightcovePlayerManager.EVENT_EXIT_FULLSCREEN, event);
     }
 
     public void setVolume(float volume) {
