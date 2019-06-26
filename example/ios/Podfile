@@ -4,9 +4,7 @@ platform :ios, '10.0'
 use_frameworks!
 
 target 'example' do
-    pod 'Brightcove-Player-Core'
+  pod 'Brightcove-Player-Core'
   pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
-
   pod 'react-native-orientation', :path => '../node_modules/react-native-orientation'
-
 end
