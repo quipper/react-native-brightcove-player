@@ -169,6 +169,14 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         });
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mediaController.show();
+        mediaController.getBrightcoveControlBar().setVisibility(VISIBLE);
+        mediaController.getBrightcoveControlBar().setMinimumWidth(getWidth());
+    }
+
     public void setPolicyKey(String policyKey) {
         this.policyKey = policyKey;
         this.loadVideo();
