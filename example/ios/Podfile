@@ -5,4 +5,6 @@ use_frameworks!
 
 target 'example' do
     pod 'Brightcove-Player-Core'
+  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
+
 end
