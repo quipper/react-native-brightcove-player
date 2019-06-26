@@ -25,7 +25,6 @@ export default class BrightcoveScroll extends Component {
 					videoId={VIDEO_ID}
 					play={true}
 					fullscreen={false}
-					fullscreenStyle={{ backgroundColor: 'pink' }}
 					autoPlay={false}
 				/>
 
