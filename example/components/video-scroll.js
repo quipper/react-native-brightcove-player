@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
-import { BrightcovePlayer } from 'react-native-brightcove-player';
 
 import ScrollView from './ScrollView';
+import BCPlayer from './BCPlayer';
 
 const ACCOUNT_ID = '1872491397001';
 const POLICY_KEY = 'BCpkADawqM2kD-MtMQswS0cLWgf553m4yFUj8vRkvNVw6wybPb1CSVo3Y4mPyR7RQPv5zMoJbxYZpJMBeHhHJYFW4_FIfrvRvid1_xNlUCkCr8mdh35esbt0gJsqi-C_zIXH8xpXRIeiM_44';
@@ -19,8 +19,7 @@ export default class BrightcoveScroll extends Component {
 		return (
 			<ScrollView style={styles.scrollView} contentContainerStyle={{ flexGrow: 1 }}>
 
-				<BrightcovePlayer
-					style={styles.player}
+				<BCPlayer
 					accountId={ACCOUNT_ID}
 					policyKey={POLICY_KEY}
 					videoId={VIDEO_ID}
@@ -88,10 +87,5 @@ const styles = StyleSheet.create({
 	text: {
 		margin: 10,
 		fontSize: 18
-	},
-	player: {
-		width: '100%',
-		aspectRatio: 16/9,
-		backgroundColor: 'green'
 	}
 });

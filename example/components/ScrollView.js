@@ -76,11 +76,12 @@ class ScrollView extends Component {
 		return React.Children.map(children, (child, key) => {
 
 			const elementName = child && child.type && child.type.name || null;
+			const isBrightcovePlayer = elementName === 'BrightcovePlayer' || elementName === 'BCPlayer';
 
 			switch (true) {
-				case elementName === 'BrightcovePlayer':
+				case isBrightcovePlayer:
 					return this.cloneBrightcovePlayer(child, key);
-				case (this.state.fullscreen && elementName !== 'BrightcovePlayer'):
+				case (this.state.fullscreen && !isBrightcovePlayer):
 					return null;
 				default:
 					return child;
