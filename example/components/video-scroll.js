@@ -24,8 +24,6 @@ export default class BrightcoveScroll extends Component {
 					policyKey={POLICY_KEY}
 					videoId={VIDEO_ID}
 					play={true}
-					onEnterFullscreen={() => this.setState({ fullscreen: true })}
-					onExitFullscreen={() => this.setState({ fullscreen: false })}
 					fullscreen={false}
 					fullscreenStyle={{ backgroundColor: 'pink' }}
 					autoPlay={false}

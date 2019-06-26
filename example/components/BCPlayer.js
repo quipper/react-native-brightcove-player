@@ -6,12 +6,29 @@ import Orientation from 'react-native-orientation';
 
 export default class BCPlayer extends Component {
 
+	state = {
+		orientation: null
+	}
+
+	componentWillMount() {
+		// The getOrientation method is async. It happens sometimes that
+		// you need the orientation at the moment the JS runtime starts running on device.
+		// `getInitialOrientation` returns directly because its a constant set at the
+		// beginning of the JS runtime.
+
+		const initial = Orientation.getInitialOrientation();
+		this.setState({ orientation: initial });
+	}
+
 	onEnterFullscreen() {
+		console.log('Enter fullscreen')
 		Orientation.lockToLandscape();
 		this.props.onEnterFullscreen  && this.props.onEnterFullscreen();
 	}
 
 	onExitFullscreen() {
+		console.log('Exit fullscreen', this.state.orientation);
+		Orientation.lockToPortrait();
 		Orientation.unlockAllOrientations();
 		this.props.onExitFullscreen  && this.props.onExitFullscreen();
 	}
