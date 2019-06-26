@@ -20,25 +20,25 @@ export default class BCPlayer extends Component {
 		this.setState({ orientation: initial });
 	}
 
-	onEnterFullscreen() {
-		console.log('Enter fullscreen')
+	onBeforeEnterFullscreen() {
+		console.log('Before Enter fullscreen')
 		Orientation.lockToLandscape();
-		this.props.onEnterFullscreen  && this.props.onEnterFullscreen();
+		this.props.onBeforeEnterFullscreen  && this.props.onBeforeEnterFullscreen();
 	}
 
-	onExitFullscreen() {
-		console.log('Exit fullscreen', this.state.orientation);
+	onBeforeExitFullscreen() {
+		console.log('Before Exit fullscreen', this.state.orientation);
 		Orientation.lockToPortrait();
 		Orientation.unlockAllOrientations();
-		this.props.onExitFullscreen  && this.props.onExitFullscreen();
+		this.props.onBeforeExitFullscreen  && this.props.onBeforeExitFullscreen();
 	}
 
 	render() {
 		return (<BrightcovePlayer
 					{...this.props}
 					style={[styles.player, this.props.style]}
-					onEnterFullscreen={this.onEnterFullscreen.bind(this)}
-					onExitFullscreen={this.onExitFullscreen.bind(this)}
+					onBeforeEnterFullscreen={this.onBeforeEnterFullscreen.bind(this)}
+					onBeforeExitFullscreen={this.onBeforeExitFullscreen.bind(this)}
 				/>
 
 		);
