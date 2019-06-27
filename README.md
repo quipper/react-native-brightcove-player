@@ -115,7 +115,10 @@ export default class App extends Component {
 | onProgress             | Function | Indicates the playback head of the video advances.                                                                                                                                                                                | `{ currentTime: number }`    |
 | onChangeDuration       | Function | Indicates the video length is changed                                                                                                                                                                                             | `{ duration: number }`       |
 | onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                                                                                                                                                                     | `{ bufferProgress: number }` |
+| onBeforeEnterFullscreen| Function | Indicates the player before enters full screen
+                                                                                                                   |                              |
 | onEnterFullscreen      | Function | Indicates the player enters full screen                                                                                                                                                                                           |                              |
+| onBeforeExitFullscreen | Function | Indicates the player beforeexit full screen                                                                                                                                                                                       |                              |
 | onExitFullscreen       | Function | Indicates the player exit full screen                                                                                                                                                                                             |                              |
 
 | Method                                | Description                       |

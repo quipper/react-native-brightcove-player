@@ -220,6 +220,18 @@
     }
 }
 
+-(void)playerView:(BCOVPUIPlayerView *)playerView willTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {
+    if (screenMode == BCOVPUIScreenModeNormal) {
+        if (self.onBeforeExitFullscreen) {
+            self.onBeforeExitFullscreen(@{});
+        }
+    } else if (screenMode == BCOVPUIScreenModeFull) {
+        if (self.onBeforeEnterFullscreen) {
+            self.onBeforeEnterFullscreen(@{});
+        }
+    }
+}
+
 -(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {
     if (screenMode == BCOVPUIScreenModeNormal) {
         if (self.onExitFullscreen) {

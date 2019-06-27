@@ -21,13 +21,11 @@ export default class BCPlayer extends Component {
 	}
 
 	onBeforeEnterFullscreen() {
-		console.log('Before Enter fullscreen')
 		Orientation.lockToLandscape();
 		this.props.onBeforeEnterFullscreen  && this.props.onBeforeEnterFullscreen();
 	}
 
 	onBeforeExitFullscreen() {
-		console.log('Before Exit fullscreen', this.state.orientation);
 		Orientation.lockToPortrait();
 		Orientation.unlockAllOrientations();
 		this.props.onBeforeExitFullscreen  && this.props.onBeforeExitFullscreen();

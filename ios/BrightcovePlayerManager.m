@@ -35,7 +35,9 @@ RCT_EXPORT_VIEW_PROPERTY(onEnd, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onProgress, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onChangeDuration, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onUpdateBufferProgress, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onBeforeEnterFullscreen, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onEnterFullscreen, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onBeforeExitFullscreen, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onExitFullscreen, RCTDirectEventBlock);
 
 RCT_EXPORT_METHOD(seekTo:(nonnull NSNumber *)reactTag seconds:(nonnull NSNumber *)seconds) {
