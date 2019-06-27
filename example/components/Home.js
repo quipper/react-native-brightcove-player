@@ -23,6 +23,12 @@ export default class Home extends Component {
 						onPress={() => navigate('BrightcoveScroll')}
 					/>
 				</View>
+				<View style={styles.control}>
+					<Button
+						title="HTML Example"
+						onPress={() => navigate('ArticleStack')}
+					/>
+				</View>
 			</View>
 		);
 	}

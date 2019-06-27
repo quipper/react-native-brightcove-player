@@ -9,11 +9,11 @@ const VIDEO_ID = '4089564165001';
 
 const AppHeader = (headerProps) => <Header {... headerProps} />;
 
-export default class App extends Component {
+export default class VideoHeader extends Component {
 
 	static navigationOptions = ({ navigation }) => {
 		return {
-			headerTitle: 'Headr Example',
+			headerTitle: 'Header Example',
 			header: navigation.state.params ? navigation.state.params.header : AppHeader
 		}
 	};

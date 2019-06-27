@@ -8,7 +8,7 @@ const ACCOUNT_ID = '1872491397001';
 const POLICY_KEY = 'BCpkADawqM2kD-MtMQswS0cLWgf553m4yFUj8vRkvNVw6wybPb1CSVo3Y4mPyR7RQPv5zMoJbxYZpJMBeHhHJYFW4_FIfrvRvid1_xNlUCkCr8mdh35esbt0gJsqi-C_zIXH8xpXRIeiM_44';
 const VIDEO_ID = '4089564165001';
 
-export default class BrightcoveScroll extends Component {
+export default class VideoScroll extends Component {
 
 	static navigationOptions = {
 		header: null
