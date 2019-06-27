@@ -58,9 +58,6 @@ buck-out/
 *.jsbundle
 
 # Android settings
-android/.project
-android/.settings
-android/app/.classpath
-android/app/.project
-android/app/.settings
-android/app/bin/
+.project
+.settings
+.classpath
