@@ -27,6 +27,8 @@ export default class BCPlayer extends Component {
 
 		const initial = Orientation.getInitialOrientation();
 		this.setState({ orientation: initial });
+		// Remember to remove listener
+		Orientation.removeOrientationListener(this.orientationDidChange);
 	}
 
 	componentDidMount() {
@@ -53,7 +55,7 @@ export default class BCPlayer extends Component {
 	}
 
 	orientationDidChange(orientation) {
-
+		console.log("orientation did change");
 		// If the player hasn't been loaded yet, then don't do anything
 		if (!this.player) return;
 
