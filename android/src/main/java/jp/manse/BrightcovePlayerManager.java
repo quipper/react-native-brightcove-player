@@ -17,6 +17,7 @@ import java.util.Map;
 public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerView> {
     public static final String REACT_CLASS = "BrightcovePlayer";
     public static final int COMMAND_SEEK_TO = 1;
+    public static final int COMMAND_SET_FULLSCREEN = 2;
     public static final String EVENT_READY = "ready";
     public static final String EVENT_PLAY = "play";
     public static final String EVENT_PAUSE = "pause";
@@ -111,8 +112,8 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     @Override
     public Map<String, Integer> getCommandsMap() {
         return MapBuilder.of(
-                "seekTo",
-                COMMAND_SEEK_TO
+                "seekTo", COMMAND_SEEK_TO,
+                "setFullscreen", COMMAND_SET_FULLSCREEN
         );
     }
 
@@ -123,6 +124,10 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         switch (commandType) {
             case COMMAND_SEEK_TO: {
                 view.seekTo((int)(args.getDouble(0) * 1000));
+                return;
+            }
+            case COMMAND_SET_FULLSCREEN: {
+                view.setFullscreen((boolean)(args.getBoolean(0)));
                 return;
             }
         }
