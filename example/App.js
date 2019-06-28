@@ -3,7 +3,7 @@ import BrightcoveHeader from './components/video-header';
 import BrightcoveScroll from './components/video-scroll';
 import ArticleScreen from './components/article';
 import VideoScreen from './components/video';
-import { createStackNavigator, createAppContainer } from 'react-navigation';
+import { createStackNavigator, createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
 
 const ArticleStack = createStackNavigator(
 	{
@@ -14,22 +14,23 @@ const ArticleStack = createStackNavigator(
 			screen: VideoScreen
 		}
 	},
-  {
-    mode: 'modal',
-	 headerMode: 'none'
-  }
+	{
+		mode: 'modal',
+		headerMode: 'none',
+		navigationOptions: ({ navigation, screenProps }) => {
+			return {
+				title: 'Article',
+				...getActiveChildNavigationOptions(navigation, screenProps),
+			}
+		}
+	}
 );
 
 const MainNavigator = createStackNavigator({
 	Home: { screen: Home },
 	BrightcoveHeader: { screen: BrightcoveHeader },
 	BrightcoveScroll: { screen: BrightcoveScroll },
-	ArticleStack: {
-		screen: ArticleStack,
-		navigationOptions: ({ navigation }) => ({
-			title: 'Article',
-		})
-	}
+	ArticleStack: { screen: ArticleStack }
 });
 
 const App = createAppContainer(MainNavigator);

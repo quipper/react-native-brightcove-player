@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import { Header } from 'react-navigation';
 import BCPlayer from './BCPlayer';
 
@@ -10,6 +10,17 @@ const VIDEO_ID = '4089564165001';
 const AppHeader = (headerProps) => <Header {... headerProps} />;
 
 export default class Video extends Component {
+
+	static navigationOptions = ({ navigation }) => {
+		return {
+			headerTitle: 'Video',
+			headerLeft: null,
+			headerRight:
+				<TouchableOpacity onPress={()=>{navigation.navigate('Article')}}>
+					<Text style={styles.close}>X Close</Text>
+				</TouchableOpacity>
+		}
+	};
 
 	render() {
 		return (
@@ -51,5 +62,8 @@ const styles = StyleSheet.create({
 		width: '100%',
 		aspectRatio: 16/9,
 		backgroundColor: '#000000'
+	},
+	close: {
+		paddingRight: 20
 	}
 });
