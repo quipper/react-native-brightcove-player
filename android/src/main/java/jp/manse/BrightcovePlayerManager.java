@@ -127,7 +127,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
                 return;
             }
             case COMMAND_SET_FULLSCREEN: {
-                view.setFullscreen((boolean)(args.getBoolean(0)));
+                if (args.getBoolean(0)) {
+                    view.dispatchEnterFullScreenClickEvent();
+                } else {
+                    view.dispatchExitFullScreenClickEvent();
+                }
                 return;
             }
         }
