@@ -100,7 +100,7 @@ BrightcovePlayer.prototype.seekTo = Platform.select({
   android: function(seconds) {
     UIManager.dispatchViewManagerCommand(
       ReactNative.findNodeHandle(this._root),
-      UIManager.BrightcovePlayer.Commands.seekTo,
+      UIManager.getViewManagerConfig('BrightcovePlayer').Commands.seekTo,
       [seconds]
     );
   }
@@ -116,7 +116,7 @@ BrightcovePlayer.prototype.setFullscreen = Platform.select({
   android: function(fullscreen) {
     UIManager.dispatchViewManagerCommand(
       ReactNative.findNodeHandle(this._root),
-      UIManager.BrightcovePlayer.Commands.setFullscreen,
+      UIManager.getViewManagerConfig('BrightcovePlayer').Commands.setFullscreen,
       [fullscreen]
     );
   }
