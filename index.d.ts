@@ -35,6 +35,7 @@ export class BrightcovePlayer extends React.Component<
   {}
 > {
   seekTo(position: number): {};
+  setFullscreen(fullscreen: boolean): {};
 }
 
 export type BrightcovePlayerPosterProps = {

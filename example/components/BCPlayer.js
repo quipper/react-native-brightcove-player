@@ -6,8 +6,17 @@ import Orientation from 'react-native-orientation';
 
 export default class BCPlayer extends Component {
 
-	state = {
-		orientation: null
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			orientation: null,
+			forcedOrientation: false
+		}
+
+		this.orientationDidChange = this.orientationDidChange.bind(this);
+		this.onBeforeEnterFullscreen = this.onBeforeEnterFullscreen.bind(this);
+		this.onBeforeExitFullscreen = this.onBeforeExitFullscreen.bind(this);
 	}
 
 	componentWillMount() {
@@ -20,25 +29,58 @@ export default class BCPlayer extends Component {
 		this.setState({ orientation: initial });
 	}
 
+	componentDidMount() {
+ 		Orientation.addOrientationListener(this.orientationDidChange);
+	}
+
 	onBeforeEnterFullscreen() {
-		Orientation.lockToLandscape();
+
+		if (this.state.orientation === 'PORTRAIT') {
+			this.setState({ forcedOrientation: true });
+			Orientation.lockToLandscape();
+		}
+
 		this.props.onBeforeEnterFullscreen  && this.props.onBeforeEnterFullscreen();
 	}
 
 	onBeforeExitFullscreen() {
+		this.setState({ forcedOrientation: false });
+
 		Orientation.lockToPortrait();
 		Orientation.unlockAllOrientations();
+
 		this.props.onBeforeExitFullscreen  && this.props.onBeforeExitFullscreen();
+	}
+
+	orientationDidChange(orientation) {
+
+		// If the player hasn't been loaded yet, then don't do anything
+		if (!this.player) return;
+
+		switch (orientation) {
+			case 'LANDSCAPE':
+				// Only set the fullscreen in this case, if the forced orientation by the "lockTolandscape" hasn't been called
+				// otherwise, if you call the setfullscreen twice, it might be buggy
+				if (!this.state.forcedOrientation) {
+					this.player.setFullscreen(true);
+				}
+			break;
+			case 'PORTRAIT':
+				this.player.setFullscreen(false);
+			break;
+		}
+
+		this.setState({ orientation });
 	}
 
 	render() {
 		return (<BrightcovePlayer
+					ref={(player) => this.player = player}
 					{...this.props}
 					style={[styles.player, this.props.style]}
-					onBeforeEnterFullscreen={this.onBeforeEnterFullscreen.bind(this)}
-					onBeforeExitFullscreen={this.onBeforeExitFullscreen.bind(this)}
+					onBeforeEnterFullscreen={this.onBeforeEnterFullscreen}
+					onBeforeExitFullscreen={this.onBeforeExitFullscreen}
 				/>
-
 		);
 	}
 }

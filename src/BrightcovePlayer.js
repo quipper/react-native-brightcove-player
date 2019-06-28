@@ -106,6 +106,22 @@ BrightcovePlayer.prototype.seekTo = Platform.select({
   }
 });
 
+BrightcovePlayer.prototype.setFullscreen = Platform.select({
+  ios: function(fullscreen) {
+    NativeModules.BrightcovePlayerManager.setFullscreen(
+      ReactNative.findNodeHandle(this),
+      fullscreen
+    );
+  },
+  android: function(fullscreen) {
+    UIManager.dispatchViewManagerCommand(
+      ReactNative.findNodeHandle(this._root),
+      UIManager.BrightcovePlayer.Commands.setFullscreen,
+      [fullscreen]
+    );
+  }
+});
+
 BrightcovePlayer.propTypes = {
   ...(ViewPropTypes || View.propTypes),
   policyKey: PropTypes.string,
