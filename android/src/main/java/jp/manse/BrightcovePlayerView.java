@@ -145,8 +145,6 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BEFORE_EXIT_FULLSCREEN, Arguments.createMap());
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_EXIT_FULLSCREEN, event);
-                // Trying to fix controller bar dimensions when it goes back to portrait, it sometimws shrinks
-                adjustMediaControllerDimensions();
             }
         });
         eventEmitter.on(EventType.VIDEO_DURATION_CHANGED, new EventListener() {
