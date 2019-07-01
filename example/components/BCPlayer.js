@@ -48,7 +48,6 @@ export default class BCPlayer extends Component {
 	onBeforeExitFullscreen() {
 		this.setState({ forcedOrientation: false });
 
-		Orientation.lockToPortrait();
 		Orientation.unlockAllOrientations();
 
 		this.props.onBeforeExitFullscreen  && this.props.onBeforeExitFullscreen();
