@@ -121,9 +121,10 @@ export default class App extends Component {
 | onBeforeExitFullscreen | Function | Indicates the player beforeexit full screen                                                                                                                                                                                       |                              |
 | onExitFullscreen       | Function | Indicates the player exit full screen                                                                                                                                                                                             |                              |
 
-| Method                                | Description                       |
-| ------------------------------------- | --------------------------------- |
-| seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
+| Method                                	| Description                       		|
+| ------------------------------------- 	| ----------------------------------------- |
+| seekTo(timeInSeconds: number) => void 	| Change playhead to arbitrary time 		|
+| setFullscreen(fullscren: boolean) => void | Programaticaly Enter/Exit from fullscreen |
 
 ### BrightcovePlayerPoster
 
