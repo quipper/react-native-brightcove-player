@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { BrightcovePlayer } from 'react-native-brightcove-player';
 
 import Orientation from 'react-native-orientation';
@@ -48,6 +48,9 @@ export default class BCPlayer extends Component {
 	onBeforeExitFullscreen() {
 		this.setState({ forcedOrientation: false });
 
+		if (Platform.OS === 'ios') {
+			Orientation.lockToPortrait();
+		}
 		Orientation.unlockAllOrientations();
 
 		this.props.onBeforeExitFullscreen  && this.props.onBeforeExitFullscreen();
