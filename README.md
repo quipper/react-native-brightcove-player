@@ -107,7 +107,6 @@ export default class App extends Component {
 | volume                 | number   | Set audio volume (`0.0 ~ 1.0`)                                                                                                                                                                                                    |                              |
 | bitRate                | number   | Set maximum buffering bitrate. Set `0` to automatic quality                                                                                                                                                                       |                              |
 | playbackRate           | number   | Set playback speed scale. Default is `1`
-                                                                                                                   |                              |
 | disableDefaultControl  | boolean  | Disable default player control. Set `true` when you implement own video controller.                                                                                                                                               |                              |
 | onReady                | Function | Indicates the video can be played back                                                                                                                                                                                            |                              |
 | onPlay                 | Function | Indicates the video playback starts                                                                                                                                                                                               |                              |
@@ -117,10 +116,12 @@ export default class App extends Component {
 | onChangeDuration       | Function | Indicates the video length is changed                                                                                                                                                                                             | `{ duration: number }`       |
 | onUpdateBufferProgress | Function | Indicates the video loading buffer is updated                                                                                                                                                                                     | `{ bufferProgress: number }` |
 | onBeforeEnterFullscreen| Function | Indicates the player before enters full screen
-                                                                                                                   |                              |
 | onEnterFullscreen      | Function | Indicates the player enters full screen                                                                                                                                                                                           |                              |
 | onBeforeExitFullscreen | Function | Indicates the player beforeexit full screen                                                                                                                                                                                       |                              |
 | onExitFullscreen       | Function | Indicates the player exit full screen                                                                                                                                                                                             |                              |
+
+
+<br>
 
 | Method                                	| Description                       		|
 | ------------------------------------- 	| ----------------------------------------- |
