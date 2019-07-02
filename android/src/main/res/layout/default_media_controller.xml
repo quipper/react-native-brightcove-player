@@ -7,7 +7,7 @@
     android:id="@+id/brightcove_control_bar"
     android:background="@color/bmc_background"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/bc_control_bar_height"
     android:padding="8dp"
     android:orientation="horizontal"
     android:layout_gravity="bottom"
