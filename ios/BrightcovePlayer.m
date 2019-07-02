@@ -91,6 +91,14 @@
 - (void)setAccountId:(NSString *)accountId {
     _accountId = accountId;
     _playbackServiceDirty = YES;
+	_playbackController.analytics.account = accountId;
+    [self setupService];
+    [self loadMovie];
+}
+
+- (void)setPlayerId:(NSString *)playerId {
+    _playerId = playerId;
+	_playbackController.analytics.destination = [NSString stringWithFormat: @"bcsdk://%@", playerId];
     [self setupService];
     [self loadMovie];
 }
