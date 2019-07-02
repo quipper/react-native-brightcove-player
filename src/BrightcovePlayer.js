@@ -126,6 +126,7 @@ BrightcovePlayer.propTypes = {
   ...(ViewPropTypes || View.propTypes),
   policyKey: PropTypes.string,
   accountId: PropTypes.string,
+  playerId: PropTypes.string,
   referenceId: PropTypes.string,
   videoId: PropTypes.string,
   videoToken: PropTypes.string,

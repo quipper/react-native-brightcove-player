@@ -6,6 +6,7 @@ type VideoToken = string;
 export type BrightcovePlayerProps = {
   policyKey?: string;
   accountId?: string;
+  playerId?: string;
   referenceId?: string;
   videoId?: string;
   videoToken?: VideoToken;

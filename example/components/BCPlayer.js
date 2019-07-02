@@ -82,6 +82,7 @@ export default class BCPlayer extends Component {
 					ref={(player) => this.player = player}
 					{...this.props}
 					style={[styles.player, this.props.style]}
+					playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
 					onBeforeEnterFullscreen={this.onBeforeEnterFullscreen}
 					onBeforeExitFullscreen={this.onBeforeExitFullscreen}
 				/>
