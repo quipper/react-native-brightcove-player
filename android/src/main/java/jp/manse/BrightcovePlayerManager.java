@@ -59,6 +59,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         view.setAccountId(accountId);
     }
 
+    @ReactProp(name = "playerId")
+    public void setPlayerId(BrightcovePlayerView view, String playerId) {
+        view.setPlayerId(playerId);
+    }
+
     @ReactProp(name = "videoId")
     public void setVideoId(BrightcovePlayerView view, String videoId) {
         view.setVideoId(videoId);

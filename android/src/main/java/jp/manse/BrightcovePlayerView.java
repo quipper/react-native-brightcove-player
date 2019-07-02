@@ -17,6 +17,7 @@ import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
 import com.brightcove.player.model.Video;
+import com.brightcove.player.analytics.Analytics;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -47,10 +48,12 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     private BrightcoveMediaController mediaController;
     private String policyKey;
     private String accountId;
+    private String playerId;
     private String videoId;
     private String referenceId;
     private String videoToken;
     private Catalog catalog;
+	private Analytics analytics;
     private OfflineCatalog offlineCatalog;
     private boolean autoPlay = true;
     private boolean playing = false;
@@ -73,6 +76,9 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.playerVideoView.setMediaController(this.mediaController);
         this.requestLayout();
         ViewCompat.setTranslationZ(this, 9999);
+
+        // Implement the analytics to the  Brightcove player
+        this.analytics = this.playerVideoView.getAnalytics();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
@@ -197,6 +203,13 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+		this.analytics.setAccount(accountId);
+        this.loadVideo();
+    }
+
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
+		this.analytics.setDestination("bcsdk://" + playerId);
         this.loadVideo();
     }
 
