@@ -21,6 +21,7 @@
   "license": "MIT",
   "homepage": "https://github.com/manse/react-native-brightcove-player",
   "dependencies": {
-    "prop-types": "^15.5.10"
+    "prop-types": "^15.5.10",
+    "react-native-orientation": "^3.1.3"
   }
 }

@@ -16,7 +16,7 @@ const htmlContent = `
 		<p style="margin: 12px;">Mr Hveding met with a Norwegian lawmaker this month to present a petition signed by dozens of islanders in support of declaring a "time-free zone", and to discuss any practical and legal obstacles to basically ignoring what clocks say about day and night.</p>
 		<p style="margin: 12px;">"It's a bit crazy, but at the same it is pretty serious," he said.</p>
 		<p style="margin: 12px;">Sommaroey, which lies north of the Arctic Circle, stays dark from November to January. The idea behind the time-free zone is that disregarding timepieces would make it easier for residents, especially students, employers and workers, to make the most of the precious months when the opposite is true.</p>
-		<test videoId="${VIDEO_ID}" accountId="${ACCOUNT_ID}" thumbnail="https://bcsecure01-a.akamaihd.net/5/1872491397001/201906/689/1872491397001_6052783783001_4089564165001-vs.jpg?pubId=1872491397001&videoId=4089564165001"></test>
+		<test videoId="${VIDEO_ID}" accountId="${ACCOUNT_ID}" policyKey="${POLICY_KEY}" thumbnail="https://bcsecure01-a.akamaihd.net/5/1872491397001/201906/689/1872491397001_6052783783001_4089564165001-vs.jpg?pubId=1872491397001&videoId=4089564165001"></test>
 		<p style="margin: 12px;">Going off the clock "is a great solution but we likely won't become an entirely time-free zone as it will be too complex," Hveding said. "But we have put the time element on the agenda, and we might get more flexibility ... to adjust to the daylight."</p>
 		<p style="margin: 12px;">"The idea is also to chill out. I have seen people suffering from stress because they were pressed by time," he said.</p>
 		<img src="https://thumbs-prod.si-cdn.com/Vcpvjd2_enozl9LJsRfMINN0e2Y=/800x600/filters:no_upscale():focal(3251x1664:3252x1665)/https://public-media.si-cdn.com/filer/a7/15/a715942a-2893-427e-aaf5-89003e9d9af6/gettyimages-559296039.jpg" />
@@ -44,7 +44,7 @@ export default class VideoHTML extends Component {
 		console.log('onThumbnailClick');
 	}
 
-	videoRenderer({ accountid, videoid, thumbnail }) {
+	videoRenderer({ accountid, videoid, policykey, thumbnail }) {
 		return (
 			<TouchableHighlight key={Math.random()} onPress={ this.onThumbnailClick }>
 				<Image
