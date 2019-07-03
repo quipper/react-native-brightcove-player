@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, Text } from 'react-native';
 import BrightcovePlayer from './BrightcovePlayer';
 
 import Orientation from 'react-native-orientation';
@@ -138,9 +138,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000'
   }
 });
-<<<<<<< HEAD
-
 
 module.exports = BCPlayer;
-=======
->>>>>>> Moved the BC Player component to the root
