@@ -97,7 +97,6 @@
 }
 
 - (void)setPlayerId:(NSString *)playerId {
-    _playerId = playerId;
 	_playbackController.analytics.destination = [NSString stringWithFormat: @"bcsdk://%@", playerId];
     [self setupService];
     [self loadMovie];
@@ -214,9 +213,11 @@
 }
 
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
+    NSTimeInterval duration = CMTimeGetSeconds(session.player.currentItem.duration);
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
-                          @"currentTime": @(progress)
+                          @"currentTime": @(progress),
+                          @"duration": @(duration)
                           });
     }
     float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
@@ -224,6 +225,7 @@
         _lastBufferProgress = bufferProgress;
         self.onUpdateBufferProgress(@{
                                       @"bufferProgress": @(bufferProgress),
+                                      @"duration": @(duration)
                                       });
     }
 }

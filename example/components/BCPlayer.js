@@ -17,6 +17,13 @@ export default class BCPlayer extends Component {
 		this.orientationDidChange = this.orientationDidChange.bind(this);
 		this.onBeforeEnterFullscreen = this.onBeforeEnterFullscreen.bind(this);
 		this.onBeforeExitFullscreen = this.onBeforeExitFullscreen.bind(this);
+		this.onReady = this.onReady.bind(this);
+		this.onPlay = this.onPlay.bind(this);
+		this.onPause = this.onPause.bind(this);
+		this.onEnd = this.onEnd.bind(this);
+		this.onProgress = this.onProgress.bind(this);
+		this.onEnterFullscreen = this.onEnterFullscreen.bind(this);
+		this.onExitFullscreen = this.onExitFullscreen.bind(this);
 	}
 
 	componentWillMount() {
@@ -77,12 +84,50 @@ export default class BCPlayer extends Component {
 		this.setState({ orientation });
 	}
 
+	onReady(event) {
+		console.log('READY', event);
+		this.props.onReady && this.props.onReady(event);
+	}
+
+	onPlay(event) {
+		console.log('PLAY', this.player);
+		this.props.onPlay && this.props.onPlay(event);
+	}
+
+	onPause(event) {
+		this.props.onPause && this.props.onPause(event);
+	}
+
+	onEnd(event) {
+		this.props.onEnd && this.props.onEnd(event);
+	}
+
+	onProgress(event) {
+		console.log('ON PROGRESS', { event })
+		this.props.onProgress && this.props.onProgress(event);
+	}
+
+	onEnterFullscreen(event) {
+		this.props.onEnterFullscreen && this.props.onEnterFullscreen(event);
+	}
+
+	onExitFullscreen(event) {
+		this.props.onExitFullscreen && this.props.onExitFullscreen(event);
+	}
+
 	render() {
 		return (<BrightcovePlayer
 					ref={(player) => this.player = player}
 					{...this.props}
 					style={[styles.player, this.props.style]}
 					playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
+					onReady={this.onReady}
+					onPlay={this.onPlay}
+					onPause={this.onPause}
+					onEnd={this.onEnd}
+					onProgress={this.onProgress}
+					onEnterFullscreen={this.onEnterFullscreen}
+					onExitFullscreen={this.onExitFullscreen}
 					onBeforeEnterFullscreen={this.onBeforeEnterFullscreen}
 					onBeforeExitFullscreen={this.onBeforeExitFullscreen}
 				/>

@@ -129,6 +129,8 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 WritableMap event = Arguments.createMap();
                 Integer playhead = (Integer) e.properties.get(Event.PLAYHEAD_POSITION);
                 event.putDouble("currentTime", playhead / 1000d);
+                Integer duration = (Integer) e.properties.get(Event.VIDEO_DURATION);
+                event.putDouble("duration", duration / 1000d);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
             }
