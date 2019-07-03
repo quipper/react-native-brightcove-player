@@ -40,6 +40,9 @@ export default class VideoHeader extends Component {
 							header: AppHeader
 						});
 					}}
+					onEvent={(event) => {
+						console.log(event);
+					}}
 				/>
 
 				<ScrollView style={styles.scrollView} contentContainerStyle={{flexGrow:1}}>
