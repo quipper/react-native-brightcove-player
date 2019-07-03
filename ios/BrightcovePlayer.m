@@ -97,10 +97,6 @@
 }
 
 - (void)setPlayerId:(NSString *)playerId {
-<<<<<<< HEAD
-=======
-    _playerId = playerId;
->>>>>>> Added the iOS implementation of the playerId
 	_playbackController.analytics.destination = [NSString stringWithFormat: @"bcsdk://%@", playerId];
     [self setupService];
     [self loadMovie];
