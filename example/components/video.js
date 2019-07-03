@@ -13,6 +13,7 @@ export default class Video extends Component {
 
 	static navigationOptions = ({ navigation }) => {
 		return {
+			header: navigation.state.params ? navigation.state.params.header : AppHeader,
 			headerTitle: 'Video',
 			headerLeft: null,
 			headerRight:
