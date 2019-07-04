@@ -3,6 +3,7 @@
 
 @interface BrightcovePlayer () <BCOVPlaybackControllerDelegate, BCOVPUIPlayerViewDelegate>
 
+
 @end
 
 @implementation BrightcovePlayer
@@ -51,12 +52,14 @@
     if (_videoId) {
         [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
+				_mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
             }
         }];
     } else if (_referenceId) {
         [_playbackService findVideoWithReferenceID:_referenceId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
+				_mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
             }
         }];
@@ -182,6 +185,13 @@
         [self refreshBitRate];
         if (self.onReady) {
             self.onReady(@{});
+        }
+
+        if (self.onMetadataLoaded) {
+			NSDictionary *mediainfo = @{ @"title" : _mediaInfo[@"name"]};
+            self.onMetadataLoaded(@{
+				@"mediainfo": mediainfo
+			});
         }
         if (_autoPlay) {
             [_playbackController play];

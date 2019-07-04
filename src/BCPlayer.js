@@ -12,9 +12,10 @@ class BCPlayer extends Component {
 		super(props);
 
 		this.state = {
-		orientation: null,
-		forcedOrientation: false,
-		percentageTracked: { Q1: false, Q2: false, Q3: false, Q4: false }
+			orientation: null,
+			forcedOrientation: false,
+			percentageTracked: { Q1: false, Q2: false, Q3: false, Q4: false },
+			mediainfo: null
 		}
 
 		this.orientationDidChange = this.orientationDidChange.bind(this);
@@ -40,8 +41,8 @@ class BCPlayer extends Component {
 	onBeforeEnterFullscreen() {
 
 		if (this.state.orientation === 'PORTRAIT') {
-		this.setState({ forcedOrientation: true });
-		Orientation.lockToLandscape();
+			this.setState({ forcedOrientation: true });
+			Orientation.lockToLandscape();
 		}
 
 		this.props.onBeforeEnterFullscreen  && this.props.onBeforeEnterFullscreen();
@@ -51,7 +52,7 @@ class BCPlayer extends Component {
 		this.setState({ forcedOrientation: false });
 
 		if (Platform.OS === 'ios') {
-		Orientation.lockToPortrait();
+			Orientation.lockToPortrait();
 		}
 		Orientation.unlockAllOrientations();
 
@@ -89,6 +90,17 @@ class BCPlayer extends Component {
 	}
 
 	/**
+	 * Event triggered when the player sets the metadata
+	 * @param {NativeEvent} event
+	 */
+	onMetadataLoaded(event) {
+		this.setState({ mediainfo: event.mediainfo }, () => {
+			this.onEvent({ 'type': PlayerEventTypes.ON_METADATA_LOADED });
+		});
+		this.props.onMetadataLoaded && this.props.onMetadataLoaded(event);
+	}
+
+	/**
 	 * Event triggered everytime that it starts playing. Can be when it starts, or when it resumes from pause
 	 * @param {NativeEvent} event
 	 */
@@ -114,6 +126,7 @@ class BCPlayer extends Component {
 		this.onEvent({ 'type': PlayerEventTypes.ON_END });
 		this.props.onEnd && this.props.onEnd(event);
 	}
+
 
 	/**
 	 * Event triggered as the stream progress.
@@ -194,10 +207,12 @@ class BCPlayer extends Component {
 	onEvent(event) {
 		event = {
 			...event,
-			name: 'This is the name of the video',
+			name: this.state.mediainfo && this.state.mediainfo.title || 'N/A',
 			videoId: this.props.videoId,
+			referenceId: this.props.referenceId,
 			accountId: this.props.accountId,
-			playerId: this.player.props.playerId
+			playerId: this.player.props.playerId,
+			platform: Platform.OS
 		}
 		this.props.onEvent && this.props.onEvent(event);
 	}
@@ -209,6 +224,7 @@ class BCPlayer extends Component {
 			style={[styles.player, this.props.style]}
 			playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
 			onReady={this.onReady.bind(this)}
+			onMetadataLoaded={this.onMetadataLoaded.bind(this)}
 			onPlay={this.onPlay.bind(this)}
 			onPause={this.onPause.bind(this)}
 			onEnd={this.onEnd.bind(this)}
@@ -226,11 +242,11 @@ class BCPlayer extends Component {
  * Component styles
  */
 const styles = StyleSheet.create({
-  player: {
-	width: '100%',
-	aspectRatio: 16/9,
-	backgroundColor: '#000000'
-  }
+	player: {
+		width: '100%',
+		aspectRatio: 16/9,
+		backgroundColor: '#000000'
+	}
 });
 
 module.exports = BCPlayer;

@@ -25,6 +25,7 @@
 @property (nonatomic) float targetBitRate;
 @property (nonatomic) float targetPlaybackRate;
 @property (nonatomic) BOOL playbackServiceDirty;
+@property (nonatomic) NSDictionary *mediaInfo;
 
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;
@@ -32,6 +33,7 @@
 @property (nonatomic, copy) NSString *accountId;
 @property (nonatomic, copy) NSString *policyKey;
 @property (nonatomic, copy) RCTDirectEventBlock onReady;
+@property (nonatomic, copy) RCTDirectEventBlock onMetadataLoaded;
 @property (nonatomic, copy) RCTDirectEventBlock onPlay;
 @property (nonatomic, copy) RCTDirectEventBlock onPause;
 @property (nonatomic, copy) RCTDirectEventBlock onEnd;
@@ -46,5 +48,6 @@
 -(void) seekTo:(NSNumber *)time;
 -(void) setFullscreen:(BOOL *)fullscreen;
 -(void)dispose;
+
 
 @end
