@@ -19,11 +19,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final int COMMAND_SEEK_TO = 1;
     public static final int COMMAND_SET_FULLSCREEN = 2;
     public static final String EVENT_READY = "ready";
+    public static final String EVENT_METADATA_LOADED = "metadata_loaded";
     public static final String EVENT_PLAY = "play";
     public static final String EVENT_PAUSE = "pause";
     public static final String EVENT_END = "end";
     public static final String EVENT_PROGRESS = "progress";
-    public static final String EVENT_TOGGLE_ANDROID_FULLSCREEN = "toggle_android_fullscreen";
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
     public static final String EVENT_BEFORE_ENTER_FULLSCREEN = "event_before_enter_fullscreen";
@@ -146,6 +146,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public @Nullable Map <String,Object> getExportedCustomDirectEventTypeConstants() {
         Map<String, Object> map = new HashMap<>();
         map.put(EVENT_READY, (Object) MapBuilder.of("registrationName", "onReady"));
+        map.put(EVENT_METADATA_LOADED, (Object) MapBuilder.of("registrationName", "onMetadataLoaded"));
         map.put(EVENT_PLAY, (Object) MapBuilder.of("registrationName", "onPlay"));
         map.put(EVENT_PAUSE, (Object) MapBuilder.of("registrationName", "onPause"));
         map.put(EVENT_END, (Object) MapBuilder.of("registrationName", "onEnd"));
