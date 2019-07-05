@@ -55,6 +55,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     private Catalog catalog;
 	private Analytics analytics;
     private OfflineCatalog offlineCatalog;
+	private Map<String, Object> mediaInfo;
     private boolean autoPlay = true;
     private boolean playing = false;
     private int bitRate = 0;
@@ -69,6 +70,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context.getCurrentActivity());
+
         this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
@@ -97,6 +99,21 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_READY, event);
             }
         });
+
+        eventEmitter.on(EventType.DID_SET_VIDEO, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+				WritableMap mediaInfo = Arguments.createMap();
+				mediaInfo.putString("title", BrightcovePlayerView.this.mediaInfo.get("name").toString());
+
+                WritableMap event = Arguments.createMap();
+				event.putMap("mediainfo", mediaInfo);
+
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_METADATA_LOADED, event);
+            }
+        });
+
         eventEmitter.on(EventType.DID_PLAY, new EventListener() {
             @Override
             public void processEvent(Event e) {
@@ -352,6 +369,17 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         VideoListener listener = new VideoListener() {
             @Override
             public void onVideo(Video video) {
+				BrightcovePlayerView.this.mediaInfo = video.getProperties();
+				Log.v("ONVIDEO", "HERE");
+
+// Log.d("RAF","test: getProperties" + String.valueOf(video.getProperties()));
+//   Map properties = video.getProperties();
+//   for(Iterator<String> iterator = properties.keySet().iterator(); iterator.hasNext(); ) {
+//     String key = iterator.next();
+//     Log.d("RAF","test: " + key + " => " + properties.get(key));
+//   }
+
+
                 playVideo(video);
             }
         };

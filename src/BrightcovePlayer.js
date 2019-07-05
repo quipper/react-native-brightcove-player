@@ -49,6 +49,9 @@ class BrightcovePlayer extends Component {
         onReady={event =>
           this.props.onReady && this.props.onReady(event.nativeEvent)
         }
+        onMetadataLoaded={event =>
+          this.props.onMetadataLoaded && this.props.onMetadataLoaded(event.nativeEvent)
+        }
         onPlay={event =>
           this.props.onPlay && this.props.onPlay(event.nativeEvent)
         }
@@ -139,6 +142,7 @@ BrightcovePlayer.propTypes = {
   bitRate: PropTypes.number,
   playbackRate: PropTypes.number,
   onReady: PropTypes.func,
+  onMetadataLoaded: PropTypes.func,
   onPlay: PropTypes.func,
   onPause: PropTypes.func,
   onEnd: PropTypes.func,

@@ -40,7 +40,8 @@ class BCPlayer extends Component {
 			inlineHeight: Win.width * 0.5625,
 			loading: false,
 			currentTime: 0,
-			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false}
+			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false},
+			mediainfo: null
 		}
 		this.animInline = new Animated.Value(Win.width * 0.5625)
 		this.animFullscreen = new Animated.Value(Win.width * 0.5625)
@@ -147,6 +148,17 @@ class BCPlayer extends Component {
 	}
 
 	/**
+	 * Event triggered when the player sets the metadata
+	 * @param {NativeEvent} event
+	 */
+	onMetadataLoaded(event) {
+		this.setState({ mediainfo: event.mediainfo }, () => {
+			this.onEvent({ 'type': PlayerEventTypes.ON_METADATA_LOADED });
+		});
+		this.props.onMetadataLoaded && this.props.onMetadataLoaded(event);
+	}
+
+	/**
 	 * Event triggered everytime that it starts playing. Can be when it starts, or when it resumes from pause
 	 * @param {NativeEvent} event
 	 */
@@ -172,6 +184,7 @@ class BCPlayer extends Component {
 		this.onEvent({'type': PlayerEventTypes.ON_END});
 		this.props.onEnd && this.props.onEnd(event);
 	}
+
 
 	/**
 	 * Event triggered as the stream progress.
@@ -250,10 +263,12 @@ class BCPlayer extends Component {
 	onEvent(event) {
 		event = {
 			...event,
-			name: 'This is the name of the video',
+			name: this.state.mediainfo && this.state.mediainfo.title || 'N/A',
 			videoId: this.props.videoId,
+			referenceId: this.props.referenceId,
 			accountId: this.props.accountId,
-			playerId: this.player.props.playerId
+			playerId: this.player.props.playerId,
+			platform: Platform.OS
 		}
 		this.props.onEvent && this.props.onEvent(event);
 	}
@@ -322,5 +337,6 @@ BCPlayer.defaultProps = {
 	onFullScreen: () => {
 	}
 }
+
 
 module.exports = BCPlayer;

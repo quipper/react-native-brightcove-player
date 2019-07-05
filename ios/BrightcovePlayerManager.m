@@ -30,6 +30,7 @@ RCT_EXPORT_VIEW_PROPERTY(volume, NSNumber);
 RCT_EXPORT_VIEW_PROPERTY(bitRate, NSNumber);
 RCT_EXPORT_VIEW_PROPERTY(playbackRate, NSNumber);
 RCT_EXPORT_VIEW_PROPERTY(onReady, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onMetadataLoaded, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlay, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPause, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onEnd, RCTDirectEventBlock);
@@ -58,6 +59,7 @@ RCT_EXPORT_METHOD(setFullscreen:(nonnull NSNumber *)reactTag fullscreen:(BOOL)fu
         }
     }];
 }
+
 
 RCT_EXPORT_METHOD(dispose:(nonnull NSNumber *)reactTag) {
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
