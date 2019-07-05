@@ -1,90 +1,148 @@
-import React, { Component } from 'react';
-import { StyleSheet, Platform } from 'react-native';
-import BrightcovePlayer from './BrightcovePlayer';
+import React, {Component} from 'react'
+import {Animated, BackHandler, Dimensions, Image, Platform, StatusBar, StyleSheet, Text} from 'react-native'
+import Orientation from 'react-native-orientation'
+import BrightcovePlayer from "./BrightcovePlayer";
+import PlayerEventTypes from "react-native-brightcove-player/src/PlayerEventTypes";
 
-import Orientation from 'react-native-orientation';
+const checkSource = (uri) => {
+	return typeof uri === 'string' ?
+		{source: {uri}} : {source: uri}
+}
 
-import PlayerEventTypes from './PlayerEventTypes';
+
+const Win = Dimensions.get('window')
+const backgroundColor = '#000'
+
+const styles = StyleSheet.create({
+	background: {
+		backgroundColor,
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: 98
+	},
+	fullScreen: {
+		...StyleSheet.absoluteFillObject
+	},
+	image: {
+		...StyleSheet.absoluteFillObject,
+		width: undefined,
+		height: undefined,
+		zIndex: 99
+	}
+})
 
 class BCPlayer extends Component {
-
 	constructor(props) {
-		super(props);
-
+		super(props)
 		this.state = {
-		orientation: null,
-		forcedOrientation: false,
-		percentageTracked: { Q1: false, Q2: false, Q3: false, Q4: false }
+			paused: !props.autoPlay,
+			fullScreen: false,
+			inlineHeight: Win.width * 0.5625,
+			loading: false,
+			currentTime: 0,
+			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false}
 		}
-
-		this.orientationDidChange = this.orientationDidChange.bind(this);
-
-	}
-
-	componentWillMount() {
-		// The getOrientation method is async. It happens sometimes that
-		// you need the orientation at the moment the JS runtime starts running on device.
-		// `getInitialOrientation` returns directly because its a constant set at the
-		// beginning of the JS runtime.
-
-		const initial = Orientation.getInitialOrientation();
-		this.setState({ orientation: initial });
-		// Remember to remove listener
-		Orientation.removeOrientationListener(this.orientationDidChange);
+		this.animInline = new Animated.Value(Win.width * 0.5625)
+		this.animFullscreen = new Animated.Value(Win.width * 0.5625)
+		this.BackHandler = this.BackHandler.bind(this)
+		this.onRotated = this.onRotated.bind(this)
 	}
 
 	componentDidMount() {
-		Orientation.addOrientationListener(this.orientationDidChange);
+		Dimensions.addEventListener('change', this.onRotated)
+		BackHandler.addEventListener('hardwareBackPress', this.BackHandler)
 	}
 
-	onBeforeEnterFullscreen() {
-
-		if (this.state.orientation === 'PORTRAIT') {
-		this.setState({ forcedOrientation: true });
-		Orientation.lockToLandscape();
-		}
-
-		this.props.onBeforeEnterFullscreen  && this.props.onBeforeEnterFullscreen();
+	componentWillUnmount() {
+		Dimensions.removeEventListener('change', this.onRotated)
+		BackHandler.removeEventListener('hardwareBackPress', this.BackHandler)
 	}
 
-	onBeforeExitFullscreen() {
-		this.setState({ forcedOrientation: false });
-
-		if (Platform.OS === 'ios') {
-		Orientation.lockToPortrait();
-		}
-		Orientation.unlockAllOrientations();
-
-		this.props.onBeforeExitFullscreen  && this.props.onBeforeExitFullscreen();
-	}
-
-	orientationDidChange(orientation) {
-
-		// If the player hasn't been loaded yet, then don't do anything
-		if (!this.player) return;
-
-		switch (orientation) {
-		case 'LANDSCAPE':
-			// Only set the fullscreen in this case, if the forced orientation by the "lockTolandscape" hasn't been called
-			// otherwise, if you call the setfullscreen twice, it might be buggy
-			if (!this.state.forcedOrientation) {
-			this.player.setFullscreen(true);
+	onRotated({window: {width, height}}) {
+		if (this.props.inlineOnly) return
+		const orientation = width > height ? 'LANDSCAPE' : 'PORTRAIT'
+		if (this.props.rotateToFullScreen) {
+			if (orientation === 'LANDSCAPE') {
+				this.setState({fullScreen: true}, () => {
+					this.animToFullscreen(height)
+					this.props.onFullScreen(this.state.fullScreen)
+				})
+				return
 			}
-		break;
-		case 'PORTRAIT':
-			this.player.setFullscreen(false);
-		break;
+			if (orientation === 'PORTRAIT') {
+				this.setState({
+					fullScreen: false,
+					paused: this.props.fullScreenOnly || this.state.paused
+				}, () => {
+					this.animToInline()
+					if (this.props.fullScreenOnly) this.props.onPlay(!this.state.paused)
+					this.props.onFullScreen(this.state.fullScreen)
+				})
+				return
+			}
+		} else {
+			this.animToInline()
 		}
-
-		this.setState({ orientation });
+		if (this.state.fullScreen) this.animToFullscreen(height)
 	}
 
-	/**
-	 * Event triggered when the player is ready to play
-	 * @param {NativeEvent} event
-	 */
+	BackHandler() {
+		if (this.state.fullScreen) {
+			this.setState({fullScreen: false}, () => {
+				this.animToInline()
+				this.props.onFullScreen(this.state.fullScreen)
+				if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
+				setTimeout(() => {
+					if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
+				}, 1500)
+			})
+			return true
+		}
+		return false
+	}
+
+	toggleFS() {
+		this.setState({fullScreen: !this.state.fullScreen}, () => {
+			Orientation.getOrientation((e, orientation) => {
+				if (this.state.fullScreen) {
+					const initialOrient = Orientation.getInitialOrientation()
+					const height = orientation !== initialOrient ?
+						Win.width : Win.height
+					this.props.onFullScreen(this.state.fullScreen)
+					if (this.props.rotateToFullScreen) Orientation.lockToLandscape()
+					this.animToFullscreen(height)
+				} else {
+					if (this.props.fullScreenOnly) {
+						this.setState({paused: true}, () => this.props.onPlay(!this.state.paused))
+					}
+					this.props.onFullScreen(this.state.fullScreen)
+					if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
+					this.animToInline()
+					setTimeout(() => {
+						if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
+					}, 1500)
+				}
+			})
+		})
+	}
+
+	animToFullscreen(height) {
+		Animated.parallel([
+			Animated.timing(this.animFullscreen, {toValue: height, duration: 200}),
+			Animated.timing(this.animInline, {toValue: height, duration: 200})
+		]).start()
+	}
+
+	animToInline(height) {
+		const newHeight = height || this.state.inlineHeight
+		Animated.parallel([
+			Animated.timing(this.animFullscreen, {toValue: newHeight, duration: 100}),
+			Animated.timing(this.animInline, {toValue: this.state.inlineHeight, duration: 100})
+		]).start()
+	}
+
 	onReady(event) {
-		this.onEvent({ 'type': PlayerEventTypes.ON_READY });
+		this.onEvent({'type': PlayerEventTypes.ON_READY});
 		this.props.onReady && this.props.onReady(event);
 	}
 
@@ -93,7 +151,7 @@ class BCPlayer extends Component {
 	 * @param {NativeEvent} event
 	 */
 	onPlay(event) {
-		this.onEvent({ 'type': PlayerEventTypes.ON_PLAY });
+		this.onEvent({'type': PlayerEventTypes.ON_PLAY});
 		this.props.onPlay && this.props.onPlay(event);
 	}
 
@@ -102,7 +160,7 @@ class BCPlayer extends Component {
 	 * @param {NativeEvent} event
 	 */
 	onPause(event) {
-		this.onEvent({ 'type': PlayerEventTypes.ON_PAUSE });
+		this.onEvent({'type': PlayerEventTypes.ON_PAUSE});
 		this.props.onPause && this.props.onPause(event);
 	}
 
@@ -111,7 +169,7 @@ class BCPlayer extends Component {
 	 * @param {NativeEvent} event
 	 */
 	onEnd(event) {
-		this.onEvent({ 'type': PlayerEventTypes.ON_END });
+		this.onEvent({'type': PlayerEventTypes.ON_END});
 		this.props.onEnd && this.props.onEnd(event);
 	}
 
@@ -122,12 +180,12 @@ class BCPlayer extends Component {
 	 * @param {number} event.duration - The total duration of the video
 	 */
 	onProgress(event) {
-		let { currentTime, duration } = event,
-			{ percentageTracked } = this.state;
+		let {currentTime, duration} = event,
+			{percentageTracked} = this.state;
 
 		/*
-		* Calculate the percentage played
-		*/
+        * Calculate the percentage played
+        */
 		let percentagePlayed = Math.round(currentTime / duration * 100),
 			roundUpPercentage = Math.ceil(percentagePlayed / 25) * 25 || 25; // make sure that 0 is 25
 
@@ -165,7 +223,7 @@ class BCPlayer extends Component {
 			}
 		}));
 
-		this.onEvent({ type: PlayerEventTypes[`ON_PROGRESS_Q${mark}`] });
+		this.onEvent({type: PlayerEventTypes[`ON_PROGRESS_Q${mark}`]});
 	}
 
 	/**
@@ -173,8 +231,7 @@ class BCPlayer extends Component {
 	 * @param {NativeEvent} event
 	 */
 	onEnterFullscreen(event) {
-		this.onEvent({ 'type': PlayerEventTypes.ON_ENTER_FULLSCREEN });
-		this.props.onEnterFullscreen && this.props.onEnterFullscreen(event);
+		this.onEvent({'type': PlayerEventTypes.ON_ENTER_FULLSCREEN});
 	}
 
 	/**
@@ -182,8 +239,7 @@ class BCPlayer extends Component {
 	 * @param {NativeEvent} event
 	 */
 	onExitFullscreen(event) {
-		this.onEvent({ 'type': PlayerEventTypes.ON_EXIT_FULLSCREEN });
-		this.props.onExitFullscreen && this.props.onExitFullscreen(event);
+		this.onEvent({'type': PlayerEventTypes.ON_EXIT_FULLSCREEN});
 	}
 
 	/**
@@ -203,34 +259,68 @@ class BCPlayer extends Component {
 	}
 
 	render() {
-		return (<BrightcovePlayer
-			ref={(player) => this.player = player}
-			{...this.props}
-			style={[styles.player, this.props.style]}
-			playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
-			onReady={this.onReady.bind(this)}
-			onPlay={this.onPlay.bind(this)}
-			onPause={this.onPause.bind(this)}
-			onEnd={this.onEnd.bind(this)}
-			onProgress={this.onProgress.bind(this)}
-			onEnterFullscreen={this.onEnterFullscreen.bind(this)}
-			onExitFullscreen={this.onExitFullscreen.bind(this)}
-			onBeforeEnterFullscreen={this.onBeforeEnterFullscreen.bind(this)}
-			onBeforeExitFullscreen={this.onBeforeExitFullscreen.bind(this)}
-			/>
-		);
+		const {
+			fullScreen,
+			loading,
+			currentTime
+		} = this.state
+
+		const {
+			style,
+			placeholder,
+		} = this.props
+
+		return (
+			<Animated.View
+				style={[
+					styles.background,
+					fullScreen ?
+						(styles.fullScreen, {height: this.animFullscreen})
+						: {height: this.animInline},
+					fullScreen ? null : style
+				]}
+			>
+				<StatusBar hidden={fullScreen}/>
+				{
+					((loading && placeholder) || currentTime < 0.01) &&
+					<Image resizeMode="cover" style={styles.image} {...checkSource(placeholder)} />
+				}
+				<BrightcovePlayer
+					ref={(player) => this.player = player}
+					{...this.props}
+					style={[styles.player, this.props.style]}
+					playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
+					onReady={this.onReady.bind(this)}
+					onPlay={this.onPlay.bind(this)}
+					onPause={this.onPause.bind(this)}
+					onEnd={this.onEnd.bind(this)}
+					onProgress={this.onProgress.bind(this)}
+					onEnterFullscreen={this.onEnterFullscreen.bind(this)}
+					onExitFullscreen={this.onExitFullscreen.bind(this)}
+					onBeforeEnterFullscreen={this.toggleFS.bind(this)}
+					onBeforeExitFullscreen={this.toggleFS.bind(this)}
+				/>
+			</Animated.View>
+		)
 	}
 }
 
-/**
- * Component styles
- */
-const styles = StyleSheet.create({
-  player: {
-	width: '100%',
-	aspectRatio: 16/9,
-	backgroundColor: '#000000'
-  }
-});
+BCPlayer.defaultProps = {
+	placeholder: undefined,
+	style: {},
+	autoPlay: false,
+	inlineOnly: false,
+	fullScreenOnly: false,
+	rotateToFullScreen: false,
+	lockPortraitOnFsExit: false,
+	onEnd: () => {
+	},
+	onPlay: () => {
+	},
+	onProgress: () => {
+	},
+	onFullScreen: () => {
+	}
+}
 
 module.exports = BCPlayer;

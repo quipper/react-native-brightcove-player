@@ -29,6 +29,12 @@ export default class Home extends Component {
 						onPress={() => navigate('ArticleStack')}
 					/>
 				</View>
+				<View style={styles.control}>
+					<Button
+						title="Nested View Example"
+						onPress={() => navigate('NestedView')}
+					/>
+				</View>
 			</View>
 		);
 	}
