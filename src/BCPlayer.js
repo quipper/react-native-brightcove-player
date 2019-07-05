@@ -2,13 +2,12 @@ import React, {Component} from 'react'
 import {Animated, BackHandler, Dimensions, Image, Platform, StatusBar, StyleSheet, Text} from 'react-native'
 import Orientation from 'react-native-orientation'
 import BrightcovePlayer from "./BrightcovePlayer";
-import PlayerEventTypes from "react-native-brightcove-player/src/PlayerEventTypes";
+import PlayerEventTypes from "./PlayerEventTypes";
 
 const checkSource = (uri) => {
 	return typeof uri === 'string' ?
 		{source: {uri}} : {source: uri}
 }
-
 
 const Win = Dimensions.get('window')
 const backgroundColor = '#000'
