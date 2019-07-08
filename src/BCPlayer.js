@@ -42,30 +42,30 @@ class BCPlayer extends Component {
 			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false},
 			mediainfo: null
 		}
-		this.animInline = new Animated.Value(Win.width * 0.5625)
-		this.animFullscreen = new Animated.Value(Win.width * 0.5625)
-		this.BackHandler = this.BackHandler.bind(this)
-		this.onRotated = this.onRotated.bind(this)
+		this.animInline = new Animated.Value(Win.width * 0.5625);
+		this.animFullscreen = new Animated.Value(Win.width * 0.5625);
+		this.BackHandler = this.BackHandler.bind(this);
+		this.onRotated = this.onRotated.bind(this);
 	}
 
 	componentDidMount() {
-		Dimensions.addEventListener('change', this.onRotated)
-		BackHandler.addEventListener('hardwareBackPress', this.BackHandler)
+		Dimensions.addEventListener('change', this.onRotated);
+		BackHandler.addEventListener('hardwareBackPress', this.BackHandler);
 	}
 
 	componentWillUnmount() {
-		Dimensions.removeEventListener('change', this.onRotated)
-		BackHandler.removeEventListener('hardwareBackPress', this.BackHandler)
+		Dimensions.removeEventListener('change', this.onRotated);
+		BackHandler.removeEventListener('hardwareBackPress', this.BackHandler);
 	}
 
 	onRotated({window: {width, height}}) {
-		if (this.props.inlineOnly) return
-		const orientation = width > height ? 'LANDSCAPE' : 'PORTRAIT'
+		if (this.props.inlineOnly) return;
+		const orientation = width > height ? 'LANDSCAPE' : 'PORTRAIT';
 		if (this.props.rotateToFullScreen) {
 			if (orientation === 'LANDSCAPE') {
 				this.setState({fullScreen: true}, () => {
-					this.animToFullscreen(height)
-					this.props.onFullScreen(this.state.fullScreen)
+					this.animToFullscreen(height);
+					this.props.onFullScreen(this.state.fullScreen);
 				})
 				return
 			}
@@ -74,71 +74,71 @@ class BCPlayer extends Component {
 					fullScreen: false,
 					paused: this.props.fullScreenOnly || this.state.paused
 				}, () => {
-					this.animToInline()
+					this.animToInline();
 					if (this.props.fullScreenOnly) this.props.onPlay(!this.state.paused)
-					this.props.onFullScreen(this.state.fullScreen)
+					this.props.onFullScreen(this.state.fullScreen);
 				})
-				return
+				return;
 			}
 		} else {
-			this.animToInline()
+			this.animToInline();
 		}
-		if (this.state.fullScreen) this.animToFullscreen(height)
+		if (this.state.fullScreen) this.animToFullscreen(height);
 	}
 
 	BackHandler() {
 		if (this.state.fullScreen) {
 			this.setState({fullScreen: false}, () => {
-				this.animToInline()
-				this.props.onFullScreen(this.state.fullScreen)
-				if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
+				this.animToInline();
+				this.props.onFullScreen(this.state.fullScreen);
+				if (this.props.rotateToFullScreen) Orientation.lockToPortrait();
 				setTimeout(() => {
-					if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
+					if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations();
 				}, 1500)
 			})
-			return true
+			return true;
 		}
-		return false
+		return false;
 	}
 
 	toggleFS() {
 		this.setState({fullScreen: !this.state.fullScreen}, () => {
 			Orientation.getOrientation((e, orientation) => {
 				if (this.state.fullScreen) {
-					const initialOrient = Orientation.getInitialOrientation()
+					const initialOrient = Orientation.getInitialOrientation();
 					const height = orientation !== initialOrient ?
-						Win.width : Win.height
-					this.props.onFullScreen(this.state.fullScreen)
-					if (this.props.rotateToFullScreen) Orientation.lockToLandscape()
-					this.animToFullscreen(height)
+						Win.width : Win.height;
+					this.props.onFullScreen(this.state.fullScreen);
+					if (this.props.rotateToFullScreen) Orientation.lockToLandscape();
+					this.animToFullscreen(height);
 				} else {
 					if (this.props.fullScreenOnly) {
-						this.setState({paused: true}, () => this.props.onPlay(!this.state.paused))
+						this.setState({paused: true}, () => this.props.onPlay(!this.state.paused));
 					}
 					this.props.onFullScreen(this.state.fullScreen)
-					if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
-					this.animToInline()
+					if (this.props.rotateToFullScreen) Orientation.lockToPortrait();
+					this.animToInline();
 					setTimeout(() => {
-						if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
+						if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations();
 					}, 1500)
 				}
 			})
-		})
+		});
 	}
 
 	animToFullscreen(height) {
 		Animated.parallel([
 			Animated.timing(this.animFullscreen, {toValue: height, duration: 200}),
 			Animated.timing(this.animInline, {toValue: height, duration: 200})
-		]).start()
+		]).start();
 	}
 
 	animToInline(height) {
-		const newHeight = height || this.state.inlineHeight
+		const newHeight = height || this.state.inlineHeight;
 		Animated.parallel([
 			Animated.timing(this.animFullscreen, {toValue: newHeight, duration: 100}),
 			Animated.timing(this.animInline, {toValue: this.state.inlineHeight, duration: 100})
-		]).start()
+		]).start();
 	}
 
 	onReady(event) {
@@ -277,12 +277,12 @@ class BCPlayer extends Component {
 			fullScreen,
 			loading,
 			currentTime
-		} = this.state
+		} = this.state;
 
 		const {
 			style,
 			placeholder,
-		} = this.props
+		} = this.props;
 
 		return (
 			<Animated.View
