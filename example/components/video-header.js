@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ScrollView, StyleSheet, View, Image, Text } from 'react-native';
 import { Header } from 'react-navigation';
-import { BCPlayer } from 'react-native-brightcove-player';
+import {BCPlayer} from 'react-native-brightcove-player';
 
 const ACCOUNT_ID = '1872491397001';
 const POLICY_KEY = 'BCpkADawqM2kD-MtMQswS0cLWgf553m4yFUj8vRkvNVw6wybPb1CSVo3Y4mPyR7RQPv5zMoJbxYZpJMBeHhHJYFW4_FIfrvRvid1_xNlUCkCr8mdh35esbt0gJsqi-C_zIXH8xpXRIeiM_44';
@@ -21,7 +21,6 @@ export default class VideoHeader extends Component {
 	render() {
 		return (
 			<View style={styles.container}>
-
 				<BCPlayer
 					style={styles.player}
 					accountId={ACCOUNT_ID}
@@ -30,19 +29,17 @@ export default class VideoHeader extends Component {
 					play={true}
 					autoPlay={true}
 					fullscreen={false}
-					onEnterFullscreen={() => {
-						this.props.navigation.setParams({
+					onFullScreen={isLandscape => {
+						isLandscape ? this.props.navigation.setParams({
 							header: null
-						});
-					}}
-					onExitFullscreen={() => {
-						this.props.navigation.setParams({
+						}) : this.props.navigation.setParams({
 							header: AppHeader
-						});
+						})
 					}}
 					onEvent={(event) => {
 						console.log(event);
 					}}
+					rotateToFullScreen
 				/>
 
 				<ScrollView style={styles.scrollView} contentContainerStyle={{flexGrow:1}}>

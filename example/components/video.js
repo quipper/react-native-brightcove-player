@@ -35,15 +35,13 @@ export default class Video extends Component {
 					play={true}
 					autoPlay={true}
 					fullscreen={false}
-					onEnterFullscreen={() => {
-						this.props.navigation.setParams({
+					onFullScreen={isLandscape => {
+						console.log('onFullScreen')
+						isLandscape ? this.props.navigation.setParams({
 							header: null
-						});
-					}}
-					onExitFullscreen={() => {
-						this.props.navigation.setParams({
+						}) : this.props.navigation.setParams({
 							header: AppHeader
-						});
+						})
 					}}
 				/>
 			</View>

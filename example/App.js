@@ -1,6 +1,7 @@
 import Home from './components/Home';
 import BrightcoveHeader from './components/video-header';
 import BrightcoveScroll from './components/video-scroll';
+import NestedView from './components/nested-view';
 import ArticleScreen from './components/article';
 import VideoScreen from './components/video';
 import { createStackNavigator, createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
@@ -30,7 +31,9 @@ const MainNavigator = createStackNavigator({
 	Home: { screen: Home },
 	BrightcoveHeader: { screen: BrightcoveHeader },
 	BrightcoveScroll: { screen: BrightcoveScroll },
-	ArticleStack: { screen: ArticleStack }
+	NestedView: {screen: NestedView},
+	ArticleStack: { screen: ArticleStack },
+
 });
 
 const App = createAppContainer(MainNavigator);
