@@ -4,11 +4,6 @@ import Orientation from 'react-native-orientation'
 import BrightcovePlayer from "./BrightcovePlayer";
 import PlayerEventTypes from "./PlayerEventTypes";
 
-const checkSource = (uri) => {
-	return typeof uri === 'string' ?
-		{source: {uri}} : {source: uri}
-}
-
 const Win = Dimensions.get('window')
 const backgroundColor = '#000'
 
