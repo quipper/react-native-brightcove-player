@@ -37,8 +37,6 @@ class BCPlayer extends Component {
 			paused: !props.autoPlay,
 			fullScreen: false,
 			inlineHeight: Win.width * 0.5625,
-			loading: false,
-			currentTime: 0,
 			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false},
 			mediainfo: null
 		}
@@ -274,14 +272,11 @@ class BCPlayer extends Component {
 
 	render() {
 		const {
-			fullScreen,
-			loading,
-			currentTime
+			fullScreen
 		} = this.state;
 
 		const {
-			style,
-			placeholder,
+			style
 		} = this.props;
 
 		return (
@@ -294,11 +289,6 @@ class BCPlayer extends Component {
 					fullScreen ? null : style
 				]}
 			>
-				<StatusBar hidden={fullScreen}/>
-				{
-					((loading && placeholder) || currentTime < 0.01) &&
-					<Image resizeMode="cover" style={styles.image} {...checkSource(placeholder)} />
-				}
 				<BrightcovePlayer
 					ref={(player) => this.player = player}
 					{...this.props}
