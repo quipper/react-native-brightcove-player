@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet, StatusBar} from 'react-native'
+import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet} from 'react-native'
 import Orientation from 'react-native-orientation'
 import BrightcovePlayer from "./BrightcovePlayer";
 import PlayerEventTypes from "./PlayerEventTypes";
