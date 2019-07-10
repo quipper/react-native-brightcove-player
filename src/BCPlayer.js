@@ -165,10 +165,10 @@ class BCPlayer extends Component {
 				]}
 			>
 				<StatusBar hidden={fullScreen}/>
-				{/* {
+				{
 					((loading && placeholder) || currentTime < 0.01) &&
 					<Image resizeMode="cover" style={styles.image} {...checkSource(placeholder)} />
-				} */}
+				}
 				<BrightcovePlayer
 					ref={(player) => this.player = player}
 					{...this.props}
