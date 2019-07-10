@@ -35,6 +35,12 @@ export default class Home extends Component {
 						onPress={() => navigate('NestedView')}
 					/>
 				</View>
+				<View style={styles.control}>
+					<Button
+						title="Live - No DVR"
+						onPress={() => navigate('BrightcoveLiveNoDVR')}
+					/>
+				</View>
 			</View>
 		);
 	}
