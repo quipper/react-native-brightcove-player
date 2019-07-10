@@ -227,7 +227,7 @@
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
                           @"currentTime": @(progress),
-                          @"duration": @(duration)
+                          @"duration": @(!isnan(duration) ? duration : -1)
                           });
     }
     float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
@@ -235,7 +235,7 @@
         _lastBufferProgress = bufferProgress;
         self.onUpdateBufferProgress(@{
                                       @"bufferProgress": @(bufferProgress),
-                                      @"duration": @(duration)
+                                      @"duration": @(!isnan(duration) ? duration : -1)
                                       });
     }
 }
