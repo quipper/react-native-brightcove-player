@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Animated, BackHandler, Dimensions, Image, Platform, StatusBar, StyleSheet, Text} from 'react-native'
+import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet, StatusBar} from 'react-native'
 import Orientation from 'react-native-orientation'
 import BrightcovePlayer from "./BrightcovePlayer";
 import PlayerEventTypes from "./PlayerEventTypes";
@@ -284,6 +284,7 @@ class BCPlayer extends Component {
 					fullScreen ? null : style
 				]}
 			>
+				<StatusBar hidden={fullScreen}/>
 				<BrightcovePlayer
 					ref={(player) => this.player = player}
 					{...this.props}
