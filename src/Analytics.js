@@ -146,12 +146,12 @@ function withAnalytics(BCPlayerComponent) {
 		}
 
 		/**
-		 * Event triggered when the user exists from the fullscreen
+		 * Event triggered when an error gets triggered
 		 * @param {NativeEvent} event
 		 */
 		onError(event = {}) {
 			this.onEvent({
-				'type': PlayerEventTypes.ON_EXIT_FULLSCREEN,
+				'type': PlayerEventTypes.ON_ERROR,
 				...event
 			});
 			this.props.onError && this.props.onError(event);
