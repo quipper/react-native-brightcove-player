@@ -4335,9 +4335,9 @@ react-native-animatable@^1.3.1:
   dependencies:
     prop-types "^15.5.10"
 
-"react-native-brightcove-player@git://github.com/pankaj-pp/react-native-brightcove-player.git#reactor-video-player-2":
+"react-native-brightcove-player@git://github.com/pankaj-pp/react-native-brightcove-player.git#development":
   version "1.6.5"
-  resolved "git://github.com/pankaj-pp/react-native-brightcove-player.git#a97f6124e138d254cbcb640c38fc040137c74985"
+  resolved "git://github.com/pankaj-pp/react-native-brightcove-player.git#bbd9ce3d0fac47f0fa8e0f20d6df3064aebb76ca"
   dependencies:
     prop-types "^15.5.10"
     react-native-orientation "^3.1.3"
