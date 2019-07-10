@@ -1,13 +1,8 @@
 import React, {Component} from 'react'
-import {Animated, BackHandler, Dimensions, Image, Platform, StatusBar, StyleSheet, Text} from 'react-native'
+import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet} from 'react-native'
 import Orientation from 'react-native-orientation'
 import BrightcovePlayer from "./BrightcovePlayer";
 import withAnalytics from "./Analytics";
-
-const checkSource = (uri) => {
-	return typeof uri === 'string' ?
-		{source: {uri}} : {source: uri}
-}
 
 const Win = Dimensions.get('window')
 const backgroundColor = '#000'
@@ -37,8 +32,6 @@ class BCPlayer extends Component {
 			paused: !props.autoPlay,
 			fullScreen: false,
 			inlineHeight: Win.width * 0.5625,
-			loading: false,
-			currentTime: 0,
 			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false},
 			mediainfo: null
 		}
@@ -141,17 +134,13 @@ class BCPlayer extends Component {
 		]).start();
 	}
 
-
 	render() {
 		const {
-			fullScreen,
-			loading,
-			currentTime
+			fullScreen
 		} = this.state;
 
 		const {
-			style,
-			placeholder,
+			style
 		} = this.props;
 
 		return (
@@ -165,10 +154,6 @@ class BCPlayer extends Component {
 				]}
 			>
 				<StatusBar hidden={fullScreen}/>
-				{
-					((loading && placeholder) || currentTime < 0.01) &&
-					<Image resizeMode="cover" style={styles.image} {...checkSource(placeholder)} />
-				}
 				<BrightcovePlayer
 					ref={(player) => this.player = player}
 					{...this.props}
@@ -191,5 +176,6 @@ BCPlayer.defaultProps = {
 	rotateToFullScreen: false,
 	lockPortraitOnFsExit: false
 }
+
 
 module.exports = withAnalytics(BCPlayer);
