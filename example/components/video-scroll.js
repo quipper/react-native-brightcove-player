@@ -25,6 +25,8 @@ export default class VideoScroll extends Component {
 					play={true}
 					fullscreen={false}
 					autoPlay={false}
+					style={styles.player}
+					rotateToFullScreen
 				/>
 
 				<View style={styles.articleContainer}>
@@ -83,5 +85,10 @@ const styles = StyleSheet.create({
 	text: {
 		margin: 10,
 		fontSize: 18
+	},
+	player: {
+		width: '100%',
+		aspectRatio: 16/9,
+		backgroundColor: '#000000'
 	}
 });

@@ -43,6 +43,7 @@ export default class Video extends Component {
 							header: AppHeader
 						})
 					}}
+					rotateToFullScreen
 				/>
 			</View>
 		);
