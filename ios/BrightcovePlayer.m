@@ -20,7 +20,7 @@
     _playbackController.delegate = self;
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
-	[_playbackController setAllowsExternalPlayback:YES];
+    [_playbackController setAllowsExternalPlayback:YES];
 
     _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
     _playerView.delegate = self;
@@ -54,7 +54,7 @@
     if (_videoId) {
         [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
-				_mediaInfo = jsonResponse;
+                _mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
             } else {
                 [self emitError:error];
@@ -63,7 +63,7 @@
     } else if (_referenceId) {
         [_playbackService findVideoWithReferenceID:_referenceId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
-				_mediaInfo = jsonResponse;
+                _mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
             } else {
                 [self emitError:error];
@@ -100,13 +100,13 @@
 - (void)setAccountId:(NSString *)accountId {
     _accountId = accountId;
     _playbackServiceDirty = YES;
-	_playbackController.analytics.account = accountId;
+    _playbackController.analytics.account = accountId;
     [self setupService];
     [self loadMovie];
 }
 
 - (void)setPlayerId:(NSString *)playerId {
-	_playbackController.analytics.destination = [NSString stringWithFormat: @"bcsdk://%@", playerId];
+    _playbackController.analytics.destination = [NSString stringWithFormat: @"bcsdk://%@", playerId];
     [self setupService];
     [self loadMovie];
 }
@@ -183,9 +183,7 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
-    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
-        _playbackSession = nil;
-    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         _playbackSession = session;
         [self refreshVolume];
         [self refreshBitRate];
@@ -194,10 +192,10 @@
         }
 
         if (self.onMetadataLoaded) {
-			NSDictionary *mediainfo = @{ @"title" : _mediaInfo[@"name"]};
+            NSDictionary *mediainfo = @{ @"title" : _mediaInfo[@"name"]};
             self.onMetadataLoaded(@{
-				@"mediainfo": mediainfo
-			});
+                @"mediainfo": mediainfo
+            });
         }
         if (_autoPlay) {
             [_playbackController play];
@@ -217,29 +215,54 @@
         if (self.onEnd) {
             self.onEnd(@{});
         }
-	/**
-	* A generic error has occurred.
-	*/
+    /**
+     * The playback buffer is empty. This will occur when the video initially loads,
+     * after a seek occurs, and when playback stops because of a slow or disabled
+     * network. When the buffer is full enough to start playback again,
+     * kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp will be sent.
+	 * or
+ 	 * Playback of the video has stalled. When the video recovers,
+	 * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
+     */
+     } else if ((lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) || (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled)) {
+        if (self.onBufferingStarted) {
+            self.onBufferingStarted(@{});
+        }
+    /**
+     * After becoming empty, this event is sent when the playback buffer has filled
+     * enough that it should be able to keep up with playback. This event will come after
+     * kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty.
+	 * or
+	 * Playback has recovered after being stalled.
+     */
+     } else if ((lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) || (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered)) {
+        if (self.onBufferingCompleted) {
+            self.onBufferingCompleted(@{});
+        }
+    /**
+     * A generic error has occurred.
+     */
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
         NSError *error = lifecycleEvent.properties[@"error"];
         NSLog(@"Lifecycle Event Fail error: %@", error);
-		[self emitError:error];
-	/**
-	* The video failed to load.
-	*/
+        [self emitError:error];
+    /**
+     * The video failed to load.
+     */
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
         NSError *error = lifecycleEvent.properties[@"error"];
         NSLog(@"Lifecycle Event Fail error: %@", error);
-		[self emitError:error];
-	/**
-	* The video failed during playback and was unable to recover, possibly due to a
-	* network error.
-	*/
+        [self emitError:error];
+    /**
+     * The video failed during playback and was unable to recover, possibly due to a
+     * network error.
+     */
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
         NSError *error = lifecycleEvent.properties[@"error"];
         NSLog(@"Lifecycle Event Fail error: %@", error);
-		[self emitError:error];
+        [self emitError:error];
     }
+
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didChangeDuration:(NSTimeInterval)duration {
