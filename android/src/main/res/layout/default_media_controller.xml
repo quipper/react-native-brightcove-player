@@ -90,6 +90,7 @@
         android:layout_width="wrap_content"
         android:layout_gravity="center_vertical"
         android:visibility="gone"
+        android:layout_marginStart="10dp"
         android:background="@drawable/ic_live"/>
 
     <Button
