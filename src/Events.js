@@ -202,9 +202,10 @@ function withEvents(BCPlayerComponent) {
 					return { errorCode: 'LOAD_ERROR', errorMessage: 'There was an error trying to play the video. Check your internet connection.' }
 				}
 
-				// This happens on Android, it means that the internet might be down or it couldn't get through the segments
+				// This happens on Android, it means that it cannot process the video anymore.
+				// One scenario is that it retried to download the segments a few times and it failed, so this event gets thrown
 				if (errorMessage === 'onPlayerError') {
-					return { errorCode: 'PLAYER_ERROR', errorMessage: 'Error trying to play the content. Check your internet connection.' }
+					return { errorCode: 'PLAYER_ERROR', errorMessage: 'There was an error with the player. Check your internet connection and refresh.' }
 				}
 			}
 
@@ -217,7 +218,7 @@ function withEvents(BCPlayerComponent) {
 				}
 
 				/**
-				 * Error Code that indicates there was an error returned by the API.
+				 * Error Code that indicates there was an error returned by the API. It could be any error from the API.
 				 */
 				if (error_code === '3') {
 					error_code = 'PLAYER_ERROR';
