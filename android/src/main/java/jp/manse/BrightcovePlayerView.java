@@ -79,7 +79,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
         this.requestLayout();
-        setupLayoutHack();
+        setupLayout();
         ViewCompat.setTranslationZ(this, 9999);
 
         // Implement the analytics to the  Brightcove player
@@ -514,10 +514,10 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
     // A view with elements that have a visibility to gone on the initial render won't be displayed after you've set 
     // is visibility to visible. view.isShown() will return true, but it will not be there or it will be there but not 
-    // really re-layout. This hack somehow draws the child views manually
+    // really re-layout. This workaround somehow draws the child views manually
     // https://github.com/facebook/react-native/issues/17968
 
-    private void setupLayoutHack() {
+    private void setupLayout() {
 
         Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
             @Override
