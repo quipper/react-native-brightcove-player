@@ -70,6 +70,14 @@ class BrightcovePlayer extends Component {
           this.props.onUpdateBufferProgress &&
           this.props.onUpdateBufferProgress(event.nativeEvent)
         }
+        onBufferingStarted={event =>
+          this.props.onBufferingStarted &&
+          this.props.onBufferingStarted(event.nativeEvent)
+        }
+        onBufferingEnded={event =>
+          this.props.onBufferingEnded &&
+          this.props.onBufferingEnded(event.nativeEvent)
+        }
         onBeforeEnterFullscreen={event => {
           this.props.onBeforeEnterFullscreen &&
           this.props.onBeforeEnterFullscreen(event.nativeEvent)
@@ -152,6 +160,8 @@ BrightcovePlayer.propTypes = {
   onProgress: PropTypes.func,
   onChangeDuration: PropTypes.func,
   onUpdateBufferProgress: PropTypes.func,
+  onBufferingStarted: PropTypes.func,
+  onBufferingEnded: PropTypes.func,
   onBeforeEnterFullscreen: PropTypes.func,
   onBeforeExitFullscreen: PropTypes.func,
   onEnterFullscreen: PropTypes.func,
