@@ -156,7 +156,7 @@ function withAnalytics(BCPlayerComponent) {
 				return;
 			}
 
-			let { errorCode, errorMessage } = this.normaliseErrorCodes(event);
+			let { errorCode, errorMessage } = this.normaliseErrorCodes({ errorCode: event.error_code, errorMessage: event.errorMessage || event.message });
 
 			this.onEvent({
 				'type': PlayerEventTypes.ERROR,
@@ -169,8 +169,11 @@ function withAnalytics(BCPlayerComponent) {
 		/**
 		 * Some of the errors are not very consistent. So we need to normalise them in order to get proper meaninful messages
 		 * and make sure ios and Android are aligned with the same errors
+		 * @params error {object} - Error object
+		 * @params error.error_code - The error code sent from native
+		 * @params error.errorMessage - error message
 		 */
-		normaliseErrorCodes({ error_code, errorMessage, message }) {
+		normaliseErrorCodes({ error_code, errorMessage }) {
 
 			if (Platform.OS === 'android') {
 				// This happens on Android, it means that the internet might be down or it couldn't get through the segments
@@ -180,29 +183,28 @@ function withAnalytics(BCPlayerComponent) {
 
 				// This happens on Android, it means that the internet might be down or it couldn't get through the segments
 				if (errorMessage === 'onPlayerError') {
-					return { errorCode: 'PLAYER_ERROR', errorMessage: 'Error trying to play the content.' }
+					return { errorCode: 'PLAYER_ERROR', errorMessage: 'Error trying to play the content. Check your internet connection.' }
 				}
 			}
 
 			if (Platform.OS === 'ios') {
-
 				/**
 				 * Error Code that indicates there was an error connecting to the Playback API.
 				 */
 				if (error_code === '1') {
-					return { errorCode: 'LOAD_ERROR', errorMessage: 'There was an error trying to play the video. Check your internet connection.' + ((errorMessage || message) ? `(${errorMessage || message})` : '') }
+					return { errorCode: 'LOAD_ERROR', errorMessage: 'There was an error trying to play the video. Check your internet connection.' + ((errorMessage) ? `(${errorMessage})` : '') }
 				}
 
 				/**
 				 * Error Code that indicates there was an error returned by the API.
 				 */
-				if (error_code === '3' && Platform.OS === 'ios') {
-					error_code = 'RESOURCE_NOT_FOUND';
+				if (error_code === '3') {
+					error_code = 'PLAYER_ERROR';
 				}
 			}
 
 			// If no error code is defined, then use a generic one, and pass the error message or the default 'There was an error'
-			return { errorCode: error_code || 'ERROR', errorMessage: errorMessage || message || 'There was an error!' }
+			return { errorCode: error_code || 'ERROR', errorMessage: errorMessage || 'There was an error!' }
 		}
 
 		/**
