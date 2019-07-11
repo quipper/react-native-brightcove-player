@@ -44,6 +44,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onEnterFullscreen;
 @property (nonatomic, copy) RCTDirectEventBlock onBeforeExitFullscreen;
 @property (nonatomic, copy) RCTDirectEventBlock onExitFullscreen;
+@property (nonatomic, copy) RCTDirectEventBlock onError;
 
 -(void) seekTo:(NSNumber *)time;
 -(void) setFullscreen:(BOOL *)fullscreen;
