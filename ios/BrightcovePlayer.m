@@ -48,12 +48,16 @@
         }
         return;
     }
+
     if (!_playbackService) return;
+
     if (_videoId) {
         [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
 				_mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
+            } else {
+                [self emitError:error];
             }
         }];
     } else if (_referenceId) {
@@ -61,6 +65,8 @@
             if (video) {
 				_mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
+            } else {
+                [self emitError:error];
             }
         }];
     }
@@ -211,6 +217,28 @@
         if (self.onEnd) {
             self.onEnd(@{});
         }
+	/**
+	* A generic error has occurred.
+	*/
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
+        NSError *error = lifecycleEvent.properties[@"error"];
+        NSLog(@"Lifecycle Event Fail error: %@", error);
+		[self emitError:error];
+	/**
+	* The video failed to load.
+	*/
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
+        NSError *error = lifecycleEvent.properties[@"error"];
+        NSLog(@"Lifecycle Event Fail error: %@", error);
+		[self emitError:error];
+	/**
+	* The video failed during playback and was unable to recover, possibly due to a
+	* network error.
+	*/
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
+        NSError *error = lifecycleEvent.properties[@"error"];
+        NSLog(@"Lifecycle Event Fail error: %@", error);
+		[self emitError:error];
     }
 }
 
@@ -266,6 +294,17 @@
 
 -(void)dispose {
     [self.playbackController setVideos:@[]];
+}
+
+- (void)emitError:(NSError *)error {
+
+    if (!self.onError) {
+        return;
+    }
+
+    NSString *code = [NSString stringWithFormat:@"%ld", (long)[error code]];
+
+    self.onError(@{@"error_code": code, @"message": [error localizedDescription]});
 }
 
 @end

@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet} from 'react-native'
 import Orientation from 'react-native-orientation'
 import BrightcovePlayer from "./BrightcovePlayer";
-import PlayerEventTypes from "./PlayerEventTypes";
+import withAnalytics from "./Analytics";
 
 const Win = Dimensions.get('window')
 const backgroundColor = '#000'
@@ -134,137 +134,6 @@ class BCPlayer extends Component {
 		]).start();
 	}
 
-	onReady(event) {
-		this.onEvent({'type': PlayerEventTypes.ON_READY});
-		this.props.onReady && this.props.onReady(event);
-	}
-
-	/**
-	 * Event triggered when the player sets the metadata
-	 * @param {NativeEvent} event
-	 */
-	onMetadataLoaded(event) {
-		this.setState({ mediainfo: event.mediainfo }, () => {
-			this.onEvent({ 'type': PlayerEventTypes.ON_METADATA_LOADED });
-		});
-		this.props.onMetadataLoaded && this.props.onMetadataLoaded(event);
-	}
-
-	/**
-	 * Event triggered everytime that it starts playing. Can be when it starts, or when it resumes from pause
-	 * @param {NativeEvent} event
-	 */
-	onPlay(event) {
-		this.onEvent({'type': PlayerEventTypes.ON_PLAY});
-		this.props.onPlay && this.props.onPlay(event);
-	}
-
-	/**
-	 * Event triggered everytime the user clicks pause
-	 * @param {NativeEvent} event
-	 */
-	onPause(event) {
-		this.onEvent({'type': PlayerEventTypes.ON_PAUSE});
-		this.props.onPause && this.props.onPause(event);
-	}
-
-	/**
-	 * Event triggered when the video ends
-	 * @param {NativeEvent} event
-	 */
-	onEnd(event) {
-		this.onEvent({'type': PlayerEventTypes.ON_END});
-		this.props.onEnd && this.props.onEnd(event);
-	}
-
-
-	/**
-	 * Event triggered as the stream progress.
-	 * @param {NativeEvent} event
-	 * @param {number} event.currentTime - The current time of the video
-	 * @param {number} event.duration - The total duration of the video
-	 */
-	onProgress(event) {
-		let {currentTime, duration} = event,
-			{percentageTracked} = this.state;
-
-		/*
-        * Calculate the percentage played
-        */
-		let percentagePlayed = Math.round(currentTime / duration * 100),
-			roundUpPercentage = Math.ceil(percentagePlayed / 25) * 25 || 25; // make sure that 0 is 25
-
-		/**
-		 * The following logic is applied:
-		 * Between 0% - 25% - Track Q1 mark
-		 * Between 25% - 50% - Track Q2 mark
-		 * Between 50% - 75% - Track Q3 mark
-		 * Between 75% - 100% - Track Q4 mark
-		 */
-		if (roundUpPercentage === 25 && !percentageTracked.Q1) {
-			this.trackQuarters(1);
-		} else if (roundUpPercentage === 50 && !percentageTracked.Q2) {
-			this.trackQuarters(2);
-		} else if (roundUpPercentage === 75 && !percentageTracked.Q3) {
-			this.trackQuarters(3);
-		} else if (roundUpPercentage === 100 && !percentageTracked.Q4) {
-			this.trackQuarters(4);
-		}
-
-		// Fire the call back of the onProgress
-		this.props.onProgress && this.props.onProgress(event);
-	}
-
-
-	/**
-	 * Method that tracks back to the "onEvent" call back to communicate a tracking of a quarter
-	 * @param {number} mark - The number of the quarter (1,2,3,4)
-	 */
-	trackQuarters(mark) {
-		this.setState((prevState) => ({
-			percentageTracked: {
-				...prevState.percentageTracked,
-				[`Q${mark}`]: true
-			}
-		}));
-
-		this.onEvent({type: PlayerEventTypes[`ON_PROGRESS_Q${mark}`]});
-	}
-
-	/**
-	 * Event triggered when the fullscreen happens
-	 * @param {NativeEvent} event
-	 */
-	onEnterFullscreen(event) {
-		this.onEvent({'type': PlayerEventTypes.ON_ENTER_FULLSCREEN});
-	}
-
-	/**
-	 * Event triggered when the user exists from the fullscreen
-	 * @param {NativeEvent} event
-	 */
-	onExitFullscreen(event) {
-		this.onEvent({'type': PlayerEventTypes.ON_EXIT_FULLSCREEN});
-	}
-
-	/**
-	 * Handler to normalise the events and send it back to the onEvent callback if that exists
-	 * @param {object} event
-	 * @param {string} event.type - the event type
-	 */
-	onEvent(event) {
-		event = {
-			...event,
-			name: this.state.mediainfo && this.state.mediainfo.title || 'N/A',
-			videoId: this.props.videoId,
-			referenceId: this.props.referenceId,
-			accountId: this.props.accountId,
-			playerId: this.player.props.playerId,
-			platform: Platform.OS
-		}
-		this.props.onEvent && this.props.onEvent(event);
-	}
-
 	render() {
 		const {
 			fullScreen
@@ -290,13 +159,6 @@ class BCPlayer extends Component {
 					{...this.props}
 					style={[styles.player, this.props.style]}
 					playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
-					onReady={this.onReady.bind(this)}
-					onPlay={this.onPlay.bind(this)}
-					onPause={this.onPause.bind(this)}
-					onEnd={this.onEnd.bind(this)}
-					onProgress={this.onProgress.bind(this)}
-					onEnterFullscreen={this.onEnterFullscreen.bind(this)}
-					onExitFullscreen={this.onExitFullscreen.bind(this)}
 					onBeforeEnterFullscreen={this.toggleFS.bind(this)}
 					onBeforeExitFullscreen={this.toggleFS.bind(this)}
 				/>
@@ -312,16 +174,8 @@ BCPlayer.defaultProps = {
 	inlineOnly: false,
 	fullScreenOnly: false,
 	rotateToFullScreen: false,
-	lockPortraitOnFsExit: false,
-	onEnd: () => {
-	},
-	onPlay: () => {
-	},
-	onProgress: () => {
-	},
-	onFullScreen: () => {
-	}
+	lockPortraitOnFsExit: false
 }
 
 
-module.exports = BCPlayer;
+module.exports = withAnalytics(BCPlayer);
