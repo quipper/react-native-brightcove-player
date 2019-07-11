@@ -192,14 +192,44 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
         });
+
+		// Emits all the errors back to the React Native
+      	eventEmitter.on(EventType.ERROR, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap error = mapToRnWritableMap(e.properties);
+                emitError(error);
+            }
+        });
     }
 
+	/**
+	 * Dispatch the event to the player to ENTER the full screen state
+	 */
     public void dispatchEnterFullScreenClickEvent() {
         this.playerVideoView.getEventEmitter().emit(EventType.ENTER_FULL_SCREEN);
     }
 
+	/**
+	 * Dispatch the event to the player to EXIT the full screen state
+	 */
     public void dispatchExitFullScreenClickEvent() {
         this.playerVideoView.getEventEmitter().emit(EventType.EXIT_FULL_SCREEN);
+    }
+
+	/**
+	 * Emits the errors back to React Native application
+	 * @param error {WritableMap} - The error object with the information of the error
+	 */
+	private void emitError(WritableMap error) {
+        ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+        reactContext
+                .getJSModule(RCTEventEmitter.class)
+                .receiveEvent(
+                        BrightcovePlayerView.this.getId(),
+                        BrightcovePlayerManager.EVENT_ERROR,
+                        error
+                );
     }
 
     @Override
@@ -370,25 +400,27 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
             @Override
             public void onVideo(Video video) {
 				BrightcovePlayerView.this.mediaInfo = video.getProperties();
-				Log.v("ONVIDEO", "HERE");
-
-// Log.d("RAF","test: getProperties" + String.valueOf(video.getProperties()));
-//   Map properties = video.getProperties();
-//   for(Iterator<String> iterator = properties.keySet().iterator(); iterator.hasNext(); ) {
-//     String key = iterator.next();
-//     Log.d("RAF","test: " + key + " => " + properties.get(key));
-//   }
-
-
                 playVideo(video);
             }
+
+            @Override
+            public void onError(String s) {
+                WritableMap error = Arguments.createMap();
+                error.putString("error_code", "CATALOG_FETCH_ERROR");
+                error.putString("errorMessage", s);
+                emitError(error);
+            }
         };
+
         this.catalog = new Catalog(this.playerVideoView.getEventEmitter(), this.accountId, this.policyKey);
-        if (this.videoId != null) {
-            this.catalog.findVideoByID(this.videoId, listener);
-        } else if (this.referenceId != null) {
-            this.catalog.findVideoByReferenceID(this.referenceId, listener);
-        }
+
+		if (this.accountId != null) {
+			if (this.videoId != null) {
+				this.catalog.findVideoByID(this.videoId, listener);
+			} else if (this.referenceId != null) {
+				this.catalog.findVideoByReferenceID(this.referenceId, listener);
+			}
+		}
     }
 
     private void playVideo(Video video) {
@@ -417,6 +449,28 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
             Log.d("debug", entry.getKey());
         }
     }
+
+    // Converts MAP into React WritableMap
+    // Also, doesn't work with recursive maps or arrays
+    private WritableMap mapToRnWritableMap(Map<String, Object> map) {
+        WritableMap writableMap = Arguments.createMap();
+        for (String key : map.keySet()) {
+            Object val = map.get(key);
+
+            if (val instanceof String) {
+                writableMap.putString(key, (String)val);
+            } else if (val instanceof Integer) {
+                writableMap.putInt(key, (Integer)val);
+            } else if (val instanceof Boolean) {
+                writableMap.putBoolean(key, (Boolean)val);
+            } else if (val instanceof Double) {
+                writableMap.putDouble(key, (Double)val);
+            }
+        }
+
+        return writableMap;
+    }
+
 
     @Override
     public void onHostResume() {
