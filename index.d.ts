@@ -21,13 +21,16 @@ export type BrightcovePlayerProps = {
   onPlay?: () => void;
   onPause?: () => void;
   onEnd?: () => void;
-  onProgress?: ({ currentTime: number }) => void;
+  onProgress?: ({ currentTime: number, duration: number }) => void;
   onChangeDuration?: ({ duration: number }) => void;
   onUpdateBufferProgress?: ({ bufferProgress: number }) => void;
+  onBufferingStarted?: () => void;
+  onBufferingCompleted?: () => void;
   onBeforeEnterFullscreen?: () => void;
   onBeforeExitFullscreen?: () => void;
   onEnterFullscreen?: () => void;
   onExitFullscreen?: () => void;
+  onError?: () => void;
   style?: ViewStyle;
 };
 

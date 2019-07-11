@@ -192,7 +192,26 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
         });
-
+      	eventEmitter.on(EventType.BUFFERING_STARTED, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext
+                        .getJSModule(RCTEventEmitter.class)
+                        .receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BUFFERING_STARTED, event);
+            }
+        });
+        eventEmitter.on(EventType.BUFFERING_COMPLETED, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext
+                        .getJSModule(RCTEventEmitter.class)
+                        .receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BUFFERING_COMPLETED, event);
+            }
+        });
 		// Emits all the errors back to the React Native
       	eventEmitter.on(EventType.ERROR, new EventListener() {
             @Override

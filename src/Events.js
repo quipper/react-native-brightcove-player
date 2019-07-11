@@ -3,9 +3,9 @@ import {Platform} from 'react-native'
 import PlayerEventTypes from "./PlayerEventTypes";
 
 // This function takes a component...
-function withAnalytics(BCPlayerComponent) {
+function withEvents(BCPlayerComponent) {
 	// ...and returns another component...
-	class WithAnalytics extends Component {
+	class withEvents extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
@@ -71,6 +71,25 @@ function withAnalytics(BCPlayerComponent) {
 
 
 		/**
+		 * Event triggered when buffering started
+		 * @param {NativeEvent} event
+		 */
+		onBufferingStarted(event) {
+			this.onEvent({'type': PlayerEventTypes.BUFFERING_STARTED});
+			this.props.onBufferingStarted && this.props.onBufferingStarted(event);
+		}
+
+		/**
+		 * Event triggered when the video ends
+		 * @param {NativeEvent} event
+		 */
+		onBufferingCompleted(event) {
+			this.onEvent({'type': PlayerEventTypes.BUFFERING_COMPLETED});
+			this.props.onBufferingCompleted && this.props.onBufferingCompleted(event);
+		}
+
+
+		/**
 		 * Event triggered as the stream progress.
 		 * @param {NativeEvent} event
 		 * @param {number} event.currentTime - The current time of the video
@@ -80,27 +99,29 @@ function withAnalytics(BCPlayerComponent) {
 			let {currentTime, duration} = event,
 				{percentageTracked} = this.state;
 
-			/*
-			* Calculate the percentage played
-			*/
-			let percentagePlayed = Math.round(currentTime / duration * 100),
-				roundUpPercentage = Math.ceil(percentagePlayed / 25) * 25 || 25; // make sure that 0 is 25
+			if (duration > -1) {
+				/*
+				* Calculate the percentage played
+				*/
+				let percentagePlayed = Math.round(currentTime / duration * 100),
+					roundUpPercentage = Math.ceil(percentagePlayed / 25) * 25 || 25; // make sure that 0 is 25
 
-			/**
-			 * The following logic is applied:
-			 * Between 0% - 25% - Track Q1 mark
-			 * Between 25% - 50% - Track Q2 mark
-			 * Between 50% - 75% - Track Q3 mark
-			 * Between 75% - 100% - Track Q4 mark
-			 */
-			if (roundUpPercentage === 25 && !percentageTracked.Q1) {
-				this.trackQuarters(1, percentagePlayed);
-			} else if (roundUpPercentage === 50 && !percentageTracked.Q2) {
-				this.trackQuarters(2, percentagePlayed);
-			} else if (roundUpPercentage === 75 && !percentageTracked.Q3) {
-				this.trackQuarters(3, percentagePlayed);
-			} else if (roundUpPercentage === 100 && !percentageTracked.Q4) {
-				this.trackQuarters(4, percentagePlayed);
+				/**
+				 * The following logic is applied:
+				 * Between 0% - 25% - Track Q1 mark
+				 * Between 25% - 50% - Track Q2 mark
+				 * Between 50% - 75% - Track Q3 mark
+				 * Between 75% - 100% - Track Q4 mark
+				 */
+				if (roundUpPercentage === 25 && !percentageTracked.Q1) {
+					this.trackQuarters(1, percentagePlayed);
+				} else if (roundUpPercentage === 50 && !percentageTracked.Q2) {
+					this.trackQuarters(2, percentagePlayed);
+				} else if (roundUpPercentage === 75 && !percentageTracked.Q3) {
+					this.trackQuarters(3, percentagePlayed);
+				} else if (roundUpPercentage === 100 && !percentageTracked.Q4) {
+					this.trackQuarters(4, percentagePlayed);
+				}
 			}
 
 			// Fire the call back of the onProgress
@@ -181,9 +202,10 @@ function withAnalytics(BCPlayerComponent) {
 					return { errorCode: 'LOAD_ERROR', errorMessage: 'There was an error trying to play the video. Check your internet connection.' }
 				}
 
-				// This happens on Android, it means that the internet might be down or it couldn't get through the segments
+				// This happens on Android, it means that it cannot process the video anymore.
+				// One scenario is that it retried to download the segments a few times and it failed, so this event gets thrown
 				if (errorMessage === 'onPlayerError') {
-					return { errorCode: 'PLAYER_ERROR', errorMessage: 'Error trying to play the content. Check your internet connection.' }
+					return { errorCode: 'PLAYER_ERROR', errorMessage: 'There was an error with the player. Check your internet connection and refresh.' }
 				}
 			}
 
@@ -196,7 +218,7 @@ function withAnalytics(BCPlayerComponent) {
 				}
 
 				/**
-				 * Error Code that indicates there was an error returned by the API.
+				 * Error Code that indicates there was an error returned by the API. It could be any error from the API.
 				 */
 				if (error_code === '3') {
 					error_code = 'PLAYER_ERROR';
@@ -237,6 +259,8 @@ function withAnalytics(BCPlayerComponent) {
 				onPause={this.onPause.bind(this)}
 				onEnd={this.onEnd.bind(this)}
 				onProgress={this.onProgress.bind(this)}
+				onBufferingStarted={this.onBufferingStarted.bind(this)}
+				onBufferingCompleted={this.onBufferingCompleted.bind(this)}
 				onEnterFullscreen={this.onEnterFullscreen.bind(this)}
 				onExitFullscreen={this.onExitFullscreen.bind(this)}
 				onError={this.onError.bind(this)}
@@ -246,8 +270,8 @@ function withAnalytics(BCPlayerComponent) {
 
 	// Rename the new component name to be the same as the high order component
 	// This is done because there are other components that looks up to the name of the BCPlayer (like ScrollView)
-	WithAnalytics.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BCPlayer';
-	return WithAnalytics;
+	withEvents.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BCPlayer';
+	return withEvents;
 }
 
-module.exports = withAnalytics;
+module.exports = withEvents;
