@@ -4,7 +4,9 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
@@ -77,6 +79,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
         this.requestLayout();
+        setupLayout();
         ViewCompat.setTranslationZ(this, 9999);
 
         // Implement the analytics to the  Brightcove player
@@ -507,5 +510,31 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.playerVideoView.clear();
         this.removeAllViews();
         this.applicationContext.removeLifecycleEventListener(this);
+    }
+
+    // A view with elements that have a visibility to gone on the initial render won't be displayed after you've set 
+    // its visibility to visible. view.isShown() will return true, but it will not be there or it will be there but not 
+    // really re-layout. This workaround somehow draws the child views manually
+    // https://github.com/facebook/react-native/issues/17968
+
+    private void setupLayout() {
+
+        Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                manuallyLayoutChildren();
+                getViewTreeObserver().dispatchOnGlobalLayout();
+                Choreographer.getInstance().postFrameCallback(this);
+            }
+        });
+    }
+
+    private void manuallyLayoutChildren() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+            child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+        }
     }
 }
