@@ -71,6 +71,25 @@ function withEvents(BCPlayerComponent) {
 
 
 		/**
+		 * Event triggered when buffering started
+		 * @param {NativeEvent} event
+		 */
+		onBufferingStarted(event) {
+			this.onEvent({'type': PlayerEventTypes.BUFFERING_STARTED});
+			this.props.onBufferingStarted && this.props.onBufferingStarted(event);
+		}
+
+		/**
+		 * Event triggered when the video ends
+		 * @param {NativeEvent} event
+		 */
+		onBufferingCompleted(event) {
+			this.onEvent({'type': PlayerEventTypes.BUFFERING_COMPLETED});
+			this.props.onBufferingCompleted && this.props.onBufferingCompleted(event);
+		}
+
+
+		/**
 		 * Event triggered as the stream progress.
 		 * @param {NativeEvent} event
 		 * @param {number} event.currentTime - The current time of the video
@@ -80,27 +99,29 @@ function withEvents(BCPlayerComponent) {
 			let {currentTime, duration} = event,
 				{percentageTracked} = this.state;
 
-			/*
-			* Calculate the percentage played
-			*/
-			let percentagePlayed = Math.round(currentTime / duration * 100),
-				roundUpPercentage = Math.ceil(percentagePlayed / 25) * 25 || 25; // make sure that 0 is 25
+			if (duration > -1) {
+				/*
+				* Calculate the percentage played
+				*/
+				let percentagePlayed = Math.round(currentTime / duration * 100),
+					roundUpPercentage = Math.ceil(percentagePlayed / 25) * 25 || 25; // make sure that 0 is 25
 
-			/**
-			 * The following logic is applied:
-			 * Between 0% - 25% - Track Q1 mark
-			 * Between 25% - 50% - Track Q2 mark
-			 * Between 50% - 75% - Track Q3 mark
-			 * Between 75% - 100% - Track Q4 mark
-			 */
-			if (roundUpPercentage === 25 && !percentageTracked.Q1) {
-				this.trackQuarters(1, percentagePlayed);
-			} else if (roundUpPercentage === 50 && !percentageTracked.Q2) {
-				this.trackQuarters(2, percentagePlayed);
-			} else if (roundUpPercentage === 75 && !percentageTracked.Q3) {
-				this.trackQuarters(3, percentagePlayed);
-			} else if (roundUpPercentage === 100 && !percentageTracked.Q4) {
-				this.trackQuarters(4, percentagePlayed);
+				/**
+				 * The following logic is applied:
+				 * Between 0% - 25% - Track Q1 mark
+				 * Between 25% - 50% - Track Q2 mark
+				 * Between 50% - 75% - Track Q3 mark
+				 * Between 75% - 100% - Track Q4 mark
+				 */
+				if (roundUpPercentage === 25 && !percentageTracked.Q1) {
+					this.trackQuarters(1, percentagePlayed);
+				} else if (roundUpPercentage === 50 && !percentageTracked.Q2) {
+					this.trackQuarters(2, percentagePlayed);
+				} else if (roundUpPercentage === 75 && !percentageTracked.Q3) {
+					this.trackQuarters(3, percentagePlayed);
+				} else if (roundUpPercentage === 100 && !percentageTracked.Q4) {
+					this.trackQuarters(4, percentagePlayed);
+				}
 			}
 
 			// Fire the call back of the onProgress
@@ -237,6 +258,8 @@ function withEvents(BCPlayerComponent) {
 				onPause={this.onPause.bind(this)}
 				onEnd={this.onEnd.bind(this)}
 				onProgress={this.onProgress.bind(this)}
+				onBufferingStarted={this.onBufferingStarted.bind(this)}
+				onBufferingCompleted={this.onBufferingCompleted.bind(this)}
 				onEnterFullscreen={this.onEnterFullscreen.bind(this)}
 				onExitFullscreen={this.onExitFullscreen.bind(this)}
 				onError={this.onError.bind(this)}
