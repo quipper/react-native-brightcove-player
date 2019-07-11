@@ -20,8 +20,8 @@ function withAnalytics(BCPlayerComponent) {
 		 * @param {NativeEvent} event
 		 */
 		onReady(event) {
-			this.onEvent({'type': PlayerEventTypes.ON_READY});
-			this.onEvent({'type': PlayerEventTypes.ON_IMPRESSION});
+			this.onEvent({'type': PlayerEventTypes.READY});
+			this.onEvent({'type': PlayerEventTypes.IMPRESSION});
 			this.props.onReady && this.props.onReady(event);
 		}
 
@@ -31,7 +31,7 @@ function withAnalytics(BCPlayerComponent) {
 		 */
 		onMetadataLoaded(event) {
 			this.setState({ mediainfo: event.mediainfo }, () => {
-				this.onEvent({ 'type': PlayerEventTypes.ON_METADATA_LOADED });
+				this.onEvent({ 'type': PlayerEventTypes.METADATA_LOADED });
 			});
 			this.props.onMetadataLoaded && this.props.onMetadataLoaded(event);
 		}
@@ -41,11 +41,11 @@ function withAnalytics(BCPlayerComponent) {
 		 * @param {NativeEvent} event
 		 */
 		onPlay(event) {
-			this.onEvent({'type': PlayerEventTypes.ON_PLAY});
+			this.onEvent({'type': PlayerEventTypes.PLAY});
 
 			if (!this.state.firstPlayed) {
 				this.setState({ firstPlayed: true }, () => {
-					this.onEvent({'type': PlayerEventTypes.ON_VIEW});
+					this.onEvent({'type': PlayerEventTypes.VIEW});
 				});
 			}
 			this.props.onPlay && this.props.onPlay(event);
@@ -56,7 +56,7 @@ function withAnalytics(BCPlayerComponent) {
 		 * @param {NativeEvent} event
 		 */
 		onPause(event) {
-			this.onEvent({'type': PlayerEventTypes.ON_PAUSE});
+			this.onEvent({'type': PlayerEventTypes.PAUSE});
 			this.props.onPause && this.props.onPause(event);
 		}
 
@@ -65,7 +65,7 @@ function withAnalytics(BCPlayerComponent) {
 		 * @param {NativeEvent} event
 		 */
 		onEnd(event) {
-			this.onEvent({'type': PlayerEventTypes.ON_END});
+			this.onEvent({'type': PlayerEventTypes.END});
 			this.props.onEnd && this.props.onEnd(event);
 		}
 
@@ -122,7 +122,7 @@ function withAnalytics(BCPlayerComponent) {
 			}));
 
 			this.onEvent({
-				type: PlayerEventTypes[`ON_PROGRESS_Q${mark}`],
+				type: PlayerEventTypes[`PROGRESS_Q${mark}`],
 				percentagePlayed
 			});
 		}
@@ -132,7 +132,7 @@ function withAnalytics(BCPlayerComponent) {
 		 * @param {NativeEvent} event
 		 */
 		onEnterFullscreen(event) {
-			this.onEvent({'type': PlayerEventTypes.ON_ENTER_FULLSCREEN});
+			this.onEvent({'type': PlayerEventTypes.ENTER_FULLSCREEN});
 			this.props.onEnterFullscreen && this.props.onEnterFullscreen(event);
 		}
 
@@ -141,7 +141,7 @@ function withAnalytics(BCPlayerComponent) {
 		 * @param {NativeEvent} event
 		 */
 		onExitFullscreen(event) {
-			this.onEvent({'type': PlayerEventTypes.ON_EXIT_FULLSCREEN});
+			this.onEvent({'type': PlayerEventTypes.EXIT_FULLSCREEN});
 			this.props.onExitFullscreen && this.props.onExitFullscreen(event);
 		}
 
@@ -150,11 +150,59 @@ function withAnalytics(BCPlayerComponent) {
 		 * @param {NativeEvent} event
 		 */
 		onError(event = {}) {
+
+			// Make sure that if an errorCode or errorMessage is passed, then
+			if (!event.error_code && !(event.errorMessage || event.message)) {
+				return;
+			}
+
+			let { errorCode, errorMessage } = this.normaliseErrorCodes(event);
+
 			this.onEvent({
-				'type': PlayerEventTypes.ON_ERROR,
-				...event
+				'type': PlayerEventTypes.ERROR,
+				errorCode,
+				errorMessage
 			});
 			this.props.onError && this.props.onError(event);
+		}
+
+		/**
+		 * Some of the errors are not very consistent. So we need to normalise them in order to get proper meaninful messages
+		 * and make sure ios and Android are aligned with the same errors
+		 */
+		normaliseErrorCodes({ error_code, errorMessage, message }) {
+
+			if (Platform.OS === 'android') {
+				// This happens on Android, it means that the internet might be down or it couldn't get through the segments
+				if (errorMessage === 'onLoadError: sourceId: -1') {
+					return { errorCode: 'LOAD_ERROR', errorMessage: 'There was an error trying to play the video. Check your internet connection.' }
+				}
+
+				// This happens on Android, it means that the internet might be down or it couldn't get through the segments
+				if (errorMessage === 'onPlayerError') {
+					return { errorCode: 'PLAYER_ERROR', errorMessage: 'Error trying to play the content.' }
+				}
+			}
+
+			if (Platform.OS === 'ios') {
+
+				/**
+				 * Error Code that indicates there was an error connecting to the Playback API.
+				 */
+				if (error_code === '1') {
+					return { errorCode: 'LOAD_ERROR', errorMessage: 'There was an error trying to play the video. Check your internet connection.' + ((errorMessage || message) ? `(${errorMessage || message})` : '') }
+				}
+
+				/**
+				 * Error Code that indicates there was an error returned by the API.
+				 */
+				if (error_code === '3' && Platform.OS === 'ios') {
+					error_code = 'RESOURCE_NOT_FOUND';
+				}
+			}
+
+			// If no error code is defined, then use a generic one, and pass the error message or the default 'There was an error'
+			return { errorCode: error_code || 'ERROR', errorMessage: errorMessage || message || 'There was an error!' }
 		}
 
 		/**
