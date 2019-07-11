@@ -182,6 +182,7 @@ function withAnalytics(BCPlayerComponent) {
 				{...this.props}
 				ref={(player) => this.player = player}
 				onReady={this.onReady.bind(this)}
+				onMetadataLoaded={this.onMetadataLoaded.bind(this)}
 				onPlay={this.onPlay.bind(this)}
 				onPause={this.onPause.bind(this)}
 				onEnd={this.onEnd.bind(this)}
