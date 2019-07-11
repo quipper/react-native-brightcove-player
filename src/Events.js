@@ -3,9 +3,9 @@ import {Platform} from 'react-native'
 import PlayerEventTypes from "./PlayerEventTypes";
 
 // This function takes a component...
-function withAnalytics(BCPlayerComponent) {
+function withEvents(BCPlayerComponent) {
 	// ...and returns another component...
-	class WithAnalytics extends Component {
+	class withEvents extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
@@ -246,8 +246,8 @@ function withAnalytics(BCPlayerComponent) {
 
 	// Rename the new component name to be the same as the high order component
 	// This is done because there are other components that looks up to the name of the BCPlayer (like ScrollView)
-	WithAnalytics.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BCPlayer';
-	return WithAnalytics;
+	withEvents.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BCPlayer';
+	return withEvents;
 }
 
-module.exports = withAnalytics;
+module.exports = withEvents;

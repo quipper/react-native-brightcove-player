@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
 import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet} from 'react-native'
 import Orientation from 'react-native-orientation'
-import BrightcovePlayer from "./BrightcovePlayer";
-import withAnalytics from "./Analytics";
+import BrightcovePlayer from './BrightcovePlayer';
+import withEvents from './Events';
 
 const Win = Dimensions.get('window')
 const backgroundColor = '#000'
@@ -178,4 +178,4 @@ BCPlayer.defaultProps = {
 }
 
 
-module.exports = withAnalytics(BCPlayer);
+module.exports = withEvents(BCPlayer);
