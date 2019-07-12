@@ -1,7 +1,12 @@
 package jp.manse;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
 import android.view.Choreographer;
@@ -43,7 +48,9 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener {
+import jp.manse.util.AudioFocusManager;
+
+public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener, AudioFocusManager.AudioFocusChangedListener {
     private ThemedReactContext context;
     private ReactApplicationContext applicationContext;
     private BrightcoveExoPlayerVideoView playerVideoView;
@@ -63,6 +70,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     private int bitRate = 0;
     private float playbackRate = 1;
     private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
+    private AudioFocusManager audioFocusManager;
 
     public BrightcovePlayerView(ThemedReactContext context, ReactApplicationContext applicationContext) {
         super(context);
@@ -84,6 +92,10 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
         // Implement the analytics to the  Brightcove player
         this.analytics = this.playerVideoView.getAnalytics();
+
+        // Create AudioFocusManager instance and register BrightcovePlayerView as a listener
+        this.audioFocusManager = new AudioFocusManager(this.context);
+        this.audioFocusManager.registerListener(this);
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
@@ -124,6 +136,8 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PLAY, event);
+                // When the playback starts, request focus to stop any background audio
+                audioFocusManager.requestFocus();
             }
         });
         eventEmitter.on(EventType.DID_PAUSE, new EventListener() {
@@ -133,6 +147,8 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PAUSE, event);
+                // When the playback stops, release the audio focus
+                audioFocusManager.abandonFocus();
             }
         });
         eventEmitter.on(EventType.COMPLETED, new EventListener() {
@@ -496,12 +512,14 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
     @Override
     public void onHostResume() {
-
+	    // Register to audio focus changes when the screen resumes
+	    audioFocusManager.registerListener(this);
     }
 
     @Override
     public void onHostPause() {
-
+        // Unregister from audio focus changes when the screen goes in the background
+        audioFocusManager.unregisterListener();
     }
 
     @Override
@@ -535,6 +553,14 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
             child.measure(MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+        }
+    }
+
+    @Override
+    public void audioFocusChanged(boolean hasFocus) {
+	    // Pasue the video when it looses focus
+	    if (!hasFocus && playerVideoView.isPlaying()) {
+	        playerVideoView.pause();
         }
     }
 }
