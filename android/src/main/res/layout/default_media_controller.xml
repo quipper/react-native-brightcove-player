@@ -8,7 +8,7 @@
     android:background="@color/bmc_background"
     android:layout_width="match_parent"
     android:layout_height="@dimen/bc_control_bar_height"
-    android:padding="8dp"
+    android:padding="@dimen/bc_control_bar_padding"
     android:orientation="horizontal"
     android:layout_gravity="bottom"
     style="@style/BrightcoveControlBar">
@@ -86,7 +86,7 @@
     <Button
         android:id="@id/live"
         style="@style/BorderlessButton"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/ic_live_button_height"
         android:layout_width="wrap_content"
         android:layout_gravity="center_vertical"
         android:visibility="gone"
