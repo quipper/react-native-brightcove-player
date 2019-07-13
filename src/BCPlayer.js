@@ -1,7 +1,7 @@
-import React, {Component} from 'react'
-import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet} from 'react-native'
-import Orientation from 'react-native-orientation'
+import React, {Component} from 'react';
+import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet} from 'react-native';
 import BrightcovePlayer from './BrightcovePlayer';
+import Orientation from 'react-native-orientation'
 import withEvents from './Events';
 
 const Win = Dimensions.get('window')
@@ -33,89 +33,77 @@ class BCPlayer extends Component {
 			fullScreen: false,
 			inlineHeight: Win.width * 0.5625,
 			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false},
-			mediainfo: null
+			mediainfo: null,
+			onRotate: false
 		}
 		this.animInline = new Animated.Value(Win.width * 0.5625);
 		this.animFullscreen = new Animated.Value(Win.width * 0.5625);
 		this.BackHandler = this.BackHandler.bind(this);
-		this.onRotated = this.onRotated.bind(this);
+		this.orientationDidChange = this.orientationDidChange.bind(this);
+	}
+
+	componentWillMount() {
+		// The getOrientation method is async. It happens sometimes that
+		// you need the orientation at the moment the JS runtime starts running on device.
+		// `getInitialOrientation` returns directly because its a constant set at the
+		// beginning of the JS runtime.
+		// Remember to remove listener
+		Orientation.removeOrientationListener(this.orientationDidChange);
 	}
 
 	componentDidMount() {
-		Dimensions.addEventListener('change', this.onRotated);
+		Orientation.addOrientationListener(this.orientationDidChange);
 		BackHandler.addEventListener('hardwareBackPress', this.BackHandler);
 	}
 
 	componentWillUnmount() {
-		Dimensions.removeEventListener('change', this.onRotated);
 		BackHandler.removeEventListener('hardwareBackPress', this.BackHandler);
+		Orientation.removeOrientationListener(this.orientationDidChange);
 	}
 
-	onRotated({window: {width, height}}) {
-		if (this.props.inlineOnly) return;
-		const orientation = width > height ? 'LANDSCAPE' : 'PORTRAIT';
+	orientationDidChange(orientation) {
 		if (this.props.rotateToFullScreen) {
-			if (orientation === 'LANDSCAPE') {
-				this.setState({fullScreen: true}, () => {
-					this.animToFullscreen(height);
-					this.props.onFullScreen(this.state.fullScreen);
-				})
+			if (orientation === 'LANDSCAPE' && !this.state.fullScreen) {
+				this.setState({onRotate: true}, () => {this.player.setFullscreen(true)});
 				return
 			}
-			if (orientation === 'PORTRAIT') {
-				this.setState({
-					fullScreen: false,
-					paused: this.props.fullScreenOnly || this.state.paused
-				}, () => {
-					this.animToInline();
-					if (this.props.fullScreenOnly) this.props.onPlay(!this.state.paused)
-					this.props.onFullScreen(this.state.fullScreen);
-				})
+			if (orientation === 'PORTRAIT' && this.state.fullScreen) {
+				this.setState({onRotate: true}, () => {this.player.setFullscreen(false)});
 				return;
 			}
 		} else {
 			this.animToInline();
 		}
-		if (this.state.fullScreen) this.animToFullscreen(height);
 	}
 
 	BackHandler() {
 		if (this.state.fullScreen) {
-			this.setState({fullScreen: false}, () => {
-				this.animToInline();
-				this.props.onFullScreen(this.state.fullScreen);
-				if (this.props.rotateToFullScreen) Orientation.lockToPortrait();
-				setTimeout(() => {
-					if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations();
-				}, 1500)
-			})
-			return true;
+			this.player.setFullscreen(false);
+			return true
 		}
 		return false;
 	}
 
 	toggleFS() {
 		this.setState({fullScreen: !this.state.fullScreen}, () => {
-			Orientation.getOrientation((e, orientation) => {
-				if (this.state.fullScreen) {
-					const initialOrient = Orientation.getInitialOrientation();
-					const height = orientation !== initialOrient ?
-						Win.width : Win.height;
-					this.props.onFullScreen(this.state.fullScreen);
-					if (this.props.rotateToFullScreen) Orientation.lockToLandscape();
-					this.animToFullscreen(height);
-				} else {
-					if (this.props.fullScreenOnly) {
-						this.setState({paused: true}, () => this.props.onPlay(!this.state.paused));
-					}
-					this.props.onFullScreen(this.state.fullScreen)
-					if (this.props.rotateToFullScreen) Orientation.lockToPortrait();
-					this.animToInline();
-					setTimeout(() => {
-						if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations();
-					}, 1500)
+			if (this.state.fullScreen) {
+				const initialOrient = Orientation.getInitialOrientation();
+				const height = this.state.onRotate ? Dimensions.get('window').height : Dimensions.get('window').width
+				this.props.onFullScreen(this.state.fullScreen);
+				if (this.props.rotateToFullScreen && !this.state.onRotate) Orientation.lockToLandscape();
+				this.animToFullscreen(height);
+			} else {
+				if (this.props.fullScreenOnly) {
+					this.setState({paused: true}, () => this.props.onPlay(!this.state.paused));
 				}
-			})
+				this.props.onFullScreen(this.state.fullScreen)
+				if (this.props.rotateToFullScreen && !this.state.onRotate) Orientation.lockToPortrait();
+				this.animToInline();
+				setTimeout(() => {
+					Orientation.unlockAllOrientations();
+				}, 1500)
+			}
+			this.setState({onRotate: false})
 		});
 	}
 
