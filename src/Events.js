@@ -270,7 +270,7 @@ function withEvents(BCPlayerComponent) {
 
 	// Rename the new component name to be the same as the high order component
 	// This is done because there are other components that looks up to the name of the BCPlayer (like ScrollView)
-	withEvents.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BCPlayer';
+	withEvents.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BrightcovePlayer';
 	return withEvents;
 }
 
