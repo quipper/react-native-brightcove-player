@@ -23,6 +23,8 @@ import com.brightcove.player.event.EventEmitter;
 import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
+import com.brightcove.player.mediacontroller.BrightcoveMediaControlRegistry;
+import com.brightcove.player.mediacontroller.buttons.SeekButtonController;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.analytics.Analytics;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
@@ -69,6 +71,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     private boolean playing = false;
     private int bitRate = 0;
     private float playbackRate = 1;
+	private static final int SEEK_AMOUNT = 10000; // In milliseconds
     private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
     private AudioFocusManager audioFocusManager;
 
@@ -89,6 +92,10 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.requestLayout();
         setupLayout();
         ViewCompat.setTranslationZ(this, 9999);
+
+		// Change the seek amounts
+		final BrightcoveMediaControlRegistry registry = this.playerVideoView.getBrightcoveMediaController().getMediaControlRegistry();
+        ((SeekButtonController) registry.getButtonController(R.id.rewind)).setSeekDefault(SEEK_AMOUNT);
 
         // Implement the analytics to the  Brightcove player
         this.analytics = this.playerVideoView.getAnalytics();
@@ -530,8 +537,8 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.applicationContext.removeLifecycleEventListener(this);
     }
 
-    // A view with elements that have a visibility to gone on the initial render won't be displayed after you've set 
-    // its visibility to visible. view.isShown() will return true, but it will not be there or it will be there but not 
+    // A view with elements that have a visibility to gone on the initial render won't be displayed after you've set
+    // its visibility to visible. view.isShown() will return true, but it will not be there or it will be there but not
     // really re-layout. This workaround somehow draws the child views manually
     // https://github.com/facebook/react-native/issues/17968
 
