@@ -149,7 +149,7 @@ BrightcovePlayer.propTypes = {
   fullscreen: PropTypes.bool,
   fullscreenStyle: PropTypes.object,
   disableDefaultControl: PropTypes.bool,
-  isLive: PropTypes.string,
+  playerType: PropTypes.string,
   volume: PropTypes.number,
   bitRate: PropTypes.number,
   playbackRate: PropTypes.number,
