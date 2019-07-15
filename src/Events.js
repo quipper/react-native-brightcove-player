@@ -241,18 +241,20 @@ function withEvents(BCPlayerComponent) {
 				videoId: this.props.videoId,
 				referenceId: this.props.referenceId,
 				accountId: this.props.accountId,
-				playerId: this.player.props.playerId,
+				playerId: this.props.playerId,
 				platform: Platform.OS
 			}
 			this.props.onEvent && this.props.onEvent(event);
 		}
 
 		render() {
+			const { forwardedRef, ...props} = this.props;
+
 			// ... and renders the wrapped component with the fresh data!
 			// Notice that we pass through any additional props
 			return <BCPlayerComponent
-				{...this.props}
-				ref={(player) => this.player = player}
+				{...props}
+				ref={forwardedRef}
 				onReady={this.onReady.bind(this)}
 				onMetadataLoaded={this.onMetadataLoaded.bind(this)}
 				onPlay={this.onPlay.bind(this)}
