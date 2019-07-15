@@ -2,5 +2,5 @@
 <resources>
     <dimen name="bc_control_bar_height">35dp</dimen>
     <dimen name="bc_control_bar_padding">2dp</dimen>
-    <dimen name="ic_live_button_height">20dp</dimen>
+    <dimen name="ic_live_button_height">26dp</dimen>
 </resources>
