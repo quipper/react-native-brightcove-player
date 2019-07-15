@@ -45,6 +45,7 @@ RCT_EXPORT_VIEW_PROPERTY(onEnterFullscreen, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onBeforeExitFullscreen, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onExitFullscreen, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onError, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onNetworkConnectivityChange, RCTDirectEventBlock);
 
 RCT_EXPORT_METHOD(seekTo:(nonnull NSNumber *)reactTag seconds:(nonnull NSNumber *)seconds) {
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {

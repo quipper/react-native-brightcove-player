@@ -244,11 +244,8 @@
      * after a seek occurs, and when playback stops because of a slow or disabled
      * network. When the buffer is full enough to start playback again,
      * kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp will be sent.
-     * or
-      * Playback of the video has stalled. When the video recovers,
-     * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
      */
-     } else if ((lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) || (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled)) {
+     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
         if (self.onBufferingStarted) {
             self.onBufferingStarted(@{});
         }
@@ -256,12 +253,26 @@
      * After becoming empty, this event is sent when the playback buffer has filled
      * enough that it should be able to keep up with playback. This event will come after
      * kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty.
-     * or
-     * Playback has recovered after being stalled.
      */
-     } else if ((lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) || (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered)) {
+     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
         if (self.onBufferingCompleted) {
             self.onBufferingCompleted(@{});
+        }
+
+    /**
+      * Playback of the video has stalled. When the video recovers,
+     * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
+     */
+     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
+        if (self.onBufferingStarted) {
+            self.onNetworkConnectivityChange(@{"status": @"error"});
+        }
+    /**
+     * Playback has recovered after being stalled.
+     */
+     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
+        if (self.onBufferingCompleted) {
+            self.onNetworkConnectivityChange(@{"status": @"recovered"});
         }
     /**
      * A generic error has occurred.
