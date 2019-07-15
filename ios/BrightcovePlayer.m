@@ -184,6 +184,15 @@
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+
+        const BOOL isLive = CMTIME_IS_INDEFINITE([session.player currentItem].duration);
+
+        if (isLive) {
+            _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveDVRControlLayout];
+        } else {
+            _playerView.controlsView.layout = [BCOVPUIControlLayout basicVODControlLayout];
+        }
+
         _playbackSession = session;
         [self refreshVolume];
         [self refreshBitRate];
@@ -220,9 +229,9 @@
      * after a seek occurs, and when playback stops because of a slow or disabled
      * network. When the buffer is full enough to start playback again,
      * kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp will be sent.
-	 * or
- 	 * Playback of the video has stalled. When the video recovers,
-	 * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
+     * or
+      * Playback of the video has stalled. When the video recovers,
+     * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
      */
      } else if ((lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) || (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled)) {
         if (self.onBufferingStarted) {
@@ -232,8 +241,8 @@
      * After becoming empty, this event is sent when the playback buffer has filled
      * enough that it should be able to keep up with playback. This event will come after
      * kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty.
-	 * or
-	 * Playback has recovered after being stalled.
+     * or
+     * Playback has recovered after being stalled.
      */
      } else if ((lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) || (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered)) {
         if (self.onBufferingCompleted) {
