@@ -265,7 +265,7 @@
      */
      } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
         if (self.onBufferingStarted) {
-            self.onNetworkConnectivityChange(@{"status": @"error"});
+            self.onNetworkConnectivityChange(@{"status": @"stalled"});
         }
     /**
      * Playback has recovered after being stalled.

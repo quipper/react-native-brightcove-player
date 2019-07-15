@@ -133,7 +133,7 @@ class BCPlayer extends Component {
 
 	onNetworkConnectivityChange(event) {
 		switch(event.status) {
-			case 'error':
+			case 'stalled':
 				this.setState({renderError: true})
 			break;
 			case 'recovered':
