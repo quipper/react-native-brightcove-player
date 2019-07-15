@@ -22,10 +22,16 @@
     _playbackController.autoAdvance = YES;
     [_playbackController setAllowsExternalPlayback:YES];
 
-    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+    BCOVPUIPlayerViewOptions *options = [[BCOVPUIPlayerViewOptions alloc] init];
+    options.presentingViewController = self;
+
+    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:options controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
+
+    // Hide the controls until it defines which controls to use based on the READY state
+    _playerView.controlsView.hidden = true;
 
     _targetVolume = 1.0;
     _autoPlay = NO;
@@ -111,6 +117,11 @@
     [self loadMovie];
 }
 
+
+- (void)setIsLive:(NSString *)isLive {
+    _isLive = isLive;
+}
+
 - (void)setPolicyKey:(NSString *)policyKey {
     _policyKey = policyKey;
     _playbackServiceDirty = YES;
@@ -174,6 +185,7 @@
 }
 
 - (void)setDisableDefaultControl:(BOOL)disable {
+    _disableDefaultControl = disable;
     _playerView.controlsView.hidden = disable;
 }
 
@@ -192,6 +204,8 @@
         } else {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicVODControlLayout];
         }
+        // Once the controls are set to the layout, define the controls to the state sent to the player
+        _playerView.controlsView.hidden = _disableDefaultControl;
 
         _playbackSession = session;
         [self refreshVolume];
