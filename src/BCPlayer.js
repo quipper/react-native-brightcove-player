@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet} from 'react-native';
+import {Animated, BackHandler, Dimensions, Platform, StatusBar, StyleSheet, Text} from 'react-native';
 import BrightcovePlayer from './BrightcovePlayer';
 import Orientation from 'react-native-orientation'
 import withEvents from './Events';
@@ -37,7 +37,8 @@ class BCPlayer extends Component {
 			inlineHeight: Win.width * 0.5625,
 			percentageTracked: {Q1: false, Q2: false, Q3: false, Q4: false},
 			mediainfo: null,
-			onRotate: false
+			onRotate: false,
+			renderError: false
 		}
 		this.animInline = new Animated.Value(Win.width * 0.5625);
 		this.animFullscreen = new Animated.Value(Win.width * 0.5625);
@@ -62,6 +63,7 @@ class BCPlayer extends Component {
 	componentWillUnmount() {
 		BackHandler.removeEventListener('hardwareBackPress', this.BackHandler);
 		Orientation.removeOrientationListener(this.orientationDidChange);
+		this.setState({renderError: false})
 	}
 
 	orientationDidChange(orientation) {
@@ -125,7 +127,29 @@ class BCPlayer extends Component {
 		]).start();
 	}
 
-	render() {
+	onError(event) {
+		this.setState({renderError: true})
+	}
+
+	renderError() {
+		const {fullScreen} = this.state
+		const inline = {
+			height: this.animInline,
+			alignSelf: 'stretch'
+		}
+		const textStyle = {color: 'white', padding: 10, textAlign: 'center'}
+		return (
+			<Animated.View
+				style={[styles.background, fullScreen ? styles.fullScreen : inline]}
+			>
+				<Text style={textStyle}>{'Oops!'}</Text>
+				<Text style={textStyle}>{'There was an error playing this video, please check your internet connection or try again later.'}</Text>
+			</Animated.View>
+		)
+	}
+
+
+	renderPlayer() {
 		const {
 			fullScreen
 		} = this.state;
@@ -152,9 +176,14 @@ class BCPlayer extends Component {
 					playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
 					onBeforeEnterFullscreen={this.toggleFS.bind(this)}
 					onBeforeExitFullscreen={this.toggleFS.bind(this)}
+					onError={this.onError.bind(this)}
 				/>
 			</Animated.View>
 		)
+	}
+
+	render() {
+		return this.state.renderError ? this.renderError() : this.renderPlayer()
 	}
 }
 
