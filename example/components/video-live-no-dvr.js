@@ -8,8 +8,6 @@ const POLICY_KEY = 'BCpkADawqM2kD-MtMQswS0cLWgf553m4yFUj8vRkvNVw6wybPb1CSVo3Y4mP
 const VIDEO_ID = '6057201331001'; // Live in Australia
 //const VIDEO_ID = '1872491397001'; // Live in USA
 
-
-
 const AppHeader = (headerProps) => <Header {... headerProps} />;
 
 export default class VideoHeader extends Component {
@@ -32,7 +30,7 @@ export default class VideoHeader extends Component {
 					play={true}
 					autoPlay={true}
 					fullscreen={false}
-					isLive={"true"}
+					playerType={"Live"}
 					onFullScreen={isLandscape => {
 						isLandscape ? this.props.navigation.setParams({
 							header: null

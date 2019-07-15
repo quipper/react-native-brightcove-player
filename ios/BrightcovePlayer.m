@@ -118,8 +118,8 @@
 }
 
 
-- (void)setIsLive:(NSString *)isLive {
-    _isLive = isLive;
+- (void)setPlayerType:(NSString *)type {
+    _playerType = type;
 }
 
 - (void)setPolicyKey:(NSString *)policyKey {
@@ -197,9 +197,9 @@
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
 
-        if ([_isLive isEqualToString:@"true"]) {
+        if ([[_playerType uppercaseString] isEqualToString:@"LIVE"]) {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveControlLayout];
-        } else if ([_isLive isEqualToString:@"dvr"]) {
+        } else if ([[_playerType uppercaseString] isEqualToString:@"DVR"]) {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveDVRControlLayout];
         } else {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicVODControlLayout];

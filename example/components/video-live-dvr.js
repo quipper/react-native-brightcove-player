@@ -3,11 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import { Header } from 'react-navigation';
 import {BCPlayer} from 'react-native-brightcove-player';
 
+// Dream 11 Account
 const ACCOUNT_ID = '6008340455001';
 const POLICY_KEY = 'BCpkADawqM2HRDvtLxjif_KyjnhHtg7RS8advAhVCOHvDc2kHo9587NU_BE0VXSDoAaRCarG8hBlBqtrLvKXUh2SRVSAURawe8BPjFcVjCdfRgBqR6kdwzsf6LT0ojMErgEMKusg7um0tBFz';
 const VIDEO_ID = '6058360435001';
-
-
 
 const AppHeader = (headerProps) => <Header {... headerProps} />;
 
@@ -31,7 +30,7 @@ export default class VideoHeader extends Component {
 					play={true}
 					autoPlay={true}
 					fullscreen={false}
-					isLive={"DVR"}
+					playerType={"DVR"}
 					onFullScreen={isLandscape => {
 						isLandscape ? this.props.navigation.setParams({
 							header: null
