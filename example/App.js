@@ -2,6 +2,7 @@ import Home from './components/Home';
 import BrightcoveHeader from './components/video-header';
 import BrightcoveScroll from './components/video-scroll';
 import BrightcoveLiveNoDVR from './components/video-live-no-dvr';
+import BrightcoveLiveDVR from './components/video-live-dvr';
 import NestedView from './components/nested-view';
 import ArticleScreen from './components/article';
 import VideoScreen from './components/video';
@@ -33,6 +34,7 @@ const MainNavigator = createStackNavigator({
 	BrightcoveHeader: { screen: BrightcoveHeader },
 	BrightcoveScroll: { screen: BrightcoveScroll },
 	BrightcoveLiveNoDVR: { screen: BrightcoveLiveNoDVR },
+	BrightcoveLiveDVR: { screen: BrightcoveLiveDVR },
 	NestedView: {screen: NestedView},
 	ArticleStack: { screen: ArticleStack },
 

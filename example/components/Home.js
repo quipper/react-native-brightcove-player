@@ -41,6 +41,12 @@ export default class Home extends Component {
 						onPress={() => navigate('BrightcoveLiveNoDVR')}
 					/>
 				</View>
+				<View style={styles.control}>
+					<Button
+						title="Live - DVR"
+						onPress={() => navigate('BrightcoveLiveDVR')}
+					/>
+				</View>
 			</View>
 		);
 	}
