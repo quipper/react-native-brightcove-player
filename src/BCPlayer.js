@@ -137,7 +137,7 @@ class BCPlayer extends Component {
 			height: this.animInline,
 			alignSelf: 'stretch'
 		}
-		const textStyle = {color: 'white', padding: 10}
+		const textStyle = {color: 'white', padding: 10, textAlign: 'center'}
 		return (
 			<Animated.View
 				style={[styles.background, fullScreen ? styles.fullScreen : inline]}
@@ -176,6 +176,7 @@ class BCPlayer extends Component {
 					playerId={this.props.playerId ? this.props.playerId : `com.brightcove/react-native/${Platform.OS}`}
 					onBeforeEnterFullscreen={this.toggleFS.bind(this)}
 					onBeforeExitFullscreen={this.toggleFS.bind(this)}
+					onError={this.onError.bind(this)}
 				/>
 			</Animated.View>
 		)
