@@ -88,6 +88,15 @@ function withEvents(BCPlayerComponent) {
 			this.props.onBufferingCompleted && this.props.onBufferingCompleted(event);
 		}
 
+		/**
+		 * Event trigger when there is a change in the connectivity
+		 * @param {NativeEvent} event
+		 */
+		onNetworkConnectivityChange(event) {
+			this.onEvent({'type': PlayerEventTypes.NETWORK_CONNECTIVITY_CHANGE, status: event.status });
+			this.props.onNetworkConnectivityChange && this.props.onNetworkConnectivityChange(event);
+		}
+
 
 		/**
 		 * Event triggered as the stream progress.
@@ -263,6 +272,7 @@ function withEvents(BCPlayerComponent) {
 				onProgress={this.onProgress.bind(this)}
 				onBufferingStarted={this.onBufferingStarted.bind(this)}
 				onBufferingCompleted={this.onBufferingCompleted.bind(this)}
+				onNetworkConnectivityChange={this.onNetworkConnectivityChange.bind(this)}
 				onEnterFullscreen={this.onEnterFullscreen.bind(this)}
 				onExitFullscreen={this.onExitFullscreen.bind(this)}
 				onError={this.onError.bind(this)}
