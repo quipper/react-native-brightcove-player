@@ -199,7 +199,7 @@
 
         if ([_isLive isEqualToString:@"true"]) {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveControlLayout];
-        } else if ([_isLive isEqualToString:@"dvr"]) {
+        } else if ([[_isLive uppercaseString] isEqualToString:@"DVR"]) {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveDVRControlLayout];
         } else {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicVODControlLayout];
