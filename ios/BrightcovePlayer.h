@@ -20,6 +20,7 @@
 @property (nonatomic) BCOVPUIPlayerView *playerView;
 @property (nonatomic) BOOL playing;
 @property (nonatomic) BOOL autoPlay;
+@property (nonatomic) NSString *isLive;
 @property (nonatomic) float lastBufferProgress;
 @property (nonatomic) float targetVolume;
 @property (nonatomic) float targetBitRate;

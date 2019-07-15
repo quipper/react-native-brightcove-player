@@ -185,9 +185,9 @@
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
 
-        const BOOL isLive = CMTIME_IS_INDEFINITE([session.player currentItem].duration);
-
-        if (isLive) {
+        if ([_isLive isEqualToString:@"true"]) {
+            _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveControlLayout];
+        } else if ([_isLive isEqualToString:@"dvr"]) {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveDVRControlLayout];
         } else {
             _playerView.controlsView.layout = [BCOVPUIControlLayout basicVODControlLayout];
@@ -196,6 +196,7 @@
         _playbackSession = session;
         [self refreshVolume];
         [self refreshBitRate];
+
         if (self.onReady) {
             self.onReady(@{});
         }

@@ -3,10 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { Header } from 'react-navigation';
 import {BCPlayer} from 'react-native-brightcove-player';
 
-const ACCOUNT_ID = '1872491397001';
-const POLICY_KEY = 'BCpkADawqM2kD-MtMQswS0cLWgf553m4yFUj8vRkvNVw6wybPb1CSVo3Y4mPyR7RQPv5zMoJbxYZpJMBeHhHJYFW4_FIfrvRvid1_xNlUCkCr8mdh35esbt0gJsqi-C_zIXH8xpXRIeiM_44';
-const VIDEO_ID = '6057201331001'; // Live in Australia
-//const VIDEO_ID = '1872491397001'; // Live in USA
+const ACCOUNT_ID = '6008340455001';
+const POLICY_KEY = 'BCpkADawqM2HRDvtLxjif_KyjnhHtg7RS8advAhVCOHvDc2kHo9587NU_BE0VXSDoAaRCarG8hBlBqtrLvKXUh2SRVSAURawe8BPjFcVjCdfRgBqR6kdwzsf6LT0ojMErgEMKusg7um0tBFz';
+const VIDEO_ID = '6058360435001';
 
 
 
@@ -16,7 +15,7 @@ export default class VideoHeader extends Component {
 
 	static navigationOptions = ({ navigation }) => {
 		return {
-			headerTitle: 'Live - NO DVR',
+			headerTitle: 'Live - DVR',
 			header: navigation.state.params ? navigation.state.params.header : AppHeader
 		}
 	}
@@ -32,7 +31,7 @@ export default class VideoHeader extends Component {
 					play={true}
 					autoPlay={true}
 					fullscreen={false}
-					isLive={"true"}
+					isLive={"DVR"}
 					onFullScreen={isLandscape => {
 						isLandscape ? this.props.navigation.setParams({
 							header: null
