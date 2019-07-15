@@ -177,6 +177,7 @@ class BCPlayer extends Component {
 					onBeforeEnterFullscreen={this.toggleFS.bind(this)}
 					onBeforeExitFullscreen={this.toggleFS.bind(this)}
 					onError={this.onError.bind(this)}
+					onNetworkConnectivityChange={this.onNetworkConnectivityChange.bind(this)}
 				/>
 			</Animated.View>
 		)
