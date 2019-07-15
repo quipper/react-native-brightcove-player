@@ -4,6 +4,9 @@ import BrightcovePlayer from './BrightcovePlayer';
 import Orientation from 'react-native-orientation'
 import withEvents from './Events';
 
+// Wraps the Brightcove player with special Events
+const BrightcovePlayerWithEvents = withEvents(BrightcovePlayer);
+
 const Win = Dimensions.get('window')
 const backgroundColor = '#000'
 
@@ -142,7 +145,7 @@ class BCPlayer extends Component {
 				]}
 			>
 				<StatusBar hidden={fullScreen}/>
-				<BrightcovePlayer
+				<BrightcovePlayerWithEvents
 					ref={(player) => this.player = player}
 					{...this.props}
 					style={[styles.player, this.props.style]}
@@ -166,4 +169,4 @@ BCPlayer.defaultProps = {
 }
 
 
-module.exports = withEvents(BCPlayer);
+module.exports = BCPlayer;
