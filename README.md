@@ -124,6 +124,7 @@ export default class App extends Component {
 | onBeforeExitFullscreen | Function | Indicates the player beforeexit full screen                                                                                                                                                                                       |                              |
 | onExitFullscreen       | Function | Indicates the player exit full screen                                                                                                                                                                                             |                              |
 | onError                | Function | Fires an error event if anything happens  that avoid the video to play                                                                                                                                                            |                              |
+| onNetworkConnectivityChange | Function | Indicates if the player has lost connection or trying to reconect or if it recover from it                                                                                                                                   |                              |
 
 
 <br>
