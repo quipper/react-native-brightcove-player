@@ -131,6 +131,17 @@ class BCPlayer extends Component {
 		this.setState({renderError: true})
 	}
 
+	onNetworkConnectivityChange(event) {
+		switch(event.status) {
+			case 'error':
+				this.setState({renderError: true})
+			break;
+			case 'recovered':
+				this.setState({renderError: false})
+			break;
+		}
+	}
+
 	renderError() {
 		const {fullScreen} = this.state
 		const inline = {
@@ -177,6 +188,7 @@ class BCPlayer extends Component {
 					onBeforeEnterFullscreen={this.toggleFS.bind(this)}
 					onBeforeExitFullscreen={this.toggleFS.bind(this)}
 					onError={this.onError.bind(this)}
+					onNetworkConnectivityChange={this.onNetworkConnectivityChange.bind(this)}
 				/>
 			</Animated.View>
 		)
