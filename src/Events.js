@@ -5,7 +5,7 @@ import PlayerEventTypes from "./PlayerEventTypes";
 // This function takes a component...
 function withEvents(BCPlayerComponent) {
 	// ...and returns another component...
-	class withEvents extends Component {
+	class BCPlayerComponentWithEvents extends Component {
 		constructor(props) {
 			super(props);
 			this.state = {
@@ -280,10 +280,14 @@ function withEvents(BCPlayerComponent) {
 		}
 	}
 
-	// Rename the new component name to be the same as the high order component
-	// This is done because there are other components that looks up to the name of the BCPlayer (like ScrollView)
-	withEvents.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BrightcovePlayer';
-	return withEvents;
+	const forwardComponent = React.forwardRef((props, ref) => {
+		return <BCPlayerComponentWithEvents {...props} forwardedRef={ref} />;
+	});
+
+	// // Rename the new component name to be the same as the high order component
+	// // This is done because there are other components that looks up to the name of the BCPlayer (like ScrollView)
+	forwardComponent.displayName = BCPlayerComponent.displayName || BCPlayerComponent.name || 'BrightcovePlayer';
+	return forwardComponent;
 }
 
 module.exports = withEvents;

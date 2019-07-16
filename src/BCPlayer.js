@@ -69,11 +69,15 @@ class BCPlayer extends Component {
 	orientationDidChange(orientation) {
 		if (this.props.rotateToFullScreen) {
 			if (orientation === 'LANDSCAPE' && !this.state.fullScreen) {
-				this.setState({onRotate: true}, () => {this.player.setFullscreen(true)});
+				this.setState({onRotate: true}, () => {
+					this.player.setFullscreen && this.player.setFullscreen(true)
+				});
 				return
 			}
 			if (orientation === 'PORTRAIT' && this.state.fullScreen) {
-				this.setState({onRotate: true}, () => {this.player.setFullscreen(false)});
+				this.setState({onRotate: true}, () => {
+					this.player.setFullscreen && this.player.setFullscreen(false)
+				});
 				return;
 			}
 		} else {

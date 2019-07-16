@@ -22,10 +22,7 @@
     _playbackController.autoAdvance = YES;
     [_playbackController setAllowsExternalPlayback:YES];
 
-    BCOVPUIPlayerViewOptions *options = [[BCOVPUIPlayerViewOptions alloc] init];
-    options.presentingViewController = self;
-
-    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:options controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
