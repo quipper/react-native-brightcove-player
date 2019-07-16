@@ -538,6 +538,16 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     }
 
     @Override
+    protected void onDetachedFromWindow() {
+        // For safety, clear listeners in onDetachedFromWindow too since when the back button or home toolbar button are
+        // clicked, onHostPause does not get executed
+        super.onDetachedFromWindow();
+        // Unregister from audio focus changes when the screen goes in the background
+        audioFocusManager.unregisterListener();
+        unregisterConnectivityChange();
+    }
+
+    @Override
     public void onHostDestroy() {
         this.playerVideoView.destroyDrawingCache();
         this.playerVideoView.clear();
