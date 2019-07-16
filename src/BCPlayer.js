@@ -94,14 +94,14 @@ class BCPlayer extends Component {
 			if (this.state.fullScreen) {
 				const initialOrient = Orientation.getInitialOrientation();
 				const height = this.state.onRotate ? Dimensions.get('window').height : Dimensions.get('window').width
-				this.props.onFullScreen(this.state.fullScreen);
+				this.props.onFullScreen && this.props.onFullScreen(this.state.fullScreen);
 				if (this.props.rotateToFullScreen && !this.state.onRotate) Orientation.lockToLandscape();
 				this.animToFullscreen(height);
 			} else {
 				if (this.props.fullScreenOnly) {
 					this.setState({paused: true}, () => this.props.onPlay(!this.state.paused));
 				}
-				this.props.onFullScreen(this.state.fullScreen)
+				this.props.onFullScreen && this.props.onFullScreen(this.state.fullScreen)
 				if (this.props.rotateToFullScreen && !this.state.onRotate) Orientation.lockToPortrait();
 				this.animToInline();
 				setTimeout(() => {
@@ -177,7 +177,6 @@ class BCPlayer extends Component {
 					onBeforeEnterFullscreen={this.toggleFS.bind(this)}
 					onBeforeExitFullscreen={this.toggleFS.bind(this)}
 					onError={this.onError.bind(this)}
-					onNetworkConnectivityChange={this.onNetworkConnectivityChange.bind(this)}
 				/>
 			</Animated.View>
 		)

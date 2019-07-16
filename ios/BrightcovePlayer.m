@@ -239,59 +239,64 @@
         if (self.onEnd) {
             self.onEnd(@{});
         }
-    /**
-     * The playback buffer is empty. This will occur when the video initially loads,
-     * after a seek occurs, and when playback stops because of a slow or disabled
-     * network. When the buffer is full enough to start playback again,
-     * kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp will be sent.
-     */
-     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
+	}
+
+     /**
+      * The playback buffer is empty. This will occur when the video initially loads,
+      * after a seek occurs, and when playback stops because of a slow or disabled
+      * network. When the buffer is full enough to start playback again,
+      * kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp will be sent.
+      */
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
         if (self.onBufferingStarted) {
             self.onBufferingStarted(@{});
         }
-    /**
-     * After becoming empty, this event is sent when the playback buffer has filled
-     * enough that it should be able to keep up with playback. This event will come after
-     * kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty.
-     */
-     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
+	 }
+     /**
+      * After becoming empty, this event is sent when the playback buffer has filled
+      * enough that it should be able to keep up with playback. This event will come after
+      * kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty.
+      */
+	 if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) {
         if (self.onBufferingCompleted) {
             self.onBufferingCompleted(@{});
         }
-
-    /**
+	 }
+     /**
       * Playback of the video has stalled. When the video recovers,
-     * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
-     */
-     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
-        if (self.onBufferingStarted) {
-            self.onNetworkConnectivityChange(@{"status": @"stalled"});
-        }
-    /**
-     * Playback has recovered after being stalled.
-     */
-     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
-        if (self.onBufferingCompleted) {
-            self.onNetworkConnectivityChange(@{"status": @"recovered"});
-        }
-    /**
-     * A generic error has occurred.
-     */
-    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
+      * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
+      */
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
+        if (self.onNetworkConnectivityChange) {
+			self.onNetworkConnectivityChange(@{@"status": @"stalled"});
+		}
+	 }
+     /**
+      * Playback has recovered after being stalled.
+      */
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
+        if (self.onNetworkConnectivityChange) {
+			self.onNetworkConnectivityChange(@{@"status": @"recovered"});
+		}
+	 }
+     /**
+      * A generic error has occurred.
+      */
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
         NSError *error = lifecycleEvent.properties[@"error"];
         NSLog(@"Lifecycle Event Fail error: %@", error);
         [self emitError:error];
-    /**
-     * The video failed to load.
-     */
+     /**
+      * The video failed to load.
+      */
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
         NSError *error = lifecycleEvent.properties[@"error"];
         NSLog(@"Lifecycle Event Fail error: %@", error);
         [self emitError:error];
-    /**
-     * The video failed during playback and was unable to recover, possibly due to a
-     * network error.
-     */
+     /**
+      * The video failed during playback and was unable to recover, possibly due to a
+      * network error.
+      */
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
         NSError *error = lifecycleEvent.properties[@"error"];
         NSLog(@"Lifecycle Event Fail error: %@", error);
