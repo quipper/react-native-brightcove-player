@@ -28,6 +28,7 @@
 @property (nonatomic) float targetPlaybackRate;
 @property (nonatomic) BOOL playbackServiceDirty;
 @property (nonatomic) NSDictionary *mediaInfo;
+@property (nonatomic) NSTimeInterval segmentDuration;
 
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;
