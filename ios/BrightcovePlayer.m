@@ -207,6 +207,9 @@
         // Once the controls are set to the layout, define the controls to the state sent to the player
         _playerView.controlsView.hidden = _disableDefaultControl;
 
+        UITapGestureRecognizer *seekToTimeTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSeekToTimeTap:)];
+        [_playerView.controlsView.progressSlider addGestureRecognizer:seekToTimeTap];
+
         _playbackSession = session;
         [self refreshVolume];
         [self refreshBitRate];
@@ -239,7 +242,7 @@
         if (self.onEnd) {
             self.onEnd(@{});
         }
-	}
+    }
 
      /**
       * The playback buffer is empty. This will occur when the video initially loads,
@@ -251,34 +254,34 @@
         if (self.onBufferingStarted) {
             self.onBufferingStarted(@{});
         }
-	 }
+     }
      /**
       * After becoming empty, this event is sent when the playback buffer has filled
       * enough that it should be able to keep up with playback. This event will come after
       * kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty.
       */
-	 if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) {
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) {
         if (self.onBufferingCompleted) {
             self.onBufferingCompleted(@{});
         }
-	 }
+     }
      /**
       * Playback of the video has stalled. When the video recovers,
       * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
       */
      if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
         if (self.onNetworkConnectivityChange) {
-			self.onNetworkConnectivityChange(@{@"status": @"stalled"});
-		}
-	 }
+            self.onNetworkConnectivityChange(@{@"status": @"stalled"});
+        }
+     }
      /**
       * Playback has recovered after being stalled.
       */
      if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
         if (self.onNetworkConnectivityChange) {
-			self.onNetworkConnectivityChange(@{@"status": @"recovered"});
-		}
-	 }
+            self.onNetworkConnectivityChange(@{@"status": @"recovered"});
+        }
+     }
      /**
       * A generic error has occurred.
       */
@@ -306,6 +309,7 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didChangeDuration:(NSTimeInterval)duration {
+    _segmentDuration = duration;
     if (self.onChangeDuration) {
         self.onChangeDuration(@{
                                 @"duration": @(duration)
@@ -353,6 +357,29 @@
             self.onEnterFullscreen(@{});
         }
     }
+}
+
+- (void)handleSeekToTimeTap:(UITapGestureRecognizer *)recognizer {
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        CGPoint location = [recognizer locationInView:[recognizer.view superview]];
+
+        double touchLocation = location.x / _playerView.controlsView.progressSlider.bounds.size.width;
+        double percentage = [self calculateSeekTime:touchLocation];
+        CMTime newTime = CMTimeMake(percentage * _segmentDuration, 1);
+
+        [_playbackController seekToTime:CMTimeMakeWithSeconds(CMTimeGetSeconds(newTime), NSEC_PER_SEC) completionHandler:^(BOOL finished) {
+        }];
+    }
+}
+
+- (double)calculateSeekTime:(double)percentage {
+    if (percentage > 1.0) {
+        percentage = 1.0;
+    } else if (percentage < 0.0) {
+        percentage = 0.0;
+    }
+
+    return percentage;
 }
 
 -(void)dispose {
