@@ -20,7 +20,7 @@
     _playbackController.delegate = self;
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
-    [_playbackController setAllowsExternalPlayback:YES];
+    // [_playbackController setAllowsExternalPlayback:YES];
 
     _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
     _playerView.delegate = self;
