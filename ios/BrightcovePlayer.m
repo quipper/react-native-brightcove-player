@@ -207,6 +207,9 @@
         // Once the controls are set to the layout, define the controls to the state sent to the player
         _playerView.controlsView.hidden = _disableDefaultControl;
 
+		UITapGestureRecognizer *seekToTimeTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSeekToTimeTap:)];
+		[_playerView.controlsView.progressSlider addGestureRecognizer:seekToTimeTap];
+
         _playbackSession = session;
         [self refreshVolume];
         [self refreshBitRate];
@@ -306,6 +309,7 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didChangeDuration:(NSTimeInterval)duration {
+    _segmentDuration = duration;
     if (self.onChangeDuration) {
         self.onChangeDuration(@{
                                 @"duration": @(duration)
@@ -353,6 +357,29 @@
             self.onEnterFullscreen(@{});
         }
     }
+}
+
+- (void)handleSeekToTimeTap:(UITapGestureRecognizer *)recognizer {
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        CGPoint location = [recognizer locationInView:[recognizer.view superview]];
+
+        double touchLocation = location.x / _playerView.controlsView.progressSlider.bounds.size.width;
+        double percentage = [self calculateSeekTime:touchLocation];
+        CMTime newTime = CMTimeMake(percentage * _segmentDuration, 1);
+
+        [_playbackController seekToTime:CMTimeMakeWithSeconds(CMTimeGetSeconds(newTime), NSEC_PER_SEC) completionHandler:^(BOOL finished) {
+        }];
+    }
+}
+
+- (double)calculateSeekTime:(double)percentage {
+    if (percentage > 1.0) {
+        percentage = 1.0;
+    } else if (percentage < 0.0) {
+        percentage = 0.0;
+    }
+
+    return percentage;
 }
 
 -(void)dispose {
