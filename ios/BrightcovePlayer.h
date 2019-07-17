@@ -11,6 +11,7 @@
 #import <BrightcovePlayerSDK/BCOVOfflineVideoManager.h>
 #import <React/RCTBridge.h>
 #import <React/UIView+React.h>
+#import <AVKit/AVKit.h>
 
 @interface BrightcovePlayer : UIView<BCOVOfflineVideoManagerDelegate>
 
@@ -29,6 +30,7 @@
 @property (nonatomic) BOOL playbackServiceDirty;
 @property (nonatomic) NSDictionary *mediaInfo;
 @property (nonatomic) NSTimeInterval segmentDuration;
+@property (nonatomic) AVRoutePickerView *route;
 
 @property (nonatomic, copy) NSString *referenceId;
 @property (nonatomic, copy) NSString *videoId;
