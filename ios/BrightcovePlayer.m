@@ -20,9 +20,9 @@
     _playbackController.delegate = self;
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
-    // [_playbackController setAllowsExternalPlayback:YES];
+    //[_playbackController setAllowsExternalPlayback:YES];
 
-    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout]];
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
@@ -231,9 +231,14 @@
             self.onPlay(@{});
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
-        _playing = false;
-        if (self.onPause) {
-            self.onPause(@{});
+        if (_playing) {
+            _playing = false;
+            if (self.onPause) {
+                self.onPause(@{});
+            }
+            
+            // Hide controls view after pause a video
+            [self refreshControlsView];
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
         if (self.onEnd) {
@@ -392,6 +397,13 @@
     NSString *code = [NSString stringWithFormat:@"%ld", (long)[error code]];
 
     self.onError(@{@"error_code": code, @"message": [error localizedDescription]});
+}
+
+- (void)refreshControlsView {
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        _playerView.controlsFadingViewVisible = !_playerView.controlsFadingViewVisible;
+    });
 }
 
 @end
