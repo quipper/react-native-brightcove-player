@@ -1,12 +1,8 @@
 package jp.manse;
 
-import android.content.Context;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.media.AudioAttributes;
-import android.media.AudioFocusRequest;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
 import android.view.Choreographer;
@@ -51,8 +47,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jp.manse.util.AudioFocusManager;
+import jp.manse.util.NetworkChangeReceiver;
+import jp.manse.util.NetworkUtil;
 
-public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener, AudioFocusManager.AudioFocusChangedListener {
+public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener,
+        AudioFocusManager.AudioFocusChangedListener, NetworkChangeReceiver.NetworkChangeListener {
     private ThemedReactContext context;
     private ReactApplicationContext applicationContext;
     private BrightcoveExoPlayerVideoView playerVideoView;
@@ -74,6 +73,9 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 	private static final int SEEK_AMOUNT = 10000; // In milliseconds
     private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
     private AudioFocusManager audioFocusManager;
+    private NetworkChangeReceiver networkChangeReceiver;
+    private boolean isNetworkForcedPause = false;
+    private boolean isRegisteredConnectivityChanged = false;
 
     public BrightcovePlayerView(ThemedReactContext context, ReactApplicationContext applicationContext) {
         super(context);
@@ -103,6 +105,10 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         // Create AudioFocusManager instance and register BrightcovePlayerView as a listener
         this.audioFocusManager = new AudioFocusManager(this.context);
         this.audioFocusManager.registerListener(this);
+
+        // Create Network Change Broadcast receiver and register this class to listen to network status changes
+        this.networkChangeReceiver = new NetworkChangeReceiver();
+        registerConnectivityChange();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
@@ -521,12 +527,24 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     public void onHostResume() {
 	    // Register to audio focus changes when the screen resumes
 	    audioFocusManager.registerListener(this);
+        registerConnectivityChange();
     }
 
     @Override
     public void onHostPause() {
         // Unregister from audio focus changes when the screen goes in the background
         audioFocusManager.unregisterListener();
+        unregisterConnectivityChange();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        // For safety, clear listeners in onDetachedFromWindow too since when the back button or home toolbar button are
+        // clicked, onHostPause does not get executed
+        super.onDetachedFromWindow();
+        // Unregister from audio focus changes when the screen goes in the background
+        audioFocusManager.unregisterListener();
+        unregisterConnectivityChange();
     }
 
     @Override
@@ -565,9 +583,64 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
     @Override
     public void audioFocusChanged(boolean hasFocus) {
-	    // Pasue the video when it looses focus
+	    // Pause the video when it looses focus
 	    if (!hasFocus && playerVideoView.isPlaying()) {
 	        playerVideoView.pause();
         }
+    }
+
+    @Override
+    public void onConnected() {
+        // When network is regained, if this is not and offline video (VideoToken check), set the network forced pause flag to false and start playback 
+        if (isNetworkForcedPause && (videoToken == null || videoToken.isEmpty())) {
+            isNetworkForcedPause = false;
+            onNetworkConnectivityChange(NetworkUtil.STATUS_RECONNECTED);
+            this.playerVideoView.start();
+        }
+    }
+
+    @Override
+    public void onDisconnected() {
+        // When network is disconnected, if this is not and offline video (VideoToken check), then set a flag that the video will be forcebly paused when 
+        // the playback of the remaining buffered part of the video ends
+        if (videoToken == null || videoToken.isEmpty()) {
+            isNetworkForcedPause = true;
+            onNetworkConnectivityChange(NetworkUtil.STATUS_STALLED);
+        }
+    }
+
+    private void registerConnectivityChange() {
+        // Register this class to listen to network change events
+        // Register the network change receiver
+        if (!isRegisteredConnectivityChanged) {
+            isRegisteredConnectivityChanged = true;
+            this.networkChangeReceiver.registerListener(this);
+            IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+            this.context.registerReceiver(this.networkChangeReceiver, intentFilter);
+        }
+    }
+
+    private void unregisterConnectivityChange() {
+        // Unregister this class from listenning to network change events
+        // Unregister the network change receiver
+        if (isRegisteredConnectivityChanged) {
+            isRegisteredConnectivityChanged = false;
+            this.networkChangeReceiver.unregisterListener();
+            this.context.unregisterReceiver(this.networkChangeReceiver);
+        }
+    }
+
+    private void onNetworkConnectivityChange(String networkStatus) {
+        // Send an event to React with the network status
+        WritableMap event = Arguments.createMap();
+        event.putString("status", networkStatus);
+        ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+        reactContext
+                .getJSModule(RCTEventEmitter.class)
+                .receiveEvent(
+                        BrightcovePlayerView.this.getId(),
+                        BrightcovePlayerManager.EVENT_NETWORK_CONNECTIVITY_CHANGED,
+                        event
+                );
     }
 }
