@@ -78,8 +78,6 @@ class BCPlayer extends Component {
                 });
                 return;
             }
-        } else {
-            this.animToInline();
         }
     }
 
@@ -97,17 +95,17 @@ class BCPlayer extends Component {
                 const initialOrient = Orientation.getInitialOrientation();
                 const height = this.state.onRotate ? Dimensions.get('window').height : Dimensions.get('window').width
                 this.props.onFullScreen && this.props.onFullScreen(this.state.fullScreen);
-                if (this.props.rotateToFullScreen && !this.state.onRotate) Orientation.lockToLandscape();
+                if (!this.state.onRotate) Orientation.lockToLandscape();
                 this.animToFullscreen(height);
             } else {
                 if (this.props.fullScreenOnly) {
                     this.setState({paused: true}, () => this.props.onPlay(!this.state.paused));
                 }
                 this.props.onFullScreen && this.props.onFullScreen(this.state.fullScreen)
-                if (this.props.rotateToFullScreen && !this.state.onRotate) Orientation.lockToPortrait();
+                if (!this.state.onRotate) Orientation.lockToPortrait();
                 this.animToInline();
                 setTimeout(() => {
-                    Orientation.unlockAllOrientations();
+                    if(!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations();
                 }, 1500)
             }
             this.setState({onRotate: false})
