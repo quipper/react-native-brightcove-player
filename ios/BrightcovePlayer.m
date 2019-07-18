@@ -3,7 +3,6 @@
 
 @interface BrightcovePlayer () <BCOVPlaybackControllerDelegate, BCOVPUIPlayerViewDelegate>
 
-
 @end
 
 @implementation BrightcovePlayer
@@ -20,7 +19,7 @@
     _playbackController.delegate = self;
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
-    //[_playbackController setAllowsExternalPlayback:YES];
+    [_playbackController setAllowsExternalPlayback:YES];
 
     _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout]];
     _playerView.delegate = self;
@@ -192,6 +191,9 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
+    
+    [self createAirplayIconOverlay];
+
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
 
         if ([[_playerType uppercaseString] isEqualToString:@"LIVE"]) {
@@ -372,6 +374,80 @@
         [_playbackController seekToTime:CMTimeMakeWithSeconds(CMTimeGetSeconds(newTime), NSEC_PER_SEC) completionHandler:^(BOOL finished) {
         }];
     }
+}
+
+- (void)routePickerViewDidEndPresentingRoutes:(AVRoutePickerView *)routePickerView {
+    [self createAirplayIconOverlay];
+}
+
+- (void)createAirplayIconOverlay {
+    if ([self isAudioSessionUsingAirplayOutputRoute]) {
+        if (![_route isDescendantOfView:_playerView.controlsContainerView]) {
+            _route = [[AVRoutePickerView alloc] init];
+            _route.backgroundColor = [UIColor clearColor];
+            _route.tintColor = [UIColor clearColor];
+            _route.activeTintColor = [UIColor colorWithWhite:1.0 alpha:1.0];
+            [_route setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+            [_playerView.controlsContainerView addSubview:_route];
+            [_playerView.controlsContainerView sendSubviewToBack:_route];
+            
+            NSLayoutConstraint *centreHorizontallyConstraint = [NSLayoutConstraint
+                                                                constraintWithItem:_route
+                                                                attribute:NSLayoutAttributeCenterX
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                toItem:_playerView
+                                                                attribute:NSLayoutAttributeCenterX
+                                                                multiplier:1.0
+                                                                constant:0];
+            
+            NSLayoutConstraint *centreVerticallyConstraint = [NSLayoutConstraint
+                                                              constraintWithItem:_route
+                                                              attribute:NSLayoutAttributeCenterY
+                                                              relatedBy:NSLayoutRelationEqual
+                                                              toItem:_playerView
+                                                              attribute:NSLayoutAttributeCenterY
+                                                              multiplier:1.0
+                                                              constant:0];
+            
+            NSLayoutConstraint *widthConstraint = [NSLayoutConstraint constraintWithItem:_route
+                                                                               attribute:NSLayoutAttributeWidth
+                                                                               relatedBy:NSLayoutRelationEqual
+                                                                                  toItem:nil
+                                                                               attribute:NSLayoutAttributeNotAnAttribute
+                                                                              multiplier:1.0
+                                                                                constant:200];
+
+            NSLayoutConstraint *heightConstraint = [NSLayoutConstraint constraintWithItem:_route
+                                                                                attribute:NSLayoutAttributeHeight
+                                                                                relatedBy:NSLayoutRelationEqual
+                                                                                   toItem:nil
+                                                                                attribute:NSLayoutAttributeNotAnAttribute
+                                                                               multiplier:1.0
+                                                                                 constant:200];
+            
+            [_playerView addConstraints:@[centreHorizontallyConstraint, centreVerticallyConstraint, widthConstraint, heightConstraint]];
+            
+            [self layoutIfNeeded];
+        }
+    } else {
+        [_route removeFromSuperview];
+    }
+}
+
+- (BOOL)isAudioSessionUsingAirplayOutputRoute {
+    /**
+     * I found no other way to check if there is a connection to an airplay device
+     * airPlayVideoActive is NO as long as the video hasn't started
+     * and this method is true as soon as the device is connected to an airplay device
+     */
+    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+    AVAudioSessionRouteDescription* currentRoute = audioSession.currentRoute;
+    for (AVAudioSessionPortDescription* outputPort in currentRoute.outputs){
+        if ([outputPort.portType isEqualToString:AVAudioSessionPortAirPlay])
+            return YES;
+    }
+    return NO;
 }
 
 - (double)calculateSeekTime:(double)percentage {
