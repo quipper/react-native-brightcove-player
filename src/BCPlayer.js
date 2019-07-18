@@ -85,7 +85,7 @@ class BCPlayer extends Component {
     componentWillUnmount() {
         BackHandler.removeEventListener('hardwareBackPress', this.BackHandler)
         Orientation.removeOrientationListener(this.orientationDidChange)
-        AppState.addEventListener('change', this._handleAppStateChange)
+        AppState.removeEventListener('change', this._handleAppStateChange)
     }
 
     orientationDidChange(orientation) {
