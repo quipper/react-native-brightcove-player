@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+ 	<!-- Define the new colors. -->
+    <color name="dream11_seekbar">#ff5002</color>
+    <color name="bmc_seekbar_played">@color/dream11_seekbar</color>
+</resources>

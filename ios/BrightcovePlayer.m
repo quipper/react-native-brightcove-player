@@ -19,15 +19,19 @@
     _playbackController.delegate = self;
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
-    
-    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+    [_playbackController setAllowsExternalPlayback:YES];
+
+    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout]];
     _playerView.delegate = self;
     _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     _playerView.backgroundColor = UIColor.blackColor;
-    
+
+    // Hide the controls until it defines which controls to use based on the READY state
+    _playerView.controlsView.hidden = true;
+
     _targetVolume = 1.0;
     _autoPlay = NO;
-    
+
     [self addSubview:_playerView];
 }
 
@@ -46,17 +50,25 @@
         }
         return;
     }
+
     if (!_playbackService) return;
+
     if (_videoId) {
         [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
+                _mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
+            } else {
+                [self emitError:error];
             }
         }];
     } else if (_referenceId) {
         [_playbackService findVideoWithReferenceID:_referenceId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
             if (video) {
+                _mediaInfo = jsonResponse;
                 [self.playbackController setVideos: @[ video ]];
+            } else {
+                [self emitError:error];
             }
         }];
     }
@@ -90,8 +102,20 @@
 - (void)setAccountId:(NSString *)accountId {
     _accountId = accountId;
     _playbackServiceDirty = YES;
+    _playbackController.analytics.account = accountId;
     [self setupService];
     [self loadMovie];
+}
+
+- (void)setPlayerId:(NSString *)playerId {
+    _playbackController.analytics.destination = [NSString stringWithFormat: @"bcsdk://%@", playerId];
+    [self setupService];
+    [self loadMovie];
+}
+
+
+- (void)setPlayerType:(NSString *)type {
+    _playerType = type;
 }
 
 - (void)setPolicyKey:(NSString *)policyKey {
@@ -157,6 +181,7 @@
 }
 
 - (void)setDisableDefaultControl:(BOOL)disable {
+    _disableDefaultControl = disable;
     _playerView.controlsView.hidden = disable;
 }
 
@@ -166,14 +191,37 @@
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
-    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
-        _playbackSession = nil;
-    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+    
+    [self createAirplayIconOverlay];
+
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
+
+        if ([[_playerType uppercaseString] isEqualToString:@"LIVE"]) {
+            _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveControlLayout];
+        } else if ([[_playerType uppercaseString] isEqualToString:@"DVR"]) {
+            _playerView.controlsView.layout = [BCOVPUIControlLayout basicLiveDVRControlLayout];
+        } else {
+            _playerView.controlsView.layout = [BCOVPUIControlLayout basicVODControlLayout];
+        }
+        // Once the controls are set to the layout, define the controls to the state sent to the player
+        _playerView.controlsView.hidden = _disableDefaultControl;
+
+        UITapGestureRecognizer *seekToTimeTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSeekToTimeTap:)];
+        [_playerView.controlsView.progressSlider addGestureRecognizer:seekToTimeTap];
+
         _playbackSession = session;
         [self refreshVolume];
         [self refreshBitRate];
+
         if (self.onReady) {
             self.onReady(@{});
+        }
+
+        if (self.onMetadataLoaded) {
+            NSDictionary *mediainfo = @{ @"title" : _mediaInfo[@"name"]};
+            self.onMetadataLoaded(@{
+                @"mediainfo": mediainfo
+            });
         }
         if (_autoPlay) {
             [_playbackController play];
@@ -185,18 +233,87 @@
             self.onPlay(@{});
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPause) {
-        _playing = false;
-        if (self.onPause) {
-            self.onPause(@{});
+        if (_playing) {
+            _playing = false;
+            if (self.onPause) {
+                self.onPause(@{});
+            }
+            
+            // Hide controls view after pause a video
+            [self refreshControlsView];
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventEnd) {
         if (self.onEnd) {
             self.onEnd(@{});
         }
     }
+
+     /**
+      * The playback buffer is empty. This will occur when the video initially loads,
+      * after a seek occurs, and when playback stops because of a slow or disabled
+      * network. When the buffer is full enough to start playback again,
+      * kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp will be sent.
+      */
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty) {
+        if (self.onBufferingStarted) {
+            self.onBufferingStarted(@{});
+        }
+     }
+     /**
+      * After becoming empty, this event is sent when the playback buffer has filled
+      * enough that it should be able to keep up with playback. This event will come after
+      * kBCOVPlaybackSessionLifecycleEventPlaybackBufferEmpty.
+      */
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackLikelyToKeepUp) {
+        if (self.onBufferingCompleted) {
+            self.onBufferingCompleted(@{});
+        }
+     }
+     /**
+      * Playback of the video has stalled. When the video recovers,
+      * kBCOVPlaybackSessionLifecycleEventPlaybackRecovered will be sent.
+      */
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackStalled) {
+        if (self.onNetworkConnectivityChange) {
+            self.onNetworkConnectivityChange(@{@"status": @"stalled"});
+        }
+     }
+     /**
+      * Playback has recovered after being stalled.
+      */
+     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventPlaybackRecovered) {
+        if (self.onNetworkConnectivityChange) {
+            self.onNetworkConnectivityChange(@{@"status": @"recovered"});
+        }
+     }
+     /**
+      * A generic error has occurred.
+      */
+    if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventError) {
+        NSError *error = lifecycleEvent.properties[@"error"];
+        NSLog(@"Lifecycle Event Fail error: %@", error);
+        [self emitError:error];
+     /**
+      * The video failed to load.
+      */
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
+        NSError *error = lifecycleEvent.properties[@"error"];
+        NSLog(@"Lifecycle Event Fail error: %@", error);
+        [self emitError:error];
+     /**
+      * The video failed during playback and was unable to recover, possibly due to a
+      * network error.
+      */
+    } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
+        NSError *error = lifecycleEvent.properties[@"error"];
+        NSLog(@"Lifecycle Event Fail error: %@", error);
+        [self emitError:error];
+    }
+
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didChangeDuration:(NSTimeInterval)duration {
+    _segmentDuration = duration;
     if (self.onChangeDuration) {
         self.onChangeDuration(@{
                                 @"duration": @(duration)
@@ -205,9 +322,11 @@
 }
 
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
+    NSTimeInterval duration = CMTimeGetSeconds(session.player.currentItem.duration);
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
-                          @"currentTime": @(progress)
+                          @"currentTime": @(progress),
+                          @"duration": @(!isnan(duration) ? duration : -1)
                           });
     }
     float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
@@ -215,7 +334,20 @@
         _lastBufferProgress = bufferProgress;
         self.onUpdateBufferProgress(@{
                                       @"bufferProgress": @(bufferProgress),
+                                      @"duration": @(!isnan(duration) ? duration : -1)
                                       });
+    }
+}
+
+-(void)playerView:(BCOVPUIPlayerView *)playerView willTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {
+    if (screenMode == BCOVPUIScreenModeNormal) {
+        if (self.onBeforeExitFullscreen) {
+            self.onBeforeExitFullscreen(@{});
+        }
+    } else if (screenMode == BCOVPUIScreenModeFull) {
+        if (self.onBeforeEnterFullscreen) {
+            self.onBeforeEnterFullscreen(@{});
+        }
     }
 }
 
@@ -231,8 +363,123 @@
     }
 }
 
+- (void)handleSeekToTimeTap:(UITapGestureRecognizer *)recognizer {
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        CGPoint location = [recognizer locationInView:[recognizer.view superview]];
+
+        double touchLocation = location.x / _playerView.controlsView.progressSlider.bounds.size.width;
+        double percentage = [self calculateSeekTime:touchLocation];
+        CMTime newTime = CMTimeMake(percentage * _segmentDuration, 1);
+
+        [_playbackController seekToTime:CMTimeMakeWithSeconds(CMTimeGetSeconds(newTime), NSEC_PER_SEC) completionHandler:^(BOOL finished) {
+        }];
+    }
+}
+
+- (void)routePickerViewDidEndPresentingRoutes:(AVRoutePickerView *)routePickerView {
+    [self createAirplayIconOverlay];
+}
+
+- (void)createAirplayIconOverlay {
+    if ([self isAudioSessionUsingAirplayOutputRoute]) {
+        if (![_route isDescendantOfView:_playerView.controlsContainerView]) {
+            _route = [[AVRoutePickerView alloc] init];
+            _route.backgroundColor = [UIColor clearColor];
+            _route.tintColor = [UIColor clearColor];
+            _route.activeTintColor = [UIColor colorWithWhite:1.0 alpha:1.0];
+            [_route setTranslatesAutoresizingMaskIntoConstraints:NO];
+
+            [_playerView.controlsContainerView addSubview:_route];
+            [_playerView.controlsContainerView sendSubviewToBack:_route];
+            
+            NSLayoutConstraint *centreHorizontallyConstraint = [NSLayoutConstraint
+                                                                constraintWithItem:_route
+                                                                attribute:NSLayoutAttributeCenterX
+                                                                relatedBy:NSLayoutRelationEqual
+                                                                toItem:_playerView
+                                                                attribute:NSLayoutAttributeCenterX
+                                                                multiplier:1.0
+                                                                constant:0];
+            
+            NSLayoutConstraint *centreVerticallyConstraint = [NSLayoutConstraint
+                                                              constraintWithItem:_route
+                                                              attribute:NSLayoutAttributeCenterY
+                                                              relatedBy:NSLayoutRelationEqual
+                                                              toItem:_playerView
+                                                              attribute:NSLayoutAttributeCenterY
+                                                              multiplier:1.0
+                                                              constant:0];
+            
+            NSLayoutConstraint *widthConstraint = [NSLayoutConstraint constraintWithItem:_route
+                                                                               attribute:NSLayoutAttributeWidth
+                                                                               relatedBy:NSLayoutRelationEqual
+                                                                                  toItem:nil
+                                                                               attribute:NSLayoutAttributeNotAnAttribute
+                                                                              multiplier:1.0
+                                                                                constant:200];
+
+            NSLayoutConstraint *heightConstraint = [NSLayoutConstraint constraintWithItem:_route
+                                                                                attribute:NSLayoutAttributeHeight
+                                                                                relatedBy:NSLayoutRelationEqual
+                                                                                   toItem:nil
+                                                                                attribute:NSLayoutAttributeNotAnAttribute
+                                                                               multiplier:1.0
+                                                                                 constant:200];
+            
+            [_playerView addConstraints:@[centreHorizontallyConstraint, centreVerticallyConstraint, widthConstraint, heightConstraint]];
+            
+            [self layoutIfNeeded];
+        }
+    } else {
+        [_route removeFromSuperview];
+    }
+}
+
+- (BOOL)isAudioSessionUsingAirplayOutputRoute {
+    /**
+     * I found no other way to check if there is a connection to an airplay device
+     * airPlayVideoActive is NO as long as the video hasn't started
+     * and this method is true as soon as the device is connected to an airplay device
+     */
+    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+    AVAudioSessionRouteDescription* currentRoute = audioSession.currentRoute;
+    for (AVAudioSessionPortDescription* outputPort in currentRoute.outputs){
+        if ([outputPort.portType isEqualToString:AVAudioSessionPortAirPlay])
+            return YES;
+    }
+    return NO;
+}
+
+- (double)calculateSeekTime:(double)percentage {
+    if (percentage > 1.0) {
+        percentage = 1.0;
+    } else if (percentage < 0.0) {
+        percentage = 0.0;
+    }
+
+    return percentage;
+}
+
 -(void)dispose {
     [self.playbackController setVideos:@[]];
+}
+
+- (void)emitError:(NSError *)error {
+
+    if (!self.onError) {
+        return;
+    }
+
+    NSString *code = [NSString stringWithFormat:@"%ld", (long)[error code]];
+
+    self.onError(@{@"error_code": code, @"message": [error localizedDescription]});
+}
+
+- (void)refreshControlsView {
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        _playerView.controlsFadingViewVisible = !_playerView.controlsFadingViewVisible;
+    });
 }
 
 @end

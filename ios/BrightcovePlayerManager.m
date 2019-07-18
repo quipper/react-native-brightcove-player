@@ -21,28 +21,46 @@ RCT_EXPORT_VIEW_PROPERTY(accountId, NSString);
 RCT_EXPORT_VIEW_PROPERTY(videoId, NSString);
 RCT_EXPORT_VIEW_PROPERTY(referenceId, NSString);
 RCT_EXPORT_VIEW_PROPERTY(videoToken, NSString);
+RCT_EXPORT_VIEW_PROPERTY(playerId, NSString);
 RCT_EXPORT_VIEW_PROPERTY(autoPlay, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(play, BOOL);
+RCT_EXPORT_VIEW_PROPERTY(playerType, NSString);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(disableDefaultControl, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(volume, NSNumber);
 RCT_EXPORT_VIEW_PROPERTY(bitRate, NSNumber);
 RCT_EXPORT_VIEW_PROPERTY(playbackRate, NSNumber);
 RCT_EXPORT_VIEW_PROPERTY(onReady, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onMetadataLoaded, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPlay, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPause, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onEnd, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onProgress, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onChangeDuration, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onUpdateBufferProgress, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onBufferingStarted, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onBufferingCompleted, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onBeforeEnterFullscreen, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onEnterFullscreen, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onBeforeExitFullscreen, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onExitFullscreen, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onError, RCTDirectEventBlock);
+RCT_EXPORT_VIEW_PROPERTY(onNetworkConnectivityChange, RCTDirectEventBlock);
 
 RCT_EXPORT_METHOD(seekTo:(nonnull NSNumber *)reactTag seconds:(nonnull NSNumber *)seconds) {
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
         BrightcovePlayer *player = (BrightcovePlayer*)viewRegistry[reactTag];
         if ([player isKindOfClass:[BrightcovePlayer class]]) {
             [player seekTo:seconds];
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(setFullscreen:(nonnull NSNumber *)reactTag fullscreen:(BOOL)fullscreen) {
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
+        BrightcovePlayer *player = (BrightcovePlayer*)viewRegistry[reactTag];
+        if ([player isKindOfClass:[BrightcovePlayer class]]) {
+            [player setFullscreen:fullscreen];
         }
     }];
 }
