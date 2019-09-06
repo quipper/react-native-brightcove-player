@@ -153,11 +153,15 @@ RCT_EXPORT_METHOD(getPlaylistWithReferenceId:(NSString *)referenceId accountId:(
         if (!description) {
             description = @"";
         }
+	NSString *referenceId = video.properties[kBCOVVideoPropertyKeyReferenceId];
+        if (!referenceId) {
+            referenceId = @"";
+        }
         [videos addObject:
          @{
            kPlaylistAccountId: video.properties[kBCOVVideoPropertyKeyAccountId],
            kPlaylistVideoId: video.properties[kBCOVVideoPropertyKeyId],
-           kPlaylistReferenceId: video.properties[kBCOVVideoPropertyKeyReferenceId],
+           kPlaylistReferenceId: referenceId,
            kPlaylistName: name,
            kPlaylistDescription: description,
            kPlaylistDuration: video.properties[kBCOVVideoPropertyKeyDuration]
