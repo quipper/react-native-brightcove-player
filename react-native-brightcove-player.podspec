@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.authors             = "Ryota Mannari"
   s.platform            = :ios, "10.0"
 
-  s.source              = { :git => "https://github.com/brightcove/BrightcoveSpecs.git" }
+  s.source              = { :git => "https://github.com/manse/react-native-brightcove-player.git" }
   s.source_files        = 'ios/**/*.{h,m}'
 
   s.dependency          'React'
