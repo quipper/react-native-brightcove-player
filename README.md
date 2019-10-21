@@ -25,7 +25,7 @@ yarn add react-native-brightcove-player
 
 - Add source to `Podfile` and `pod install && pod update`
 - Specify platform version to `10.0`
-- https://github.com/manse/react-native-brightcove-player/commit/d4d15dbff828c19fd110fe5764c2c72279e50d6a
+- [Example](https://github.com/manse/react-native-brightcove-player/commit/d4d15dbff828c19fd110fe5764c2c72279e50d6a)
 
 ```rb
 source 'https://github.com/brightcove/BrightcoveSpecs.git'
@@ -37,7 +37,7 @@ platform :ios, '10.0'
 
 - Add maven source to repositories in `android/build.gradle`
 - [Enables multiDex](https://developer.android.com/studio/build/multidex).
-- https://github.com/manse/react-native-brightcove-player/commit/337450274a0c7ed3b8de890837e60949e6df1db0
+- [Example](https://github.com/manse/react-native-brightcove-player/commit/337450274a0c7ed3b8de890837e60949e6df1db0)
 
 ```gradle
 allprojects {
