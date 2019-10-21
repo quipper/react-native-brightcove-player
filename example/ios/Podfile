@@ -1,4 +1,12 @@
-platform :ios, '9.0'
+# ====================================
+# Add Source and
+source 'https://github.com/brightcove/BrightcoveSpecs.git'
+
+# change version to 10.0
+platform :ios, '10.0'
+# ====================================
+
+
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
 target 'example' do
