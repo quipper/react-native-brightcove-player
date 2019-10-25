@@ -119,6 +119,7 @@ export default class App extends Component {
 | Method                                | Description                       |
 | ------------------------------------- | --------------------------------- |
 | seekTo(timeInSeconds: number) => void | Change playhead to arbitrary time |
+| stopPlayback() => void | Stop player/release memory |
 
 ### BrightcovePlayerPoster
 
