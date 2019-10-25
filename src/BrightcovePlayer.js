@@ -21,12 +21,12 @@ class BrightcovePlayer extends Component {
   };
 
   componentWillUnmount = Platform.select({
-    ios: function() {
+    ios: function () {
       NativeModules.BrightcovePlayerManager.dispose(
         ReactNative.findNodeHandle(this)
       );
     },
-    android: function() {}
+    android: function () { }
   });
 
   render() {
@@ -95,17 +95,30 @@ class BrightcovePlayer extends Component {
 }
 
 BrightcovePlayer.prototype.seekTo = Platform.select({
-  ios: function(seconds) {
+  ios: function (seconds) {
     NativeModules.BrightcovePlayerManager.seekTo(
       ReactNative.findNodeHandle(this),
       seconds
     );
   },
-  android: function(seconds) {
+  android: function (seconds) {
     UIManager.dispatchViewManagerCommand(
       ReactNative.findNodeHandle(this._root),
       UIManager.BrightcovePlayer.Commands.seekTo,
       [seconds]
+    );
+  }
+});
+
+BrightcovePlayer.prototype.stopPlayback = Platform.select({
+  ios: function () {
+    //no method for ios
+  },
+  android: function () {
+    UIManager.dispatchViewManagerCommand(
+      ReactNative.findNodeHandle(this._root),
+      UIManager.BrightcovePlayer.Commands.stopPlayback,
+      []
     );
   }
 });
