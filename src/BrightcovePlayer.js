@@ -58,6 +58,9 @@ class BrightcovePlayer extends Component {
         onProgress={event =>
           this.props.onProgress && this.props.onProgress(event.nativeEvent)
         }
+        onCaption={event =>
+          this.props.onCaption && this.props.onCaption(event.nativeEvent)
+        }
         onChangeDuration={event =>
           this.props.onChangeDuration &&
           this.props.onChangeDuration(event.nativeEvent)
@@ -142,6 +145,7 @@ BrightcovePlayer.propTypes = {
   onPause: PropTypes.func,
   onEnd: PropTypes.func,
   onProgress: PropTypes.func,
+  onCaption: PropTypes.func,
   onChangeDuration: PropTypes.func,
   onUpdateBufferProgress: PropTypes.func,
   onEnterFullscreen: PropTypes.func,

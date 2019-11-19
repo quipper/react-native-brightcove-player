@@ -126,6 +126,16 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
             }
         });
+        eventEmitter.on(EventType.CAPTION, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                String text = (String) e.properties.get(Event.TEXT);
+                event.putString("closedCaption", text);
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_CAPTION, event);
+            }
+        });
         eventEmitter.on(EventType.ENTER_FULL_SCREEN, new EventListener() {
             @Override
             public void processEvent(Event e) {
