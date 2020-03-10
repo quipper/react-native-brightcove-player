@@ -1,6 +1,6 @@
 package jp.manse;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -102,6 +102,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     @ReactProp(name = "fullscreen")
     public void setFullscreen(BrightcovePlayerView view, boolean fullscreen) {
         view.setFullscreen(fullscreen);
+    }
+
+    @ReactProp(name = "simulateLandscape")
+    public void setSimulateLandscape(BrightcovePlayerView view, boolean isSimulateLandscape) {
+        view.setSimulateLandscape(isSimulateLandscape);
     }
 
     @Override

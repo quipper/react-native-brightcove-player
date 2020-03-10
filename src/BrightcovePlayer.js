@@ -118,6 +118,7 @@ BrightcovePlayer.propTypes = {
   videoId: PropTypes.string,
   videoToken: PropTypes.string,
   autoPlay: PropTypes.bool,
+  simulateLandscape: PropTypes.bool,
   play: PropTypes.bool,
   fullscreen: PropTypes.bool,
   disableDefaultControl: PropTypes.bool,
