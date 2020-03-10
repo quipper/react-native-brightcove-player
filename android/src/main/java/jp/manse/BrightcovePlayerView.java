@@ -80,7 +80,6 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
         this.requestLayout();
-        ViewCompat.setTranslationZ(this, 9999);
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
