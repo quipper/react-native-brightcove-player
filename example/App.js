@@ -7,13 +7,21 @@ const POLICY_KEY =
   'BCpkADawqM0T8lW3nMChuAbrcunBBHmh4YkNl5e6ZrKQwPiK_Y83RAOF4DP5tyBF_ONBVgrEjqW6fbV0nKRuHvjRU3E8jdT9WMTOXfJODoPML6NUDCYTwTHxtNlr5YdyGYaCPLhMUZ3Xu61L';
 const PLAYLIST_REF_ID = 'brightcove-native-sdk-plist';
 
+// const ACCOUNT_ID = '6111983544001';
+// const POLICY_KEY =
+//   'BCpkADawqM3mIw2gEyYJ26qTlDZpBBB7G56vaHlkPDKmwpUQHjsi42l3vvySqov0xFDSn4cLxMKyKAIjHEj3FIv3DUP-t2gKRiNpM0Ag2g7k7aHjbjrv0N5w2ha-0RZTYQ3yqxB1kMgqi0Vu';
+// const PLAYLIST_REF_ID = '12345';
+
+var hack = 0;
+
 export default class App extends Component {
   state = {
     videos: [],
     offlineVideos: [],
     playback: {
       referenceId: null,
-      videoToken: null
+      videoToken: null,
+      simulateLandscape: false
     }
   };
 
@@ -85,13 +93,16 @@ export default class App extends Component {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" />
-        <BrightcovePlayer
-          style={styles.video}
-          accountId={ACCOUNT_ID}
-          policyKey={POLICY_KEY}
-          autoPlay
-          {...this.state.playback}
-        />
+        {
+            this.state.playback.referenceId &&
+            <BrightcovePlayer
+              style={styles.video}
+              accountId={ACCOUNT_ID}
+              policyKey={POLICY_KEY}
+              autoPlay
+              {...this.state.playback}
+            />
+        }
         <FlatList
           style={styles.list}
           extraData={this.state.offlineVideos}
@@ -165,7 +176,7 @@ const styles = StyleSheet.create({
   },
   video: {
     width: '100%',
-    height: 260
+    height: '100%'
   },
   list: {
     flex: 1

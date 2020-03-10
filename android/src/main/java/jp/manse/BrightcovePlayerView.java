@@ -1,9 +1,16 @@
 package jp.manse;
 
 import android.graphics.Color;
-import android.support.v4.view.ViewCompat;
+import androidx.core.view.ViewCompat;
+
+import android.graphics.Matrix;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SurfaceView;
+import android.view.TextureView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
@@ -16,7 +23,8 @@ import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
 import com.brightcove.player.model.Video;
-import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
+import com.brightcove.player.view.BrightcoveExoPlayerTextureVideoView;
+import com.brightcove.player.view.RenderView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -42,7 +50,7 @@ import java.util.Map;
 public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener {
     private ThemedReactContext context;
     private ReactApplicationContext applicationContext;
-    private BrightcoveExoPlayerVideoView playerVideoView;
+    private BrightcoveExoPlayerTextureVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
     private String policyKey;
     private String accountId;
@@ -55,6 +63,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     private boolean playing = false;
     private int bitRate = 0;
     private float playbackRate = 1;
+    protected boolean simulateLandscape = false;
     private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
 
     public BrightcovePlayerView(ThemedReactContext context, ReactApplicationContext applicationContext) {
@@ -64,7 +73,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.applicationContext.addLifecycleEventListener(this);
         this.setBackgroundColor(Color.BLACK);
 
-        this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
+        this.playerVideoView = new BrightcoveExoPlayerTextureVideoView(this.context);
         this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
@@ -193,11 +202,20 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.loadVideo();
     }
 
+    public void setSimulateLandscape(boolean isSimulateLandscape) {
+        boolean previousValue = this.simulateLandscape;
+        this.simulateLandscape = isSimulateLandscape;
+        if (playing && isSimulateLandscape ^ previousValue) {
+            fixVideoLayout();
+        }
+    }
+
     public void setAutoPlay(boolean autoPlay) {
         this.autoPlay = autoPlay;
     }
 
     public void setPlay(boolean play) {
+
         if (this.playing == play) return;
         if (play) {
             this.playerVideoView.start();
@@ -332,15 +350,48 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     }
 
     private void fixVideoLayout() {
-        int viewWidth = this.getMeasuredWidth();
-        int viewHeight = this.getMeasuredHeight();
-        SurfaceView surfaceView = (SurfaceView) this.playerVideoView.getRenderView();
-        surfaceView.measure(viewWidth, viewHeight);
-        int surfaceWidth = surfaceView.getMeasuredWidth();
-        int surfaceHeight = surfaceView.getMeasuredHeight();
-        int leftOffset = (viewWidth - surfaceWidth) / 2;
-        int topOffset = (viewHeight - surfaceHeight) / 2;
-        surfaceView.layout(leftOffset, topOffset, leftOffset + surfaceWidth, topOffset + surfaceHeight);
+
+        TextureView surfaceView = (TextureView) playerVideoView.getRenderView();
+
+        if (simulateLandscape) {
+
+            int viewWidth = this.getMeasuredWidth();
+            int viewHeight = this.getMeasuredHeight();
+            surfaceView.layout(0, 0, viewWidth, viewHeight);
+
+            // scale 1  (ww / vw)
+            // scale 2 (wh / scale 1)
+            RenderView renderView = playerVideoView.getRenderView();
+
+            float pX = getWidth() / 2.0f;
+            float pY = getHeight() / 2.0f;
+
+            Matrix undoDefaultStretchAndRotate = new Matrix();
+            undoDefaultStretchAndRotate.setScale(1.0f,
+                    (1.0f / ((getHeight() / (float) getWidth()))) * (renderView.getVideoHeight() / (float) renderView.getVideoWidth()),
+                    pX,
+                    pY);
+
+            undoDefaultStretchAndRotate.postRotate(90, pX, pY);
+            undoDefaultStretchAndRotate.postScale(getHeight() / (float) getWidth(),
+                    getHeight() / (float) getWidth(), pX, pY);
+
+            surfaceView.setTransform(undoDefaultStretchAndRotate);
+
+        }
+        else {
+            surfaceView.setTransform(null);
+
+            int viewWidth = this.getMeasuredWidth();
+            int viewHeight = this.getMeasuredHeight();
+
+            surfaceView.measure(viewWidth, viewHeight);
+            int surfaceWidth = surfaceView.getMeasuredWidth();
+            int surfaceHeight = surfaceView.getMeasuredHeight();
+            int leftOffset = (viewWidth - surfaceWidth) / 2;
+            int topOffset = (viewHeight - surfaceHeight) / 2;
+            surfaceView.layout(leftOffset, topOffset, leftOffset + surfaceWidth, topOffset + surfaceHeight);
+        }
     }
 
     private void printKeys(Map<String, Object> map) {
