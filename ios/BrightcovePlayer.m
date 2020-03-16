@@ -20,21 +20,22 @@
     _playbackController.delegate = self;
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
+    // Prevents the Brightcove SDK from making an unnecessary AVPlayerLayer
+    // since the AVPlayerViewController already makes one
+    _playbackController.options = @{ kBCOVAVPlayerViewControllerCompatibilityKey: @YES };
     
     _playerViewController = [[AVPlayerViewController alloc] init];
-    _playerViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    
-//    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
-//    _playerView.delegate = self;
-//    _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-//    _playerView.backgroundColor = UIColor.blackColor;
+    _playerViewController.view.translatesAutoresizingMaskIntoConstraints = NO;
+    [self addSubview:_playerViewController.view];
+    [NSLayoutConstraint activateConstraints:@[
+                                              [_playerViewController.view.topAnchor constraintEqualToAnchor:self.topAnchor],
+                                              [_playerViewController.view.rightAnchor constraintEqualToAnchor:self.rightAnchor],
+                                              [_playerViewController.view.leftAnchor constraintEqualToAnchor:self.leftAnchor],
+                                              [_playerViewController.view.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+                                              ]];
     
     _targetVolume = 1.0;
     _autoPlay = NO;
-    
-//    [self addSubview:_playerView];
-//    [self addChildViewController:_playerViewController];
-    [self addSubview:_playerViewController.view];
 }
 
 - (void)setupService {
