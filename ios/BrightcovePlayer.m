@@ -79,7 +79,6 @@
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session
 {
-    NSLog(@"ViewController Debug - Advanced to new session.");
     self.playerViewController.player = session.player;
 }
 
