@@ -1,3 +1,4 @@
+#import <AVKit/AVKit.h>
 #import "BrightcovePlayer.h"
 #import "BrightcovePlayerOfflineVideoManager.h"
 
@@ -20,15 +21,20 @@
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
     
-    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
-    _playerView.delegate = self;
-    _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    _playerView.backgroundColor = UIColor.blackColor;
+    _playerViewController = [[AVPlayerViewController alloc] init];
+    _playerViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    
+//    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+//    _playerView.delegate = self;
+//    _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+//    _playerView.backgroundColor = UIColor.blackColor;
     
     _targetVolume = 1.0;
     _autoPlay = NO;
     
-    [self addSubview:_playerView];
+//    [self addSubview:_playerView];
+    [self addChildViewController:_playerViewController];
+    [self.view addSubview:_playerViewController.view];
 }
 
 - (void)setupService {
@@ -62,10 +68,18 @@
     }
 }
 
+#pragma mark BCOVPlaybackControllerDelegate Methods
+
 - (id<BCOVPlaybackController>)createPlaybackController {
     BCOVBasicSessionProviderOptions *options = [BCOVBasicSessionProviderOptions alloc];
     BCOVBasicSessionProvider *provider = [[BCOVPlayerSDKManager sharedManager] createBasicSessionProviderWithOptions:options];
     return [BCOVPlayerSDKManager.sharedManager createPlaybackControllerWithSessionProvider:provider viewStrategy:nil];
+}
+
+- (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session
+{
+    NSLog(@"ViewController Debug - Advanced to new session.");
+    self.avpvc.player = session.player;
 }
 
 - (void)setReferenceId:(NSString *)referenceId {
@@ -115,11 +129,12 @@
 }
 
 - (void)setFullscreen:(BOOL)fullscreen {
-    if (fullscreen) {
-        [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeFull];
-    } else {
-        [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeNormal];
-    }
+//    if (fullscreen) {
+//        [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeFull];
+//    } else {
+//        [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeNormal];
+//    }
+//    _playerViewController setFull
 }
 
 - (void)setVolume:(NSNumber*)volume {
@@ -157,7 +172,7 @@
 }
 
 - (void)setDisableDefaultControl:(BOOL)disable {
-    _playerView.controlsView.hidden = disable;
+//    _playerView.controlsView.hidden = disable;
 }
 
 - (void)seekTo:(NSNumber *)time {
@@ -214,13 +229,14 @@
                           @"currentTime": @(progress)
                           });
     }
-    float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
-    if (_lastBufferProgress != bufferProgress) {
-        _lastBufferProgress = bufferProgress;
-        self.onUpdateBufferProgress(@{
-                                      @"bufferProgress": @(bufferProgress),
-                                      });
-    }
+    
+//    float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
+//    if (_lastBufferProgress != bufferProgress) {
+//        _lastBufferProgress = bufferProgress;
+//        self.onUpdateBufferProgress(@{
+//                                      @"bufferProgress": @(bufferProgress),
+//                                      });
+//    }
 }
 
 -(void)playerView:(BCOVPUIPlayerView *)playerView didTransitionToScreenMode:(BCOVPUIScreenMode)screenMode {
