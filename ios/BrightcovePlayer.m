@@ -33,8 +33,8 @@
     _autoPlay = NO;
     
 //    [self addSubview:_playerView];
-    [self addChildViewController:_playerViewController];
-    [self.view addSubview:_playerViewController.view];
+//    [self addChildViewController:_playerViewController];
+    [self addSubview:_playerViewController.view];
 }
 
 - (void)setupService {
@@ -79,7 +79,7 @@
 - (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session
 {
     NSLog(@"ViewController Debug - Advanced to new session.");
-    self.avpvc.player = session.player;
+    self.playerViewController.player = session.player;
 }
 
 - (void)setReferenceId:(NSString *)referenceId {
