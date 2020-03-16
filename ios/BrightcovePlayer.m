@@ -23,7 +23,7 @@
     // Prevents the Brightcove SDK from making an unnecessary AVPlayerLayer
     // since the AVPlayerViewController already makes one
     _playbackController.options = @{ kBCOVAVPlayerViewControllerCompatibilityKey: @YES };
-    
+
     _playerViewController = [[AVPlayerViewController alloc] init];
     _playerViewController.view.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_playerViewController.view];
@@ -33,7 +33,7 @@
                                               [_playerViewController.view.leftAnchor constraintEqualToAnchor:self.leftAnchor],
                                               [_playerViewController.view.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
                                               ]];
-    
+
     _targetVolume = 1.0;
     _autoPlay = NO;
 }
@@ -135,7 +135,6 @@
 //    } else {
 //        [_playerView performScreenTransitionWithScreenMode:BCOVPUIScreenModeNormal];
 //    }
-//    _playerViewController setFull
 }
 
 - (void)setVolume:(NSNumber*)volume {
@@ -230,7 +229,7 @@
                           @"currentTime": @(progress)
                           });
     }
-    
+
 //    float bufferProgress = _playerView.controlsView.progressSlider.bufferProgress;
 //    if (_lastBufferProgress != bufferProgress) {
 //        _lastBufferProgress = bufferProgress;
