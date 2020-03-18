@@ -1,3 +1,4 @@
+#import <AVKit/AVKit.h>
 #import <UIKit/UIKit.h>
 #import <BrightcovePlayerSDK/BCOVPlayerSDKManager.h>
 #import <BrightcovePlayerSDK/BCOVPlaybackController.h>
@@ -17,7 +18,7 @@
 @property (nonatomic) BCOVPlaybackService *playbackService;
 @property (nonatomic) id<BCOVPlaybackController> playbackController;
 @property (nonatomic) id<BCOVPlaybackSession> playbackSession;
-@property (nonatomic) BCOVPUIPlayerView *playerView;
+@property (nonatomic) AVPlayerViewController *playerViewController;
 @property (nonatomic) BOOL playing;
 @property (nonatomic) BOOL autoPlay;
 @property (nonatomic) float lastBufferProgress;
