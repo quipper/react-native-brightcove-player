@@ -257,13 +257,29 @@
 #pragma mark UIView Methods
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    NSLog("touches began");
-    self.onTouchesBegan();
+    [super touchesBegan:touches withEvent:event];
+    if (self.onTouchesBegan) {
+        self.onTouchesBegan(@{});
+    }
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesMoved:touches withEvent:event];
 }
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    NSLog("touches ended");
-    self.onTouchesEnded();
+    [super touchesEnded:touches withEvent:event];
+    if (self.onTouchesEnded) {
+        self.onTouchesEnded(@{});
+    }
 }
+
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesCancelled:touches withEvent:event];
+    if (self.onTouchesEnded) {
+        self.onTouchesEnded(@{});
+    }
+}
+
 
 @end
