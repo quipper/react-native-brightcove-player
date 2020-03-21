@@ -254,4 +254,16 @@
     [self.playbackController setVideos:@[]];
 }
 
+#pragma mark UIView Methods
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    NSLog("touches began");
+    self.onTouchesBegan();
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    NSLog("touches ended");
+    self.onTouchesEnded();
+}
+
 @end
