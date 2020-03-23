@@ -33,6 +33,15 @@
                                               [_playerViewController.view.leftAnchor constraintEqualToAnchor:self.leftAnchor],
                                               [_playerViewController.view.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
                                               ]];
+    
+    // Add Gesture Recognizers
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+    tap.numberOfTapsRequired = 1;
+    [self addGestureRecognizer:tap];
+    
+    UITapGestureRecognizer *doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap:)];
+    doubleTap.numberOfTapsRequired = 2;
+    [self addGestureRecognizer:doubleTap];
 
     _targetVolume = 1.0;
     _autoPlay = NO;
@@ -281,5 +290,16 @@
     }
 }
 
+- (void)tap: (UITapGestureRecognizer *)gesture {
+    if(self.onTap) {
+        self.onTap(@{});
+    }
+}
+
+- (void)doubleTap: (UITapGestureRecognizer *)gesture {
+    if(self.onDoubleTap) {
+        self.onDoubleTap(@{});
+    }
+}
 
 @end
