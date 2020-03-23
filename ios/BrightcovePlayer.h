@@ -43,8 +43,6 @@
 @property (nonatomic, copy) RCTDirectEventBlock onExitFullscreen;
 @property (nonatomic, copy) RCTDirectEventBlock onTouchesBegan;
 @property (nonatomic, copy) RCTDirectEventBlock onTouchesEnded;
-@property (nonatomic, copy) RCTDirectEventBlock onTap;
-@property (nonatomic, copy) RCTDirectEventBlock onDoubleTap;
 
 -(void) seekTo:(NSNumber *)time;
 -(void)dispose;
