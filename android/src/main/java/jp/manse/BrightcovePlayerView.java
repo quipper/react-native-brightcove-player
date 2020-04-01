@@ -75,7 +75,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
         this.playerVideoView = new BrightcoveExoPlayerTextureVideoView(this.context);
         this.addView(this.playerVideoView);
-        this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         this.playerVideoView.finishInitialization();
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
