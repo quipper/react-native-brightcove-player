@@ -75,13 +75,32 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
         this.playerVideoView = new BrightcoveExoPlayerTextureVideoView(this.context);
         this.addView(this.playerVideoView);
-        this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
         this.requestLayout();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
+        //Event sent when we know the Video dimensions.
+        eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
+            @Override
+            public void processEvent(Event event) {
+                // Get the width and height
+                float width = event.getIntegerProperty(Event.VIDEO_WIDTH);
+                float height = event.getIntegerProperty(Event.VIDEO_HEIGHT);
+                float aspectRatio = height/width;
+
+                //Get the display metrics
+                DisplayMetrics metrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(metrics);
+                int videoWidth = metrics.widthPixels; // We cover the entire display's width
+                int videoHeight = (int) (videoWidth*aspectRatio); //Calculate the height based on the ratio
+
+                // Set the layout params (In this example the BrightcoveVideoView was held inside a LinearLayout).
+                this.playerVideoView.setLayoutParams(new LinearLayout.LayoutParams(videoWidth,videoHeight));
+            }
+        });
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
             @Override
             public void processEvent(Event e) {
