@@ -41,6 +41,8 @@
 @property (nonatomic, copy) RCTDirectEventBlock onUpdateBufferProgress;
 @property (nonatomic, copy) RCTDirectEventBlock onEnterFullscreen;
 @property (nonatomic, copy) RCTDirectEventBlock onExitFullscreen;
+@property (nonatomic, copy) RCTDirectEventBlock onTouchesBegan;
+@property (nonatomic, copy) RCTDirectEventBlock onTouchesEnded;
 
 -(void) seekTo:(NSNumber *)time;
 -(void)dispose;

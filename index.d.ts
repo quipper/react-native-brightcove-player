@@ -25,6 +25,10 @@ export type BrightcovePlayerProps = {
   onUpdateBufferProgress?: ({ bufferProgress: number }) => void;
   onEnterFullscreen?: () => void;
   onExitFullscreen?: () => void;
+  onTouchesBegan?: () => void;
+  onTouchesEnded?: ({tapCount: number}) => void;
+  onShowMediaControls?: () => void;
+  onHideMediaControls?: () => void;
   style?: ViewStyle;
 };
 

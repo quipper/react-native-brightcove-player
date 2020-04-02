@@ -33,7 +33,6 @@
                                               [_playerViewController.view.leftAnchor constraintEqualToAnchor:self.leftAnchor],
                                               [_playerViewController.view.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
                                               ]];
-
     _targetVolume = 1.0;
     _autoPlay = NO;
 }
@@ -252,6 +251,35 @@
 
 -(void)dispose {
     [self.playbackController setVideos:@[]];
+}
+
+#pragma mark UIView Methods
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesBegan:touches withEvent:event];
+    if (self.onTouchesBegan) {
+        self.onTouchesBegan(@{});
+    }
+}
+
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesMoved:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesEnded:touches withEvent:event];
+    if (self.onTouchesEnded) {
+        NSUInteger taps = [[[event allTouches] anyObject] tapCount];
+        self.onTouchesEnded(@{@"tapCount" : @(taps)});
+    }
+}
+
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [super touchesCancelled:touches withEvent:event];
+    if (self.onTouchesEnded) {
+        NSUInteger taps = [[[event allTouches] anyObject] tapCount];
+        self.onTouchesEnded(@{@"tapCount" : @(taps)});
+    }
 }
 
 @end

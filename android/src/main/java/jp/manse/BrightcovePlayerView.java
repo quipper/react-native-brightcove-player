@@ -44,6 +44,9 @@ import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 
+import static com.brightcove.player.mediacontroller.ShowHideController.SHOW_MEDIA_CONTROLS;
+import static com.brightcove.player.mediacontroller.ShowHideController.HIDE_MEDIA_CONTROLS;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,10 +85,26 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.requestLayout();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
+        eventEmitter.on(SHOW_MEDIA_CONTROLS, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_SHOW_MEDIA_CONTROLS, event);
+            }
+        });
+        eventEmitter.on(HIDE_MEDIA_CONTROLS, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                WritableMap event = Arguments.createMap();
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_HIDE_MEDIA_CONTROLS, event);
+            }
+        });
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
             @Override
             public void processEvent(Event e) {
-                fixVideoLayout();
+                fixVideoLayout(e);
                 updateBitRate();
                 updatePlaybackRate();
             }
@@ -199,14 +218,6 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
     public void setVideoToken(String videoToken) {
         this.videoToken = videoToken;
         this.loadVideo();
-    }
-
-    public void setSimulateLandscape(boolean isSimulateLandscape) {
-        boolean previousValue = this.simulateLandscape;
-        this.simulateLandscape = isSimulateLandscape;
-        if (playing && isSimulateLandscape ^ previousValue) {
-            fixVideoLayout();
-        }
     }
 
     public void setAutoPlay(boolean autoPlay) {
@@ -348,49 +359,22 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         }
     }
 
-    private void fixVideoLayout() {
+    private void fixVideoLayout(Event e) {
 
         TextureView surfaceView = (TextureView) playerVideoView.getRenderView();
+        surfaceView.setTransform(null);
 
-        if (simulateLandscape) {
+        // Get the width and height of the video
+        float width = e.getIntegerProperty(Event.VIDEO_WIDTH);
+        float height = e.getIntegerProperty(Event.VIDEO_HEIGHT);
+        float aspectRatio = width/height;
 
-            int viewWidth = this.getMeasuredWidth();
-            int viewHeight = this.getMeasuredHeight();
-            surfaceView.layout(0, 0, viewWidth, viewHeight);
+        // Get height of view and resize surface to fill view's height
+        int viewHeight = this.getMeasuredHeight();
+        int videoWidth = (int) (viewHeight * aspectRatio);
+        int videoHeight = viewHeight; // We cover the entire display's height
 
-            // scale 1  (ww / vw)
-            // scale 2 (wh / scale 1)
-            RenderView renderView = playerVideoView.getRenderView();
-
-            float pX = getWidth() / 2.0f;
-            float pY = getHeight() / 2.0f;
-
-            Matrix undoDefaultStretchAndRotate = new Matrix();
-            undoDefaultStretchAndRotate.setScale(1.0f,
-                    (1.0f / ((getHeight() / (float) getWidth()))) * (renderView.getVideoHeight() / (float) renderView.getVideoWidth()),
-                    pX,
-                    pY);
-
-            undoDefaultStretchAndRotate.postRotate(90, pX, pY);
-            undoDefaultStretchAndRotate.postScale(getHeight() / (float) getWidth(),
-                    getHeight() / (float) getWidth(), pX, pY);
-
-            surfaceView.setTransform(undoDefaultStretchAndRotate);
-
-        }
-        else {
-            surfaceView.setTransform(null);
-
-            int viewWidth = this.getMeasuredWidth();
-            int viewHeight = this.getMeasuredHeight();
-
-            surfaceView.measure(viewWidth, viewHeight);
-            int surfaceWidth = surfaceView.getMeasuredWidth();
-            int surfaceHeight = surfaceView.getMeasuredHeight();
-            int leftOffset = (viewWidth - surfaceWidth) / 2;
-            int topOffset = (viewHeight - surfaceHeight) / 2;
-            surfaceView.layout(leftOffset, topOffset, leftOffset + surfaceWidth, topOffset + surfaceHeight);
-        }
+        surfaceView.layout(0, 0, videoWidth, videoHeight);
     }
 
     private void printKeys(Map<String, Object> map) {

@@ -25,6 +25,8 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_TOGGLE_ANDROID_FULLSCREEN = "toggle_android_fullscreen";
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
+    public static final String EVENT_SHOW_MEDIA_CONTROLS = "show_media_controls";
+    public static final String EVENT_HIDE_MEDIA_CONTROLS = "hide_media_controls";
 
     private ReactApplicationContext applicationContext;
 
@@ -104,11 +106,6 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         view.setFullscreen(fullscreen);
     }
 
-    @ReactProp(name = "simulateLandscape")
-    public void setSimulateLandscape(BrightcovePlayerView view, boolean isSimulateLandscape) {
-        view.setSimulateLandscape(isSimulateLandscape);
-    }
-
     @Override
     public Map<String, Integer> getCommandsMap() {
         return MapBuilder.of(
@@ -140,6 +137,8 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         map.put(EVENT_CHANGE_DURATION, (Object) MapBuilder.of("registrationName", "onChangeDuration"));
         map.put(EVENT_UPDATE_BUFFER_PROGRESS, (Object) MapBuilder.of("registrationName", "onUpdateBufferProgress"));
         map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, (Object) MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
+        map.put(EVENT_SHOW_MEDIA_CONTROLS, (Object) MapBuilder.of("registrationName", "onShowMediaControls"));
+        map.put(EVENT_HIDE_MEDIA_CONTROLS, (Object) MapBuilder.of("registrationName", "onHideMediaControls"));
         return map;
     }
 }
