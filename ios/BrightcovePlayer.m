@@ -268,10 +268,6 @@
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     [super touchesEnded:touches withEvent:event];
-    if (self.onTouchesEnded) {
-        NSUInteger taps = [[[event allTouches] anyObject] tapCount];
-        self.onTouchesEnded(@{@"tapCount" : @(taps)});
-    }
 }
 
 - (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
