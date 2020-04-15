@@ -44,8 +44,8 @@ import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 
-import static com.brightcove.player.mediacontroller.ShowHideController.SHOW_MEDIA_CONTROLS;
-import static com.brightcove.player.mediacontroller.ShowHideController.HIDE_MEDIA_CONTROLS;
+import static com.brightcove.player.mediacontroller.ShowHideController.DID_SHOW_MEDIA_CONTROLS;
+import static com.brightcove.player.mediacontroller.ShowHideController.DID_HIDE_MEDIA_CONTROLS;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,7 +76,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.applicationContext.addLifecycleEventListener(this);
         this.setBackgroundColor(Color.BLACK);
 
-        this.playerVideoView = new BrightcoveExoPlayerTextureVideoView(context.getCurrentActivity());
+        this.playerVideoView = new BrightcoveExoPlayerTextureVideoView(this.context);
         this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
@@ -85,7 +85,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.requestLayout();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
-        eventEmitter.on(SHOW_MEDIA_CONTROLS, new EventListener() {
+        eventEmitter.on(DID_SHOW_MEDIA_CONTROLS, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
@@ -93,7 +93,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_SHOW_MEDIA_CONTROLS, event);
             }
         });
-        eventEmitter.on(HIDE_MEDIA_CONTROLS, new EventListener() {
+        eventEmitter.on(DID_HIDE_MEDIA_CONTROLS, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
