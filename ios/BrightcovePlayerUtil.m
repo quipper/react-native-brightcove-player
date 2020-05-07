@@ -187,7 +187,6 @@ RCT_EXPORT_METHOD(getPlaylistWithReferenceId:(NSString *)referenceId accountId:(
 aggregateDownloadTask:(AVAggregateAssetDownloadTask *)aggregateDownloadTask
         didProgressTo:(NSTimeInterval)progressPercent
     forMediaSelection:(AVMediaSelection *)mediaSelection NS_AVAILABLE_IOS(11_0) {
-    NSLog(@"progress: %@", aggregateDownloadTask);
     [self sendOfflineNotification];
 }
 
