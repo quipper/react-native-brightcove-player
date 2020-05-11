@@ -45,7 +45,7 @@ RCT_EXPORT_METHOD(requestDownloadVideoWithReferenceId:(NSString *)referenceId ac
             reject(kErrorCode, error.description, error);
             return;
         }
-        [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
+        [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video mediaSelections: nil parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
             if (error) {
                 reject(kErrorCode, error.description, error);
                 return;
@@ -69,7 +69,7 @@ RCT_EXPORT_METHOD(requestDownloadVideoWithVideoId:(NSString *)videoId accountId:
             return;
         }
         [BrightcovePlayerOfflineVideoManager sharedManager].delegate = self;
-        [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
+        [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video mediaSelections: nil parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
             if (error) {
                 reject(kErrorCode, error.description, error);
                 return;
@@ -177,7 +177,16 @@ RCT_EXPORT_METHOD(getPlaylistWithReferenceId:(NSString *)referenceId accountId:(
       };
 }
 
-- (void)offlineVideoToken:(BCOVOfflineVideoToken)offlineVideoToken downloadTask:(AVAssetDownloadTask *)downloadTask didProgressTo:(NSTimeInterval)progressPercent {
+- (void)offlineVideoToken:(BCOVOfflineVideoToken)offlineVideoToken
+             downloadTask:(AVAssetDownloadTask *)downloadTask
+            didProgressTo:(NSTimeInterval)progressPercent NS_AVAILABLE_IOS(10_0) {
+    [self sendOfflineNotification];
+}
+
+- (void)offlineVideoToken:(BCOVOfflineVideoToken)offlineVideoToken
+aggregateDownloadTask:(AVAggregateAssetDownloadTask *)aggregateDownloadTask
+        didProgressTo:(NSTimeInterval)progressPercent
+    forMediaSelection:(AVMediaSelection *)mediaSelection NS_AVAILABLE_IOS(11_0) {
     [self sendOfflineNotification];
 }
 

@@ -47,10 +47,10 @@
 - (void)loadMovie {
     if (_videoToken) {
         BCOVVideo *video = [[BrightcovePlayerOfflineVideoManager sharedManager] videoObjectFromOfflineVideoToken:_videoToken];
-        if (video) {
+        if (video && video.playableOffline) {
             [self.playbackController setVideos: @[ video ]];
+            return;
         }
-        return;
     }
     if (!_playbackService) return;
     if (_videoId) {
