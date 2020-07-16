@@ -1,6 +1,7 @@
 #import <AVKit/AVKit.h>
 #import "BrightcovePlayer.h"
 #import "BrightcovePlayerOfflineVideoManager.h"
+#import <BrightcovePlayerSDK/BCOVFPSBrightcoveAuthProxy.h>
 
 @interface BrightcovePlayer () <BCOVPlaybackControllerDelegate, BCOVPUIPlayerViewDelegate>
 
@@ -16,7 +17,8 @@
 }
 
 - (void)setup {
-    _playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
+
+    _playbackController = [self createPlaybackController];
     _playbackController.delegate = self;
     _playbackController.autoPlay = NO;
     _playbackController.autoAdvance = YES;
@@ -71,9 +73,18 @@
 #pragma mark BCOVPlaybackControllerDelegate Methods
 
 - (id<BCOVPlaybackController>)createPlaybackController {
-    BCOVBasicSessionProviderOptions *options = [BCOVBasicSessionProviderOptions alloc];
-    BCOVBasicSessionProvider *provider = [[BCOVPlayerSDKManager sharedManager] createBasicSessionProviderWithOptions:options];
-    return [BCOVPlayerSDKManager.sharedManager createPlaybackControllerWithSessionProvider:provider viewStrategy:nil];
+    
+    // Create a BCOVFPSBrightcoveAuthProxy object.
+      // Use the built-in authorization proxy to take advantage of Dynamic Delivery.
+      // The application id and publisher id are not needed with Dynamic Delivery.
+      // You also don't need to worry about retrieving any application certificates.
+      BCOVFPSBrightcoveAuthProxy *proxy = [[BCOVFPSBrightcoveAuthProxy alloc] initWithPublisherId:nil
+                                                                                    applicationId:nil];
+    
+    BCOVBasicSessionProvider *psp = [BCOVPlayerSDKManager.sharedManager createBasicSessionProviderWithOptions:nil];
+    BCOVBasicSessionProvider *fsp = [BCOVPlayerSDKManager.sharedManager createFairPlaySessionProviderWithAuthorizationProxy:proxy upstreamSessionProvider:psp];
+    
+    return [BCOVPlayerSDKManager.sharedManager createPlaybackControllerWithSessionProvider:fsp viewStrategy:nil];
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller didAdvanceToPlaybackSession:(id<BCOVPlaybackSession>)session
