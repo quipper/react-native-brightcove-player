@@ -173,6 +173,10 @@ RCT_EXPORT_METHOD(getPlaylistWithReferenceId:(NSString *)referenceId accountId:(
 - (NSDictionary *)generateDownloadParameterWithBitRate:(NSNumber*)bitRate {
     return
     @{
+      // Purchase license
+      kBCOVFairPlayLicensePurchaseKey: @(YES),
+        
+      // Specify variant using the bitrate
       kBCOVOfflineVideoManagerRequestedBitrateKey: bitRate
       };
 }
