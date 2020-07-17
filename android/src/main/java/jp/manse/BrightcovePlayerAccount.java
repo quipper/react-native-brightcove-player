@@ -8,9 +8,13 @@ import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.OfflineCallback;
 import com.brightcove.player.edge.OfflineCatalog;
 import com.brightcove.player.edge.PlaylistListener;
+import com.brightcove.player.edge.VideoListener;
+import com.brightcove.player.event.Event;
+import com.brightcove.player.event.BackgroundEventListener;
 import com.brightcove.player.model.Playlist;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.network.DownloadStatus;
+import com.brightcove.player.network.HttpRequestConfig;
 import com.facebook.react.bridge.NativeArray;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -89,10 +93,29 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
             promise.reject(ERROR_CODE, ERROR_MESSAGE_DUPLICATE_SESSION);
             return;
         }
-        OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, this.accountId, this.policyKey, this);
-        session.requestDownloadWithReferenceId(referenceId, bitRate, promise);
-        this.offlineVideoDownloadSessions.add(session);
-        this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
+
+        BrightcovePlayerAccount _this = this;
+
+        VideoListener listener = new VideoListener() {
+            @Override
+            public void onVideo(Video video) {
+                _this.offlineCatalog.requestPurchaseLicense(video, new BackgroundEventListener() {
+                    @Override
+                    public void backgroundProcessEvent(Event event) {
+                        // Should probably show an error here
+                        if (event.getProperties().containsKey(Event.ERROR)) {
+                            // Error
+                        } else if (event.getProperties().containsKey(Event.VIDEO)) {
+                            OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(_this.context, _this.accountId, _this.policyKey, _this);
+                            session.requestDownloadWithReferenceId(referenceId, bitRate, promise);
+                            _this.offlineVideoDownloadSessions.add(session);
+                            _this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
+                        }
+                    }
+                });
+            }
+        };
+        this.catalog.findVideoByReferenceID(referenceId, listener);
     }
 
     public void requestDownloadWithVideoId(String videoId, int bitRate, Promise promise) {
@@ -100,10 +123,29 @@ public class BrightcovePlayerAccount implements OfflineVideoDownloadSession.OnOf
             promise.reject(ERROR_CODE, ERROR_MESSAGE_DUPLICATE_SESSION);
             return;
         }
-        OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(this.context, this.accountId, this.policyKey, this);
-        session.requestDownloadWithVideoId(videoId, bitRate, promise);
-        this.offlineVideoDownloadSessions.add(session);
-        this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
+
+        BrightcovePlayerAccount _this = this;
+
+        VideoListener listener = new VideoListener() {
+            @Override
+            public void onVideo(Video video) {
+                _this.offlineCatalog.requestPurchaseLicense(video, new BackgroundEventListener() {
+                    @Override
+                    public void backgroundProcessEvent(Event event) {
+                        // Should probably show an error here
+                        if (event.getProperties().containsKey(Event.ERROR)) {
+                            // Error
+                        } else if (event.getProperties().containsKey(Event.VIDEO)) {
+                            OfflineVideoDownloadSession session = new OfflineVideoDownloadSession(_this.context, _this.accountId, _this.policyKey, _this);
+                            session.requestDownloadWithVideoId(videoId, bitRate, promise);
+                            _this.offlineVideoDownloadSessions.add(session);
+                            _this.listener.onOfflineStorageStateChanged(collectNativeOfflineVideoStatuses());
+                        }
+                    }
+                });
+            }
+        };
+        this.catalog.findVideoByID(videoId, listener);
     }
 
     public void getOfflineVideoStatuses(Promise promise) {
