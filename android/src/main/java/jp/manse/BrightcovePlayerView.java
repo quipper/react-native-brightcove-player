@@ -53,7 +53,7 @@ import java.util.Map;
 public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener {
     private ThemedReactContext context;
     private ReactApplicationContext applicationContext;
-    private BrightcoveExoPlayerTextureVideoView playerVideoView;
+    private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
     private String policyKey;
     private String accountId;
