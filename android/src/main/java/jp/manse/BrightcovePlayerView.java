@@ -23,7 +23,7 @@ import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
 import com.brightcove.player.model.Video;
-import com.brightcove.player.view.BrightcoveExoPlayerTextureVideoView;
+import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 import com.brightcove.player.view.RenderView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -53,7 +53,7 @@ import java.util.Map;
 public class BrightcovePlayerView extends RelativeLayout implements LifecycleEventListener {
     private ThemedReactContext context;
     private ReactApplicationContext applicationContext;
-    private BrightcoveExoPlayerTextureVideoView playerVideoView;
+    private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
     private String policyKey;
     private String accountId;
@@ -76,7 +76,7 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.applicationContext.addLifecycleEventListener(this);
         this.setBackgroundColor(Color.BLACK);
 
-        this.playerVideoView = new BrightcoveExoPlayerTextureVideoView(context.getCurrentActivity());
+        this.playerVideoView = new BrightcoveExoPlayerVideoView(context.getCurrentActivity());
         this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
