@@ -396,6 +396,16 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
 
     @Override
     public void onHostDestroy() {
+        release();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        release();
+    }
+
+    private void release() {
         this.playerVideoView.destroyDrawingCache();
         this.playerVideoView.clear();
         this.removeAllViews();
