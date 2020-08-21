@@ -240,6 +240,13 @@ public class BrightcovePlayerView extends RelativeLayout implements LifecycleEve
         this.playerVideoView.seekTo(time);
     }
 
+    //We need to stop the player to avoid a potential memory leak.
+    public void stopPlayback(){
+        if(this.playerVideoView != null){
+            this.playerVideoView.stopPlayback();
+        }
+    }
+
     private void updateBitRate() {
         if (this.bitRate == 0) return;
         ExoPlayerVideoDisplayComponent videoDisplay = ((ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay());
