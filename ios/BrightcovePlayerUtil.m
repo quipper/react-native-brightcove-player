@@ -18,9 +18,19 @@ static NSString *const kPlaylistReferenceId = @"referenceId";
 static NSString *const kPlaylistName = @"name";
 static NSString *const kPlaylistDescription = @"description";
 static NSString *const kPlaylistDuration = @"duration";
+static NSString *const didRemoveOfflineVideoTokenNotificationNameConst = @"DidRemoveOfflineVideoToken";
+static NSString *const kdidRemoveOfflineVideoTokenConst = @"DidRemoveOfflineVideoToken";
 
 @implementation BrightcovePlayerUtil {
     bool hasListeners;
+}
+
++(NSString*)didRemoveOfflineVideoTokenNotificationName {
+    return didRemoveOfflineVideoTokenNotificationNameConst;
+}
+
++(NSString*)kDidRemoveOfflineVideoToken {
+    return kdidRemoveOfflineVideoTokenConst;
 }
 
 RCT_EXPORT_MODULE();
@@ -45,14 +55,39 @@ RCT_EXPORT_METHOD(requestDownloadVideoWithReferenceId:(NSString *)referenceId ac
             reject(kErrorCode, error.description, error);
             return;
         }
-        [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
+
+        AVURLAsset *avURLAsset = [[BrightcovePlayerOfflineVideoManager sharedManager] urlAssetForVideo:video error:nil];
+        // If mediaSelections is `nil` the SDK will default to the AVURLAsset's `preferredMediaSelection`
+        NSArray<AVMediaSelection *> *mediaSelections = nil;
+
+        if (@available(iOS 11.0, *)) {
+            mediaSelections = avURLAsset.allMediaSelections;
+
+            AVMediaSelectionGroup *legibleMediaSelectionGroup = [avURLAsset mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+            AVMediaSelectionGroup *audibleMediaSelectionGroup = [avURLAsset mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicAudible];
+
+            int counter = 0;
+            for (AVMediaSelection *s in mediaSelections)
+            {
+                AVMediaSelectionOption *legibleMediaSelectionOption = [s selectedMediaOptionInMediaSelectionGroup:legibleMediaSelectionGroup];
+                AVMediaSelectionOption *audibleMediaSelectionOption = [s selectedMediaOptionInMediaSelectionGroup:audibleMediaSelectionGroup];
+
+                NSLog(@"AVMediaSelection option %i | legible display name: %@", counter, legibleMediaSelectionOption.displayName ?: @"nil");
+                NSLog(@"AVMediaSelection option %i | audible display name: %@", counter, audibleMediaSelectionOption.displayName ?: @"nil");
+
+                counter++;
+            }
+        }
+
+        [BrightcovePlayerOfflineVideoManager sharedManager].delegate = self;
+        [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video mediaSelections:mediaSelections parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
             if (error) {
                 reject(kErrorCode, error.description, error);
                 return;
             }
             [NSUserDefaults.standardUserDefaults setObject: @{kUserDefaultKeyOfflineAccountId: accountId,
                                                               kUserDefaultKeyOfflineVideoId: video.properties[kBCOVVideoPropertyKeyId]
-                                                              }
+            }
                                                     forKey:[kUserDefaultKeyOfflinePrefix stringByAppendingString:offlineVideoToken]];
             [NSUserDefaults.standardUserDefaults synchronize];
             [self sendOfflineNotification];
@@ -68,20 +103,43 @@ RCT_EXPORT_METHOD(requestDownloadVideoWithVideoId:(NSString *)videoId accountId:
             reject(kErrorCode, error.description, error);
             return;
         }
-        [BrightcovePlayerOfflineVideoManager sharedManager].delegate = self;
-        [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
-            if (error) {
-                reject(kErrorCode, error.description, error);
-                return;
+
+        AVURLAsset *avURLAsset = [[BrightcovePlayerOfflineVideoManager sharedManager] urlAssetForVideo:video error:nil];
+        // If mediaSelections is `nil` the SDK will default to the AVURLAsset's `preferredMediaSelection`
+        NSArray<AVMediaSelection *> *mediaSelections = nil;
+
+        if (@available(iOS 11.0, *)) {
+            mediaSelections = avURLAsset.allMediaSelections;;
+            AVMediaSelectionGroup *legibleMediaSelectionGroup = [avURLAsset mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicLegible];
+            AVMediaSelectionGroup *audibleMediaSelectionGroup = [avURLAsset mediaSelectionGroupForMediaCharacteristic:AVMediaCharacteristicAudible];
+
+            int counter = 0;
+            for (AVMediaSelection *s in mediaSelections)
+            {
+                AVMediaSelectionOption *legibleMediaSelectionOption = [s selectedMediaOptionInMediaSelectionGroup:legibleMediaSelectionGroup];
+                AVMediaSelectionOption *audibleMediaSelectionOption = [s selectedMediaOptionInMediaSelectionGroup:audibleMediaSelectionGroup];
+
+                NSLog(@"AVMediaSelection option %i | legible display name: %@", counter, legibleMediaSelectionOption.displayName ?: @"nil");
+                NSLog(@"AVMediaSelection option %i | audible display name: %@", counter, audibleMediaSelectionOption.displayName ?: @"nil");
+
+                counter++;
             }
-            [NSUserDefaults.standardUserDefaults setObject: @{kUserDefaultKeyOfflineAccountId: accountId,
-                                                              kUserDefaultKeyOfflineVideoId: video.properties[kBCOVVideoPropertyKeyId]
-                                                              }
-                                                    forKey:[kUserDefaultKeyOfflinePrefix stringByAppendingString:offlineVideoToken]];
-            [NSUserDefaults.standardUserDefaults synchronize];
-            [self sendOfflineNotification];
-            resolve(offlineVideoToken);
-        }];
+        }
+
+            [BrightcovePlayerOfflineVideoManager sharedManager].delegate = self;
+            [[BrightcovePlayerOfflineVideoManager sharedManager] requestVideoDownload:video mediaSelections:mediaSelections parameters:[self generateDownloadParameterWithBitRate:bitRate] completion:^(BCOVOfflineVideoToken offlineVideoToken, NSError *error) {
+                if (error) {
+                    reject(kErrorCode, error.description, error);
+                    return;
+                }
+                [NSUserDefaults.standardUserDefaults setObject: @{kUserDefaultKeyOfflineAccountId: accountId,
+                                                                  kUserDefaultKeyOfflineVideoId: video.properties[kBCOVVideoPropertyKeyId]
+                }
+                                                        forKey:[kUserDefaultKeyOfflinePrefix stringByAppendingString:offlineVideoToken]];
+                [NSUserDefaults.standardUserDefaults synchronize];
+                [self sendOfflineNotification];
+                resolve(offlineVideoToken);
+            }];
     }];
 }
 
@@ -94,10 +152,15 @@ RCT_EXPORT_METHOD(deleteOfflineVideo:(NSString *)accountId policyKey:(NSString *
         reject(kErrorCode, kErrorMessageDelete, nil);
         return;
     }
+
+    BCOVVideo *video = [[BrightcovePlayerOfflineVideoManager sharedManager] videoObjectFromOfflineVideoToken:videoToken];
+    NSLog(@"%@ %s ATTEMPTING TO DELETE VIDEO %@ WITH TOKEN: %@", self, __FUNCTION__, video.properties[kBCOVVideoPropertyKeyName], videoToken);
+
     [BrightcovePlayerOfflineVideoManager sharedManager].delegate = self;
     [[BrightcovePlayerOfflineVideoManager sharedManager] cancelVideoDownload:videoToken];
     [[BrightcovePlayerOfflineVideoManager sharedManager] deleteOfflineVideo:videoToken];
     [NSUserDefaults.standardUserDefaults removeObjectForKey:[kUserDefaultKeyOfflinePrefix stringByAppendingString:videoToken]];
+    [NSNotificationCenter.defaultCenter postNotificationName:BrightcovePlayerUtil.didRemoveOfflineVideoTokenNotificationName object:nil userInfo:@{BrightcovePlayerUtil.kDidRemoveOfflineVideoToken: videoToken}];
     [NSUserDefaults.standardUserDefaults synchronize];
     [self sendOfflineNotification];
     resolve(nil);
