@@ -1,8 +1,9 @@
 #import "BrightcovePlayer.h"
 #import "BrightcovePlayerOfflineVideoManager.h"
+#import "BrightcovePlayerUtil.h"
 
 @interface BrightcovePlayer () <BCOVPlaybackControllerDelegate, BCOVPUIPlayerViewDelegate>
-
+@property NSString* loadedVideoToken;
 @end
 
 @implementation BrightcovePlayer
@@ -10,25 +11,53 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         [self setup];
+        [self setupOfflineVideoTokenObserver];
     }
     return self;
 }
 
+- (void)dealloc
+{
+    [NSNotificationCenter.defaultCenter removeObserver:self];
+}
+
+- (void)setupOfflineVideoTokenObserver {
+
+    [NSNotificationCenter.defaultCenter addObserver:self selector:@selector(didRemoveOfflineVideoToken:) name:BrightcovePlayerUtil.didRemoveOfflineVideoTokenNotificationName object:nil];
+}
+
+- (void)didRemoveOfflineVideoToken:(NSNotification*)notification {
+    NSDictionary *dict = notification.userInfo;
+    NSString* token = [dict valueForKey:BrightcovePlayerUtil.kDidRemoveOfflineVideoToken];
+
+    if ([self.loadedVideoToken isEqualToString:token]) {
+        NSLog(@"%@ %s TOKEN DELETED: %@", self, __FUNCTION__, token);
+        self.loadedVideoToken = nil;
+    }
+}
+
 - (void)setup {
-    _playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
-    _playbackController.delegate = self;
-    _playbackController.autoPlay = NO;
-    _playbackController.autoAdvance = YES;
+
+    self.playbackController = [BCOVPlayerSDKManager.sharedManager createPlaybackController];
+    self.playbackController.delegate = self;
+    self.playbackController.autoPlay = NO;
+    self.playbackController.autoAdvance = YES;
     
-    _playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
-    _playerView.delegate = self;
-    _playerView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    _playerView.backgroundColor = UIColor.blackColor;
+    self.playerView = [[BCOVPUIPlayerView alloc] initWithPlaybackController:self.playbackController options:nil controlsView:[BCOVPUIBasicControlView basicControlViewWithVODLayout] ];
+    self.playerView.delegate = self;
+    self.playerView.backgroundColor = UIColor.blackColor;
     
-    _targetVolume = 1.0;
-    _autoPlay = NO;
+    self.targetVolume = 1.0;
+    self.autoPlay = NO;
     
-    [self addSubview:_playerView];
+    [self addSubview:self.playerView];
+    self.playerView.translatesAutoresizingMaskIntoConstraints = NO;
+    NSArray* constraints = [NSArray arrayWithObjects:[self.playerView.topAnchor constraintEqualToAnchor:self.topAnchor],
+                            [self.playerView.leftAnchor constraintEqualToAnchor:self.leftAnchor],
+                            [self.playerView.rightAnchor constraintEqualToAnchor:self.rightAnchor],
+                            [self.playerView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+                            nil];
+    [NSLayoutConstraint activateConstraints:constraints];
 }
 
 - (void)setupService {
@@ -39,27 +68,31 @@
 }
 
 - (void)loadMovie {
-    if (_videoToken) {
-        BCOVVideo *video = [[BrightcovePlayerOfflineVideoManager sharedManager] videoObjectFromOfflineVideoToken:_videoToken];
-        if (video) {
-            [self.playbackController setVideos: @[ video ]];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        if (self.videoToken) {
+            BCOVVideo *video = [[BrightcovePlayerOfflineVideoManager sharedManager] videoObjectFromOfflineVideoToken:self.videoToken];
+            if (video && ![self.loadedVideoToken isEqualToString:self.videoToken]) {
+                [self.playbackController setVideos: @[ video ]];
+                self.loadedVideoToken = video.properties[kBCOVOfflineVideoTokenPropertyKey];
+                NSLog(@"%@ %s SET VIDEO %@ FOR TOKEN: %@", self, __FUNCTION__, video.properties[kBCOVVideoPropertyKeyName], self.videoToken);
+            }
+            return;
         }
-        return;
-    }
-    if (!_playbackService) return;
-    if (_videoId) {
-        [_playbackService findVideoWithVideoID:_videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
-            if (video) {
-                [self.playbackController setVideos: @[ video ]];
-            }
-        }];
-    } else if (_referenceId) {
-        [_playbackService findVideoWithReferenceID:_referenceId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
-            if (video) {
-                [self.playbackController setVideos: @[ video ]];
-            }
-        }];
-    }
+        if (!self.playbackService) return;
+        if (self.videoId) {
+            [self.playbackService findVideoWithVideoID:self.videoId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
+                if (video) {
+                    [self.playbackController setVideos: @[ video ]];
+                }
+            }];
+        } else if (self.referenceId) {
+            [self.playbackService findVideoWithReferenceID:self.referenceId parameters:nil completion:^(BCOVVideo *video, NSDictionary *jsonResponse, NSError *error) {
+                if (video) {
+                    [self.playbackController setVideos: @[ video ]];
+                }
+            }];
+        }
+    });
 }
 
 - (id<BCOVPlaybackController>)createPlaybackController {
@@ -106,11 +139,11 @@
 }
 
 - (void)setPlay:(BOOL)play {
-    if (_playing == play) return;
+    if (self.playing == play) return;
     if (play) {
-        [_playbackController play];
+        [self.playbackController play];
     } else {
-        [_playbackController pause];
+        [self.playbackController pause];
     }
 }
 

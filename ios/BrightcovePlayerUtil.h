@@ -6,4 +6,6 @@
 
 @interface BrightcovePlayerUtil : RCTEventEmitter<RCTBridgeModule, BCOVOfflineVideoManagerDelegate>
 @property (nonatomic) BCOVPlaybackService *playbackService;
++(NSString*)didRemoveOfflineVideoTokenNotificationName;
++(NSString*)kDidRemoveOfflineVideoToken;
 @end
