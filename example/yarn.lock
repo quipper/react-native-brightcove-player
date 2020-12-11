@@ -3053,9 +3053,9 @@ inherits@2, inherits@2.0.4, inherits@^2.0.3, inherits@~2.0.3:
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
 ini@~1.3.0:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
-  integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.7.tgz#a09363e1911972ea16d7a8851005d84cf09a9a84"
+  integrity sha512-iKpRpXP+CrP2jyrxvg1kMUpXDyRUFDWurxbnVT1vQPx+Wz9uCYsMIqYuSBLV+PAaZG/d7kRLKRFc9oDMsH+mFQ==
 
 inquirer@^3.0.6:
   version "3.3.0"
@@ -5158,9 +5158,10 @@ react-is@^16.8.1, react-is@^16.8.4, react-is@^16.9.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.10.2.tgz#984120fd4d16800e9a738208ab1fba422d23b5ab"
   integrity sha512-INBT1QEgtcCCgvccr5/86CfD71fw9EPmDxgiJX4I2Ddr6ZsV6iFXsuby+qWJPtmNuMY0zByTsG4468P7nHuNWA==
 
-"react-native-brightcove-player@https://github.com/manse/react-native-brightcove-player.git#rn60":
-  version "1.6.7"
-  resolved "https://github.com/manse/react-native-brightcove-player.git#7ffbd93557d56910bd5e007914849d6eba4e51a7"
+react-native-brightcove-player@1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/react-native-brightcove-player/-/react-native-brightcove-player-1.7.0.tgz#e52d8d5eed5846f4368eae30c33252a84868b508"
+  integrity sha512-nZlFTfMxIVeBbrfn6YenHATXs4FJ1eJhlFdVfKLNMELWHltGIbyNViiA0vGKzBc+NkMSVfwJ/bdy/VsXaCjSDQ==
   dependencies:
     prop-types "^15.5.10"
 
